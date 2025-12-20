@@ -8,6 +8,10 @@ const MUTED_VOL = 0.12;
 function now(){ return ctx.currentTime }
 function linearTo(node, value, time=0.2){ node.gain.linearRampToValueAtTime(value, now()+time) }
 
+// Debug helpers (enable with ?debug=1 or set window.FTC_DEBUG = true)
+function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true } catch (e){ return !!window.FTC_DEBUG } }
+function debugLog(...args){ if (isDebug()) console.log('[find-the-calm]', ...args) }
+
 // Create noise buffer
 function createNoiseBuffer(duration=1){
   const sr = ctx.sampleRate;
@@ -94,15 +98,19 @@ async function initAudio(){
   tracks = {rain, wind, piano};
   started = true;
   document.querySelector('.status').textContent = 'Audio active — tap a card to isolate a sound.';
+  debugLog('initAudio', ctx.state);
+  debugLog('tracks', Object.keys(tracks));
 }
 
 // Solo logic
 let solo = null;
 function setSolo(name){
+  debugLog('setSolo', {requested:name, previous:solo});
   if (!ctx) return;
   if (solo === name){
     // unsolo
     Object.values(tracks).forEach(t => linearTo(t.out, DEFAULT_VOL));
+    debugLog('unsolo', name);
     solo = null;
     updateUI();
     return;
@@ -111,8 +119,9 @@ function setSolo(name){
   Object.entries(tracks).forEach(([n,t]) => {
     linearTo(t.out, n===name?SOLO_VOL:MUTED_VOL);
   });
+  debugLog('soloed', name);
   updateUI();
-}
+} 
 
 function updateUI(){
   document.querySelectorAll('.card').forEach(btn => {
@@ -126,9 +135,10 @@ function updateUI(){
 // Haptics helper
 function doHaptic(short=false){
   const disabled = document.getElementById('disable-haptics').checked;
+  debugLog('doHaptic', {short, disabled, vibrateAvailable: ('vibrate' in navigator)});
   if (disabled) return;
-  if (navigator.vibrate) navigator.vibrate(short?30:60);
-}
+  if (navigator.vibrate){ navigator.vibrate(short?30:60); debugLog('vibrated', short?30:60); }
+} 
 
 // Wire up UI
 document.getElementById('start').addEventListener('click', async (e)=>{
@@ -141,6 +151,7 @@ document.querySelectorAll('.card').forEach(btn => {
   let longpress = false, timer;
   btn.addEventListener('pointerdown', (ev)=>{
     timer = setTimeout(()=>{ longpress = true; btn.classList.add('pulse'); doHaptic(false); // long press effect
+      debugLog('longpress', btn.dataset.track);
       // long press toggles stronger isolation (full solo)
       setSolo(btn.dataset.track);
     }, 550);
@@ -152,6 +163,7 @@ document.querySelectorAll('.card').forEach(btn => {
       btn.classList.add('pulse');
       setTimeout(()=>btn.classList.remove('pulse'), 420);
       doHaptic(true);
+      debugLog('tap', btn.dataset.track);
       setSolo(btn.dataset.track);
     }
     longpress = false;
