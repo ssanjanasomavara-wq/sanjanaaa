@@ -133,20 +133,26 @@ function makePiano(){
 }
 
 // Initialize AudioContext and tracks
+let masterGain;
+const volumes = {rain: DEFAULT_VOL, wind: DEFAULT_VOL, piano: DEFAULT_VOL};
 async function initAudio(){
   if (started) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = ctx.createGain(); masterGain.gain.value = 1; masterGain.connect(ctx.destination);
   const rain = makeRain();
   const wind = makeWind();
   const piano = makePiano();
-  // connect to destination
-  rain.out.connect(ctx.destination);
-  wind.out.connect(ctx.destination);
-  piano.out.connect(ctx.destination);
+  // connect to master
+  rain.out.connect(masterGain);
+  wind.out.connect(masterGain);
+  piano.out.connect(masterGain);
   rain.start(); wind.start(); piano.start();
   tracks = {rain, wind, piano};
   started = true;
   document.querySelector('.status').textContent = 'Audio active — tap a card to isolate a sound.';
+  // wire up UI controls
+  setupLayerControls();
+  setupMasterControl();
   debugLog('initAudio', ctx.state);
   debugLog('tracks', Object.keys(tracks));
 }
@@ -157,8 +163,8 @@ function setSolo(name){
   debugLog('setSolo', {requested:name, previous:solo});
   if (!ctx) return;
   if (solo === name){
-    // unsolo
-    Object.values(tracks).forEach(t => linearTo(t.out, DEFAULT_VOL));
+    // unsolo: restore to user volumes
+    Object.entries(tracks).forEach(([n,t]) => linearTo(t.out, volumes[n] ?? DEFAULT_VOL));
     debugLog('unsolo', name);
     solo = null;
     updateUI();
@@ -166,11 +172,11 @@ function setSolo(name){
   }
   solo = name;
   Object.entries(tracks).forEach(([n,t]) => {
-    linearTo(t.out, n===name?SOLO_VOL:MUTED_VOL);
+    linearTo(t.out, n===name? Math.max(volumes[n] || DEFAULT_VOL, SOLO_VOL):MUTED_VOL);
   });
   debugLog('soloed', name);
   updateUI();
-} 
+}  
 
 function updateUI(){
   document.querySelectorAll('.card').forEach(btn => {
@@ -223,9 +229,59 @@ document.querySelectorAll('.card').forEach(btn => {
 // Accessibility: toggle to restore mix
 document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){
-    solo = null; Object.values(tracks).forEach(t => linearTo(t.out, DEFAULT_VOL)); updateUI();
+    solo = null; Object.entries(tracks).forEach(([n,t]) => linearTo(t.out, volumes[n] || DEFAULT_VOL)); updateUI();
   }
 });
+
+// Layer controls wiring
+function setupLayerControls(){
+  document.querySelectorAll('.card').forEach(card=>{
+    const name = card.dataset.track;
+    const volEl = card.querySelector('.volume');
+    if (volEl){
+      volEl.value = volumes[name];
+      volEl.addEventListener('input', (e)=>{
+        const v = parseFloat(e.target.value);
+        volumes[name] = v;
+        linearTo(tracks[name].out, v);
+        debugLog('volume-change', name, v);
+      });
+    }
+    const muteBtn = card.querySelector('.mute');
+    if (muteBtn){
+      muteBtn.addEventListener('click', ()=>{
+        const pressed = muteBtn.getAttribute('aria-pressed') === 'true';
+        if (pressed){
+          // unmute: restore previous volume
+          muteBtn.setAttribute('aria-pressed','false');
+          linearTo(tracks[name].out, volumes[name] || DEFAULT_VOL);
+          debugLog('unmute', name);
+        } else {
+          muteBtn.setAttribute('aria-pressed','true');
+          linearTo(tracks[name].out, 0);
+          debugLog('mute', name);
+        }
+      });
+    }
+    const soloBtn = card.querySelector('.solo');
+    if (soloBtn){
+      soloBtn.addEventListener('click', ()=>{
+        setSolo(name);
+      });
+    }
+  });
+}
+
+function setupMasterControl(){
+  const master = document.getElementById('master-volume');
+  if (!master) return;
+  master.addEventListener('input', (e)=>{
+    const v = parseFloat(e.target.value);
+    masterGain.gain.linearRampToValueAtTime(v, now()+0.1);
+    debugLog('master', v);
+  });
+}
+
 
 // Debug: if audio isn't allowed until gesture, we show message
 if (!('vibrate' in navigator)){
