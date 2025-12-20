@@ -23,4 +23,4 @@ Design update: A warmer palette has been applied to the mockup and prototype (ac
 
 Recent tweaks: increased icon stroke weight and label contrast for improved readability on small screens.
 
-Debug panel: you can enable an on-screen debug log by opening the prototype with `?debug=1` (e.g., `prototype/find-the-calm.html?debug=1`). The panel shows timestamps, taps, long-presses, solo/unsolo, and haptic calls; it has Clear and Close controls.
+Debug panel: you can enable an on-screen debug log by opening the prototype with `?debug=1` (e.g., `prototype/find-the-calm.html?debug=1`) or by toggling the **Debug** button in the header. The panel shows timestamps, taps, long-presses, solo/unsolo, and haptic calls; it has Clear and Close controls. You can also press **Ctrl/Cmd + D** to quickly toggle the panel. The panel state persists in the browser.

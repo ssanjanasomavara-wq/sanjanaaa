@@ -9,7 +9,7 @@ function now(){ return ctx.currentTime }
 function linearTo(node, value, time=0.2){ node.gain.linearRampToValueAtTime(value, now()+time) }
 
 // Debug helpers (enable with ?debug=1 or set window.FTC_DEBUG = true)
-function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true } catch (e){ return !!window.FTC_DEBUG } }
+function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true || localStorage.getItem('ftc_debug_visible') === '1'; } catch (e){ return !!window.FTC_DEBUG || localStorage.getItem('ftc_debug_visible') === '1'; } }
 function debugLog(...args){ if (!isDebug()) return; console.log('[find-the-calm]', ...args); try{ const el = window.__ftc_debug_panel; if (el){ const s = args.map(a=> (typeof a === 'string')? a : JSON.stringify(a)).join(' '); appendDebugLine(s); } }catch(e){} }
 
 // On-screen debug panel helpers
@@ -31,12 +31,34 @@ function createDebugPanel(){
   document.body.appendChild(panel);
   window.__ftc_debug_panel = panel;
   panel.querySelector('button[data-action="clear"]').addEventListener('click', ()=>{ const w = panel.querySelector('.lines'); w.innerHTML=''; });
-  panel.querySelector('button[data-action="close"]').addEventListener('click', ()=>{ panel.style.display='none'; });
+  panel.querySelector('button[data-action="close"]').addEventListener('click', ()=>{ panel.style.display='none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); });
+  panel.style.display = 'block';
 }
+
+function showDebugPanel(){ createDebugPanel(); const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'block'; localStorage.setItem('ftc_debug_visible','1'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','true'); }}
+function hideDebugPanel(){ const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); }}
 
 // auto-create panel if debug enabled
 if (isDebug() && typeof document !== 'undefined'){
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', createDebugPanel); else createDebugPanel();
+}
+
+// Wire up debug toggle button and keyboard shortcut
+if (typeof document !== 'undefined'){
+  const setupDebugToggle = ()=>{
+    const btn = document.getElementById('debug-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', ()=>{
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      if (pressed) { hideDebugPanel(); btn.setAttribute('aria-pressed','false'); } else { showDebugPanel(); btn.setAttribute('aria-pressed','true'); }
+    });
+    // set initial state
+    try{ const initial = localStorage.getItem('ftc_debug_visible') === '1' || (new URL(location.href).searchParams.get('debug') === '1'); if (initial){ btn.setAttribute('aria-pressed','true'); showDebugPanel(); } }catch(e){}
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupDebugToggle); else setupDebugToggle();
+
+  // keyboard: Ctrl/Cmd + D to toggle
+  document.addEventListener('keydown', (e)=>{ if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd'){ e.preventDefault(); const btn = document.getElementById('debug-toggle'); if (btn) btn.click(); }});
 }
 
 // Create noise buffer
