@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Find the Calm — Presentation</title>
+  <link rel="stylesheet" href="presentation.css">
+</head>
+<body>
+  <main class="wrap">
+    <h1>Find the Calm — Visual Update</h1>
+    <p class="lead">Warmer palette applied to mockup and prototype. This quick presentation shows the updated mockup, interactive prototype preview, and the token comparison.</p>
+
+    <section class="frames">
+      <figure class="frame">
+        <figcaption>Mockup — Warmer</figcaption>
+        <div class="panel mockup">
+          <header class="hero">
+            <h2>Find the Calm</h2>
+            <p class="subtitle">Soft ambient layers — tap a card to isolate a sound.</p>
+          </header>
+          <div class="grid">
+            <div class="card"><div class="icon">☔</div><div class="label">Rain</div></div>
+            <div class="card"><div class="icon">🌬️</div><div class="label">Wind</div></div>
+            <div class="card"><div class="icon">🎹</div><div class="label">Piano</div></div>
+          </div>
+        </div>
+      </figure>
+
+      <figure class="frame">
+        <figcaption>Prototype — Warmer</figcaption>
+        <div class="panel prototype">
+          <div class="hero"><h2>Find the Calm</h2></div>
+          <div class="grid">
+            <button class="card active">Rain</button>
+            <button class="card">Wind</button>
+            <button class="card">Piano</button>
+          </div>
+          <div class="foot">Tap a card to isolate • Haptics enabled</div>
+        </div>
+      </figure>
+
+      <figure class="frame">
+        <figcaption>Design tokens</figcaption>
+        <div class="panel tokens">
+          <h3>Colors</h3>
+          <div class="swatch-row">
+            <div class="swatch">
+              <div class="color before"/>
+              <div class="label">Before<br><code>#6A9FE6</code></div>
+            </div>
+            <div class="swatch">
+              <div class="color after"/>
+              <div class="label">After<br><code>#E07A5F</code></div>
+            </div>
+          </div>
+
+          <h3>Key tokens</h3>
+          <ul>
+            <li><strong>bg:</strong> Before <code>#F6FBFF</code> → After <code>#FFF6F1</code></li>
+            <li><strong>accent:</strong> Before <code>#6A9FE6</code> → After <code>#E07A5F</code></li>
+            <li><strong>muted:</strong> Before <code>#7B8AA3</code> → After <code>#8A6F6B</code></li>
+            <li><strong>motion:</strong> keep 200–260ms ease; respect <code>prefers-reduced-motion</code></li>
+          </ul>
+        </div>
+      </figure>
+    </section>
+
+    <footer class="notes">
+      <p>Export tips: open this file in a browser and screenshot at 2x for a high-res raster export, or copy inline SVGs from the mockup file into Figma.</p>
+    </footer>
+  </main>
+</body>
+</html>
