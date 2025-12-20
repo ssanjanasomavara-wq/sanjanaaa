@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Find the Calm — Prototype</title>
+  <link rel="stylesheet" href="find-the-calm.css">
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero-inner">
+        <h1 class="title">Find the Calm</h1>
+        <p class="subtitle">Tap a card to isolate a sound. Gentle haptic feedback on interaction.</p>
+        <div class="controls">
+          <button id="start" class="btn">Start audio</button>
+          <button id="debug-toggle" class="btn btn-ghost" aria-pressed="false" title="Toggle debug panel (Ctrl/Cmd+D)">Debug</button>
+          <label class="toggle">
+            <input type="checkbox" id="disable-haptics">
+            <span>Disable Haptics</span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <section class="grid" aria-label="Sound layers">
+      <button class="card" data-track="rain" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden>
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+            <path d="M21 32a9 9 0 0118 0" />
+            <path d="M24 28c-6 0-7-7-1-10A10 10 0 0138 18c6 0 9 6 6 11"/>
+            <path d="M22 44l3 6M30 44l3 6M38 44l3 6" stroke-width="1.8"/>
+          </g>
+        </svg>
+        <div class="label">Rain</div>
+        <div class="meta">Calm, steady • ambient</div>
+      </button>
+
+      <button class="card" data-track="wind" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden>
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+            <path d="M8 28c6-3 14-3 20 0s14 3 20 0" />
+            <path d="M10 38c6-3 18-3 24 0s14 3 18 0" opacity="0.7"/>
+            <path d="M12 18c6-3 10-3 16 0s10 3 16 0" opacity="0.4"/>
+          </g>
+        </svg>
+        <div class="label">Wind</div>
+        <div class="meta">Gentle whoosh • airy</div>
+      </button>
+
+      <button class="card" data-track="piano" aria-pressed="false">
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden>
+          <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
+            <rect x="6" y="16" width="52" height="20" rx="2"/>
+            <path d="M14 20v12M22 20v12M30 20v12M38 20v12" stroke-width="1.6"/>
+            <path d="M12 40h40" stroke-width="1" opacity="0.6"/>
+          </g>
+        </svg>
+        <div class="label">Piano</div>
+        <div class="meta">Soft keys • sparse notes</div>
+      </button>
+    </section>
+
+    <footer class="foot">
+      <p class="status">Audio is not started.</p>
+    </footer>
+
+  </main>
+  <script src="find-the-calm.js"></script>
+</body>
+</html>
