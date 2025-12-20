@@ -22,3 +22,5 @@ Next steps:
 Design update: A warmer palette has been applied to the mockup and prototype (accent: #D86249, bg: #FFF6F1). See `mockups/presentation.html` for a quick comparison.
 
 Recent tweaks: increased icon stroke weight and label contrast for improved readability on small screens.
+
+Debug panel: you can enable an on-screen debug log by opening the prototype with `?debug=1` (e.g., `prototype/find-the-calm.html?debug=1`). The panel shows timestamps, taps, long-presses, solo/unsolo, and haptic calls; it has Clear and Close controls.

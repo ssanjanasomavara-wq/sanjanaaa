@@ -35,4 +35,14 @@ body{
 @keyframes cardPulse{0%{transform:translateY(0)}50%{transform:translateY(-6px)}100%{transform:translateY(0)}}
 .foot{margin-top:20px;color:var(--muted)}
 .status{font-size:0.95rem}
+
+/* On-screen debug panel (visible when ?debug=1) */
+.ftc-debug{position:fixed;left:14px;bottom:14px;max-width:320px;max-height:40vh;overflow:auto;background:rgba(26,26,26,0.9);color:#fff;padding:10px;border-radius:10px;font-family:monospace;font-size:12px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.35);}
+.ftc-debug .hdr{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
+.ftc-debug .hdr .title{font-weight:700;font-size:12px}
+.ftc-debug .hdr .controls button{background:transparent;border:1px solid rgba(255,255,255,0.12);color:#fff;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12px}
+.ftc-debug .lines{max-height:calc(40vh - 40px);overflow:auto}
+.ftc-debug .line{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.95}
+@media (prefers-reduced-motion: reduce){.ftc-debug{transition:none}}
+
 @media (prefers-reduced-motion: reduce){.card{transition:none;animation:none}}

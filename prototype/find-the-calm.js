@@ -10,7 +10,34 @@ function linearTo(node, value, time=0.2){ node.gain.linearRampToValueAtTime(valu
 
 // Debug helpers (enable with ?debug=1 or set window.FTC_DEBUG = true)
 function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true } catch (e){ return !!window.FTC_DEBUG } }
-function debugLog(...args){ if (isDebug()) console.log('[find-the-calm]', ...args) }
+function debugLog(...args){ if (!isDebug()) return; console.log('[find-the-calm]', ...args); try{ const el = window.__ftc_debug_panel; if (el){ const s = args.map(a=> (typeof a === 'string')? a : JSON.stringify(a)).join(' '); appendDebugLine(s); } }catch(e){} }
+
+// On-screen debug panel helpers
+function appendDebugLine(msg){ try{
+  let wrapper = document.querySelector('.ftc-debug .lines');
+  if (!wrapper) return;
+  const line = document.createElement('div'); line.className='line'; line.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
+  wrapper.appendChild(line);
+  // keep scroll at bottom
+  wrapper.scrollTop = wrapper.scrollHeight;
+} catch(e){}
+}
+
+function createDebugPanel(){
+  if (window.__ftc_debug_created) return;
+  window.__ftc_debug_created = true;
+  const panel = document.createElement('div'); panel.className = 'ftc-debug'; panel.setAttribute('role','log');
+  panel.innerHTML = `<div class="hdr"><div class="title">Find the Calm — debug</div><div class="controls"><button data-action="clear">Clear</button><button data-action="close">Close</button></div></div><div class="lines" aria-live="polite"></div>`;
+  document.body.appendChild(panel);
+  window.__ftc_debug_panel = panel;
+  panel.querySelector('button[data-action="clear"]').addEventListener('click', ()=>{ const w = panel.querySelector('.lines'); w.innerHTML=''; });
+  panel.querySelector('button[data-action="close"]').addEventListener('click', ()=>{ panel.style.display='none'; });
+}
+
+// auto-create panel if debug enabled
+if (isDebug() && typeof document !== 'undefined'){
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', createDebugPanel); else createDebugPanel();
+}
 
 // Create noise buffer
 function createNoiseBuffer(duration=1){
