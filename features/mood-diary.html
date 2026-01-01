@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mood Diary — Semi-Colonic</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    /* Minimal styles for the demo if no global CSS available */
+    .container{max-width:720px;margin:2rem auto;padding:0 1rem}
+    form label{display:block;margin:0.5rem 0}
+    ul.entries{list-style:none;padding:0}
+    ul.entries li{border:1px solid #ddd;padding:0.5rem;margin:0.5rem 0;border-radius:4px}
+    .mood-bubble{display:inline-block;padding:0.25rem 0.5rem;border-radius:999px;background:#f0f0f0;margin-right:0.5rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Mood Diary</h1>
+      <p>Quick, lightweight mood tracking demo. Entries are stored in your browser (localStorage).</p>
+      <p><a href="/">← Back to Semi-Colonic</a></p>
+    </header>
+
+    <section>
+      <form id="moodForm">
+        <label>
+          How are you feeling?
+          <select id="mood" required>
+            <option value="">-- select mood --</option>
+            <option value="happy">Happy</option>
+            <option value="content">Content</option>
+            <option value="anxious">Anxious</option>
+            <option value="sad">Sad</option>
+            <option value="angry">Angry</option>
+            <option value="neutral">Neutral</option>
+          </select>
+        </label>
+
+        <label>
+          Notes (optional)
+          <textarea id="note" rows="3" placeholder="Add a quick note..."></textarea>
+        </label>
+
+        <button type="submit">Add entry</button>
+        <button type="button" id="clearBtn">Clear all</button>
+      </form>
+
+      <h2>Entries</h2>
+      <ul id="entries" class="entries" aria-live="polite"></ul>
+    </section>
+  </div>
+
+  <script>
+    (function(){
+      const STORAGE_KEY = 'semi_colonic_mood_entries_v1';
+      const form = document.getElementById('moodForm');
+      const moodEl = document.getElementById('mood');
+      const noteEl = document.getElementById('note');
+      const entriesEl = document.getElementById('entries');
+      const clearBtn = document.getElementById('clearBtn');
+
+      function loadEntries(){
+        try{
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch(e){
+          console.error('Failed to load entries', e);
+          return [];
+        }
+      }
+
+      function saveEntries(list){
+        try{
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+        } catch(e){
+          console.error('Failed to save entries', e);
+        }
+      }
+
+      function render(){
+        const list = loadEntries();
+        entriesEl.innerHTML = '';
+        if(list.length === 0){
+          entriesEl.innerHTML = '<li>No entries yet.</li>';
+          return;
+        }
+        list.slice().reverse().forEach(entry => {
+          const li = document.createElement('li');
+          const moodSpan = document.createElement('span');
+          moodSpan.className = 'mood-bubble';
+          moodSpan.textContent = entry.mood;
+          const time = document.createElement('small');
+          time.style.marginLeft='0.5rem';
+          time.style.color='#666';
+          time.textContent = new Date(entry.t).toLocaleString();
+
+          const note = document.createElement('div');
+          note.textContent = entry.note || '';
+
+          li.appendChild(moodSpan);
+          li.appendChild(time);
+          li.appendChild(note);
+          entriesEl.appendChild(li);
+        });
+      }
+
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        const mood = moodEl.value;
+        const note = noteEl.value.trim();
+        if(!mood) return;
+        const list = loadEntries();
+        list.push({mood, note, t: Date.now()});
+        saveEntries(list);
+        noteEl.value = '';
+        moodEl.value = '';
+        render();
+      });
+
+      clearBtn.addEventListener('click', function(){
+        if(!confirm('Clear all mood diary entries? This cannot be undone.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        render();
+      });
+
+      // initial render
+      render();
+    })();
+  </script>
+</body>
+</html>
