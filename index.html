@@ -1,94 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Mental Health Support – India</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 20px;
-        }
+<meta charset="UTF-8">
+<title>Mood Diary</title>
 
-        .container {
-            max-width: 700px;
-            margin: auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f6f7fb;
+  text-align: center;
+  padding: 20px;
+}
 
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-        }
+h1 { color: #5a5adb; }
+.subtitle { color: #555; margin-bottom: 25px; }
 
-        p {
-            text-align: center;
-            color: #555;
-        }
+.card {
+  background: white;
+  padding: 20px;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 520px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 
-        .hotline {
-            background: #eef3f7;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
+.mood-scale button {
+  font-size: 30px;
+  margin: 5px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
 
-        .hotline h3 {
-            margin: 0;
-            color: #1a5276;
-        }
+textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  resize: none;
+}
 
-        .hotline a {
-            text-decoration: none;
-            color: #0b5345;
-            font-weight: bold;
-        }
+canvas {
+  width: 100%;
+  max-width: 420px;
+  height: 300px;
+  border: 2px dashed #aaa;
+  border-radius: 12px;
+  touch-action: none;
+}
 
-        .emergency {
-            text-align: center;
-            margin-top: 25px;
-            color: #c0392b;
-            font-weight: bold;
-        }
-    </style>
+.save-btn {
+  background: #5a5adb;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>Need to Talk to a Human?</h1>
-    <p>You are not alone. If you need immediate emotional support, please reach out to one of these helplines.</p>
+<h1>📝 Mood Diary</h1>
+<p class="subtitle">Track • Reflect • Doodle</p>
 
-    <div class="hotline">
-        <h3>KIRAN (24/7 Government Mental Health Helpline)</h3>
-        <p>📞 <a href="tel:18005990019">1800-599-0019</a></p>
-    </div>
+<!-- Mood -->
+<section class="card">
+  <h2>How do you feel today?</h2>
+  <div class="mood-scale">
+    <button onclick="selectMood('😢',1)">😢</button>
+    <button onclick="selectMood('😕',2)">😕</button>
+    <button onclick="selectMood('😐',3)">😐</button>
+    <button onclick="selectMood('🙂',4)">🙂</button>
+    <button onclick="selectMood('😁',5)">😁</button>
+  </div>
+  <p id="moodDisplay">Selected Mood: None</p>
+</section>
 
-    <div class="hotline">
-        <h3>AASRA Suicide Prevention Helpline</h3>
-        <p>📞 <a href="tel:+919820466726">+91 9820466726</a></p>
-        <p>Available 24/7</p>
-    </div>
+<!-- Journal -->
+<section class="card">
+  <h2>Journal</h2>
+  <textarea id="journal" placeholder="Write your thoughts..."></textarea>
+</section>
 
-    <div class="hotline">
-        <h3>iCALL (TISS)</h3>
-        <p>📞 <a href="tel:+919152987821">+91 9152987821</a></p>
-        <p>Monday – Saturday, 10am–8pm</p>
-    </div>
+<!-- Doodle -->
+<section class="card">
+  <h2>Doodle Your Feelings</h2>
+  <canvas id="drawCanvas" width="420" height="300"></canvas><br>
+  <button onclick="clearDoodle()">Clear</button>
+</section>
 
-    <div class="hotline">
-        <h3>Sneha Foundation</h3>
-        <p>📞 <a href="tel:04424640050">044-2464-0050</a></p>
-        <p>24/7 Support</p>
-    </div>
+<!-- Chart -->
+<section class="card">
+  <h2>Mood History</h2>
+  <canvas id="chartCanvas" width="420" height="200"></canvas>
+</section>
 
-    <div class="emergency">
-        If you are in immediate danger, please call your local emergency number or go to the nearest hospital.
-    </div>
-</div>
+<button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
+
+<script>
+/* ===== Mood Tracking ===== */
+let moodValue = null;
+let moodEmoji = "";
+const moodDisplay = document.getElementById("moodDisplay");
+
+function selectMood(emoji, value) {
+  moodEmoji = emoji;
+  moodValue = value;
+  moodDisplay.textContent = "Selected Mood: " + emoji;
+}
+
+/* ===== Save Entry ===== */
+function saveEntry() {
+  if (!moodValue) {
+    alert("Please select a mood first 💭");
+    return;
+  }
+
+  const journal = document.getElementById("journal").value;
+  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
+
+  history.push({
+    mood: moodValue,
+    emoji: moodEmoji,
+    date: new Date().toLocaleDateString()
+  });
+
+  localStorage.setItem("moodHistory", JSON.stringify(history));
+  drawChart();
+  alert("Saved 🌱");
+}
+
+/* ===== Mood Chart ===== */
+const chartCanvas = document.getElementById("chartCanvas");
+const cctx = chartCanvas.getContext("2d");
+
+function drawChart() {
+  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
+  cctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);
+
+  const barWidth = 30;
+  history.slice(-10).forEach((entry, i) => {
+    const height = entry.mood * 30;
+    cctx.fillStyle = "#5a5adb";
+    cctx.fillRect(40 + i*40, 180 - height, barWidth, height);
+    cctx.fillText(entry.emoji, 45 + i*40, 195);
+  });
+}
+
+drawChart();
+
+/* ===== Doodle (Touch + Ink) ===== */
+const drawCanvas = document.getElementById("drawCanvas");
+const dctx = drawCanvas.getContext("2d");
+let drawing = false;
+
+drawCanvas.addEventListener("pointerdown", e => {
+  drawing = true;
+  dctx.beginPath();
+  dctx.moveTo(e.offsetX, e.offsetY);
+});
+
+drawCanvas.addEventListener("pointerup", () => {
+  drawing = false;
+  dctx.beginPath();
+});
+
+drawCanvas.addEventListener("pointermove", e => {
+  if (!drawing) return;
+  dctx.lineWidth = e.pressure ? e.pressure * 10 : 4;
+  dctx.lineCap = "round";
+  dctx.strokeStyle = "#000";
+  dctx.lineTo(e.offsetX, e.offsetY);
+  dctx.stroke();
+  dctx.beginPath();
+  dctx.moveTo(e.offsetX, e.offsetY);
+});
+
+function clearDoodle() {
+  dctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
+}
+</script>
 
 </body>
 </html>
