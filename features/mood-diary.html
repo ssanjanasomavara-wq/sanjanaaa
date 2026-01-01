@@ -1,132 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mood Diary — Semi-Colonic</title>
-  <link rel="stylesheet" href="/css/styles.css" />
-  <style>
-    /* Minimal styles for the demo if no global CSS available */
-    .container{max-width:720px;margin:2rem auto;padding:0 1rem}
-    form label{display:block;margin:0.5rem 0}
-    ul.entries{list-style:none;padding:0}
-    ul.entries li{border:1px solid #ddd;padding:0.5rem;margin:0.5rem 0;border-radius:4px}
-    .mood-bubble{display:inline-block;padding:0.25rem 0.5rem;border-radius:999px;background:#f0f0f0;margin-right:0.5rem}
-  </style>
+  <title>Mood Diary — Track • Reflect • Doodle</title>
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
+
+<header>
   <div class="container">
-    <header>
-      <h1>Mood Diary</h1>
-      <p>Quick, lightweight mood tracking demo. Entries are stored in your browser (localStorage).</p>
-      <p><a href="/">← Back to Semi-Colonic</a></p>
-    </header>
+    <div class="brand">
+      <div class="logo">MD</div>
+      <div>
+        <div style="font-weight:800">Mood Diary</div>
+        <div style="font-size:12px;color:var(--muted)">Track • Reflect • Doodle</div>
+      </div>
+    </div>
 
-    <section>
-      <form id="moodForm">
-        <label>
-          How are you feeling?
-          <select id="mood" required>
-            <option value="">-- select mood --</option>
-            <option value="happy">Happy</option>
-            <option value="content">Content</option>
-            <option value="anxious">Anxious</option>
-            <option value="sad">Sad</option>
-            <option value="angry">Angry</option>
-            <option value="neutral">Neutral</option>
-          </select>
-        </label>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#demo">Try Demo</a>
+      <a href="#faq">FAQ</a>
+      <a href="#demo" class="cta">Open App</a>
+    </nav>
+  </div>
+</header>
 
-        <label>
-          Notes (optional)
-          <textarea id="note" rows="3" placeholder="Add a quick note..."></textarea>
-        </label>
+<section class="hero">
+  <div class="hero-card">
+    <h1>Know your mood. Capture your day.</h1>
+    <p class="lead">Mood Diary helps you track daily moods, journal, and doodle to understand patterns and build self-awareness — all private and browser-first.</p>
 
-        <button type="submit">Add entry</button>
-        <button type="button" id="clearBtn">Clear all</button>
-      </form>
+    <div class="features">
+      <div class="feature">Daily mood tracking</div>
+      <div class="feature">Secure local storage</div>
+      <div class="feature">Doodle & ink support</div>
+      <div class="feature">Simple mood analytics</div>
+    </div>
 
-      <h2>Entries</h2>
-      <ul id="entries" class="entries" aria-live="polite"></ul>
-    </section>
+    <div class="cta-row">
+      <button class="btn" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try the demo — it's free</button>
+      <button class="btn secondary" onclick="alert('Download/unlock features coming soon ✨')">Get updates</button>
+    </div>
+
+    <p style="margin-top:14px;color:var(--muted)">Built for personal reflection. Your entries stay in your browser unless you export them.</p>
   </div>
 
-  <script>
-    (function(){
-      const STORAGE_KEY = 'semi_colonic_mood_entries_v1';
-      const form = document.getElementById('moodForm');
-      const moodEl = document.getElementById('mood');
-      const noteEl = document.getElementById('note');
-      const entriesEl = document.getElementById('entries');
-      const clearBtn = document.getElementById('clearBtn');
+  <div class="preview card center" aria-hidden="true">
+    <div style="max-width:320px;">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Today</div>
+      <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+        <div style="font-size:40px">🙂</div>
+        <div style="text-align:left">
+          <div style="font-weight:700">Feeling calm</div>
+          <div style="font-size:13px;color:var(--muted)">A short reflection about a small win</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-      function loadEntries(){
-        try{
-          const raw = localStorage.getItem(STORAGE_KEY);
-          return raw ? JSON.parse(raw) : [];
-        } catch(e){
-          console.error('Failed to load entries', e);
-          return [];
-        }
-      }
+<main>
+  <section id="features" class="card">
+    <h2>Features</h2>
+    <div style="margin-top:12px;color:var(--muted)">
+      <ul>
+        <li><strong>Quick mood pickers:</strong> five emotive levels so logging takes seconds.</li>
+        <li><strong>Private journal:</strong> write your thoughts locally — no servers required.</li>
+        <li><strong>Doodle canvas:</strong> draw or ink feelings with pointer pressure support.</li>
+        <li><strong>Simple insights:</strong> see recent mood history as a chart.</li>
+      </ul>
+    </div>
+  </section>
 
-      function saveEntries(list){
-        try{
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-        } catch(e){
-          console.error('Failed to save entries', e);
-        }
-      }
+  <section id="demo" class="card app">
+    <h2 class="center">Try the Mood Diary — Demo</h2>
 
-      function render(){
-        const list = loadEntries();
-        entriesEl.innerHTML = '';
-        if(list.length === 0){
-          entriesEl.innerHTML = '<li>No entries yet.</li>';
-          return;
-        }
-        list.slice().reverse().forEach(entry => {
-          const li = document.createElement('li');
-          const moodSpan = document.createElement('span');
-          moodSpan.className = 'mood-bubble';
-          moodSpan.textContent = entry.mood;
-          const time = document.createElement('small');
-          time.style.marginLeft='0.5rem';
-          time.style.color='#666';
-          time.textContent = new Date(entry.t).toLocaleString();
+    <div style="margin-top:12px">
+      <h3>How do you feel today?</h3>
+      <div class="mood-scale center" style="margin-bottom:8px">
+        <button onclick="selectMood('😢',1)">😢</button>
+        <button onclick="selectMood('😕',2)">😕</button>
+        <button onclick="selectMood('😐',3)">😐</button>
+        <button onclick="selectMood('🙂',4)">🙂</button>
+        <button onclick="selectMood('😁',5)">😁</button>
+      </div>
+      <p id="moodDisplay" class="center" style="color:var(--muted)">Selected Mood: None</p>
+    </div>
 
-          const note = document.createElement('div');
-          note.textContent = entry.note || '';
+    <div class="grid-2" style="margin-top:12px">
+      <div>
+        <h3>Journal</h3>
+        <textarea id="journal" placeholder="Write a short reflection..."></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
+          <button class="save-btn secondary" onclick="exportEntries()" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Export JSON</button>
+        </div>
+      </div>
 
-          li.appendChild(moodSpan);
-          li.appendChild(time);
-          li.appendChild(note);
-          entriesEl.appendChild(li);
-        });
-      }
+      <div>
+        <h3>Doodle Your Feelings</h3>
+        <canvas id="drawCanvas" width="420" height="300"></canvas>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button onclick="clearDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Clear</button>
+          <button onclick="downloadDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Download</button>
+        </div>
+      </div>
+    </div>
 
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        const mood = moodEl.value;
-        const note = noteEl.value.trim();
-        if(!mood) return;
-        const list = loadEntries();
-        list.push({mood, note, t: Date.now()});
-        saveEntries(list);
-        noteEl.value = '';
-        moodEl.value = '';
-        render();
-      });
+    <div style="margin-top:18px">
+      <h3>Mood History</h3>
+      <canvas id="chartCanvas" width="420" height="200"></canvas>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">Showing last 10 entries (stored locally)</div>
+    </div>
+  </section>
 
-      clearBtn.addEventListener('click', function(){
-        if(!confirm('Clear all mood diary entries? This cannot be undone.')) return;
-        localStorage.removeItem(STORAGE_KEY);
-        render();
-      });
+  <section id="faq" class="card">
+    <h2>FAQ</h2>
+    <div style="margin-top:10px;color:var(--muted)">
+      <p><strong>Where is my data stored?</strong> Entries are saved in your browser's localStorage. They stay on your device unless you export and share them.</p>
+      <p><strong>Can I delete data?</strong> Yes — open your browser storage or clear entries using developer tools. (We'll add an in-app manager in a future update.)</p>
+      <p><strong>Want more features?</strong> Use the "Get updates" button to be notified when we release export/import and cloud sync options.</p>
+    </div>
+  </section>
+</main>
 
-      // initial render
-      render();
-    })();
-  </script>
+<footer>
+  <div>Made with care — Mood Diary • Local-first • 2026 — <a href="/helpline.html">Helpline: +1-800-555-0199</a></div>
+</footer>
+
+<script src="/js/app.js"></script>
 </body>
 </html>
