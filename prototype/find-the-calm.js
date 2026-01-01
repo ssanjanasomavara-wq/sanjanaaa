@@ -1,5 +1,6 @@
 // Interactive prototype JS — recorded ambient layers with per-layer controls
 let ctx, tracks = {}, started = false;
+let masterGain = null;
 const DEFAULT_VOL = 0.7;
 const SOLO_VOL = 1.0;
 const MUTED_VOL = 0.12;
@@ -12,12 +13,12 @@ const TRACK_CONFIG = {
 };
 
 // Helpers
-function now(){ return ctx.currentTime }
-function linearTo(node, value, time=0.2){ node.gain.linearRampToValueAtTime(value, now()+time) }
+function now(){ return ctx ? ctx.currentTime : 0 }
+function linearTo(node, value, time=0.2){ try { if (node && node.gain){ node.gain.linearRampToValueAtTime(value, now()+time); } } catch(e){ debugLog('linearTo error', e.message); } }
 
 // Debug helpers (enable with ?debug=1 or set window.FTC_DEBUG = true)
-function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true || localStorage.getItem('ftc_debug_visible') === '1'; } catch (e){ return !!window.FTC_DEBUG || localStorage.getItem('ftc_debug_visible') === '1'; } }
-function debugLog(...args){ if (!isDebug()) return; console.log('[find-the-calm]', ...args); try{ const el = window.__ftc_debug_panel; if (el){ const s = args.map(a=> (typeof a === 'string')? a : JSON.stringify(a)).join(' '); appendDebugLine(s); } }catch(e){} }
+function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true || localStorage.getItem('ftc_debug_visible') === '1'; } catch(e){ return false } }
+function debugLog(...args){ if (!isDebug()) return; console.log('[find-the-calm]', ...args); try{ const el = window.__ftc_debug_panel; if (el){ const s = args.map(a=> (typeof a === 'string')? a : JSON.stringify(a)).join(' '); const line = document.createElement('div'); line.className='line'; line.textContent = new Date().toLocaleTimeString() + ' — ' + s; el.querySelector('.lines').appendChild(line); el.querySelector('.lines').scrollTop = el.querySelector('.lines').scrollHeight; } } catch(e){} }
 
 // On-screen debug panel helpers
 function appendDebugLine(msg){ try{
@@ -34,7 +35,7 @@ function createDebugPanel(){
   if (window.__ftc_debug_created) return;
   window.__ftc_debug_created = true;
   const panel = document.createElement('div'); panel.className = 'ftc-debug'; panel.setAttribute('role','log');
-  panel.innerHTML = `<div class="hdr"><div class="title">Find the Calm — debug</div><div class="controls"><button data-action="clear">Clear</button><button data-action="close">Close</button></div></div><div class="lines" aria-live="polite"></div>`;
+  panel.innerHTML = `<div class="hdr"><div class="title">Find the Calm — debug</div><div class="controls"><button data-action="clear">Clear</button><button data-action="close">Close</button></div></div><div class="lines"></div>`;
   document.body.appendChild(panel);
   window.__ftc_debug_panel = panel;
   panel.querySelector('button[data-action="clear"]').addEventListener('click', ()=>{ const w = panel.querySelector('.lines'); w.innerHTML=''; });
@@ -42,8 +43,8 @@ function createDebugPanel(){
   panel.style.display = 'block';
 }
 
-function showDebugPanel(){ createDebugPanel(); const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'block'; localStorage.setItem('ftc_debug_visible','1'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','true'); }}
-function hideDebugPanel(){ const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); }}
+function showDebugPanel(){ createDebugPanel(); const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'block'; localStorage.setItem('ftc_debug_visible','1'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','true'); } }
+function hideDebugPanel(){ const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); } }
 
 // auto-create panel if debug enabled
 if (isDebug() && typeof document !== 'undefined'){
@@ -60,12 +61,12 @@ if (typeof document !== 'undefined'){
       if (pressed) { hideDebugPanel(); btn.setAttribute('aria-pressed','false'); } else { showDebugPanel(); btn.setAttribute('aria-pressed','true'); }
     });
     // set initial state
-    try{ const initial = localStorage.getItem('ftc_debug_visible') === '1' || (new URL(location.href).searchParams.get('debug') === '1'); if (initial){ btn.setAttribute('aria-pressed','true'); showDebugPanel(); } }catch(e){}
+    try{ const initial = localStorage.getItem('ftc_debug_visible') === '1' || (new URL(location.href).searchParams.get('debug') === '1'); if (initial){ btn.setAttribute('aria-pressed','true'); showDebugPanel(); } } catch(e){}
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupDebugToggle); else setupDebugToggle();
 
   // keyboard: Ctrl/Cmd + D to toggle
-  document.addEventListener('keydown', (e)=>{ if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd'){ e.preventDefault(); const btn = document.getElementById('debug-toggle'); if (btn) btn.click(); }});
+  document.addEventListener('keydown', (e)=>{ if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd'){ e.preventDefault(); const btn = document.getElementById('debug-toggle'); if (btn) btn.click(); } });
 }
 
 // Create audio track from recorded file
@@ -85,7 +86,8 @@ function makeRecordedTrack(name, audioFile){
       out = ctx.createGain();
       out.gain.value = DEFAULT_VOL;
       source.connect(out);
-      out.connect(ctx.destination);
+      // connect to masterGain if available, otherwise to destination
+      if (masterGain) out.connect(masterGain); else out.connect(ctx.destination);
       sourceCreated = true;
     }
   }
@@ -118,6 +120,10 @@ function makeRecordedTrack(name, audioFile){
 async function initAudio(){
   if (started) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
+  // create a master gain so we can adjust master volume in one place
+  masterGain = ctx.createGain();
+  masterGain.gain.value = masterVolume;
+  masterGain.connect(ctx.destination);
   
   // Create recorded tracks
   const rain = makeRecordedTrack('rain', TRACK_CONFIG.rain.file);
@@ -139,6 +145,8 @@ async function initAudio(){
   // Load saved preset if available
   loadPreset();
   updateAllUI();
+  // ensure audio node volumes match current state
+  applyTrackGains();
 }
 
 // Solo logic
@@ -149,7 +157,7 @@ function setSolo(name){
   if (solo === name){
     // unsolo
     Object.entries(tracks).forEach(([n,t]) => {
-      const targetVol = t.muted ? 0 : t.volume * masterVolume;
+      const targetVol = t.muted ? 0 : t.volume;
       linearTo(t.out, targetVol);
     });
     debugLog('unsolo', name);
@@ -160,9 +168,9 @@ function setSolo(name){
   solo = name;
   Object.entries(tracks).forEach(([n,t]) => {
     if (n === name){
-      linearTo(t.out, SOLO_VOL * masterVolume);
+      linearTo(t.out, SOLO_VOL);
     } else {
-      linearTo(t.out, MUTED_VOL * masterVolume);
+      linearTo(t.out, MUTED_VOL);
     }
   });
   debugLog('soloed', name);
@@ -187,9 +195,9 @@ function setVolume(name, value){
   }
   
   if (solo === name){
-    linearTo(track.out, SOLO_VOL * masterVolume);
+    linearTo(track.out, SOLO_VOL);
   } else {
-    linearTo(track.out, value * masterVolume);
+    linearTo(track.out, value);
   }
   
   debugLog('setVolume', name, value);
@@ -209,9 +217,9 @@ function setMute(name, muted){
   if (muted){
     linearTo(track.out, 0);
   } else if (solo === name){
-    linearTo(track.out, SOLO_VOL * masterVolume);
+    linearTo(track.out, SOLO_VOL);
   } else {
-    linearTo(track.out, track.volume * masterVolume);
+    linearTo(track.out, track.volume);
   }
   
   debugLog('setMute', name, muted);
@@ -223,25 +231,29 @@ let masterVolume = 1.0;
 
 function setMasterVolume(value){
   masterVolume = value;
-  // Re-apply current volume levels with master scaling
-  if (ctx){
-    Object.entries(tracks).forEach(([name, track]) => {
-      // Calculate the target volume based on current state
-      let targetVol;
-      if (solo && solo !== name){
-        targetVol = MUTED_VOL;
-      } else if (track.muted){
-        targetVol = 0;
-      } else if (solo === name){
-        targetVol = SOLO_VOL;
-      } else {
-        targetVol = track.volume;
-      }
-      // Apply with master volume scaling
-      linearTo(track.out, targetVol * masterVolume);
-    });
+  // Apply to master gain node (if available)
+  if (masterGain){
+    linearTo(masterGain, masterVolume);
   }
   debugLog('setMasterVolume', value);
+}
+
+// Apply per-track gains (used after loading preset or init)
+function applyTrackGains(){
+  if (!ctx) return;
+  Object.entries(tracks).forEach(([name, track]) => {
+    let targetVol;
+    if (solo && solo !== name){
+      targetVol = MUTED_VOL;
+    } else if (track.muted){
+      targetVol = 0;
+    } else if (solo === name){
+      targetVol = SOLO_VOL;
+    } else {
+      targetVol = track.volume;
+    }
+    linearTo(track.out, targetVol);
+  });
 }
 
 // Preset system using localStorage
@@ -304,6 +316,7 @@ function loadPreset(){
       masterVolume = preset.master;
       const masterSlider = document.getElementById('master-volume');
       if (masterSlider) masterSlider.value = masterVolume;
+      if (masterGain) linearTo(masterGain, masterVolume);
     }
     
     if (preset.solo){
@@ -312,6 +325,7 @@ function loadPreset(){
     
     // Apply audio settings
     updateAllUI();
+    applyTrackGains();
     
   } catch (e) {
     debugLog('loadPreset error', e.message);
@@ -346,7 +360,7 @@ function updateAllUI(){
 
 // Haptics helper
 function doHaptic(short=false){
-  const disabled = document.getElementById('disable-haptics').checked;
+  const disabled = document.getElementById('disable-haptics') ? document.getElementById('disable-haptics').checked : false;
   debugLog('doHaptic', {short, disabled, vibrateAvailable: ('vibrate' in navigator)});
   if (disabled) return;
   if (navigator.vibrate){ navigator.vibrate(short?30:60); debugLog('vibrated', short?30:60); }
@@ -388,7 +402,7 @@ document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){
     solo = null; 
     Object.entries(tracks).forEach(([name,t]) => {
-      const targetVol = t.muted ? 0 : t.volume * masterVolume;
+      const targetVol = t.muted ? 0 : t.volume;
       linearTo(t.out, targetVol);
     });
     updateAllUI();
