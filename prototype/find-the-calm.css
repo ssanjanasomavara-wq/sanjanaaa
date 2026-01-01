@@ -51,8 +51,13 @@ body{
 
 /* Breathing Visual */
 .breathing-visual{display:flex !important;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:16px}
-.breath-circle{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(216,98,73,0.2), rgba(216,98,73,0.05));border:3px solid var(--accent);animation:breathe 8s infinite ease-in-out}
+.breath-circle{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(216,98,73,0.2), rgba(216,98,73,0.05));border:3px solid var(--accent); /* no animation by default */ animation: none}
 .breath-label{font-size:1.1rem;font-weight:600;color:var(--accent);letter-spacing:1px}
+
+/* When the visual container has the `active` class, enable the appropriate animation */
+.box-breathing.active .breath-circle{animation:breatheBox 16s infinite ease-in-out}
+.breathing-478.active .breath-circle{animation:breathe478 18s infinite ease-in-out}
+.breathing-diaphragm.active .breath-circle{animation:breatheDiaphragm 10s infinite ease-in-out}
 
 @keyframes breathe{
   0%{transform:scale(1);opacity:0.6}
@@ -63,7 +68,7 @@ body{
 }
 
 .box-breathing{animation:none}
-.box-breathing .breath-circle{animation:breatheBox 16s infinite ease-in-out}
+.box-breathing .breath-circle{ /* animation moved to .box-breathing.active above */ }
 @keyframes breatheBox{
   0%{transform:scale(1);opacity:0.6}
   20%{transform:scale(1.3);opacity:1}
@@ -72,17 +77,9 @@ body{
   75%{transform:scale(1.25);opacity:1}
   100%{transform:scale(1);opacity:0.6}
 }
-.box-breathing .breath-label{animation:breatheBoxLabel 16s infinite}
-@keyframes breatheBoxLabel{
-  0%{content:'Inhale'}
-  25%{content:'Hold'}
-  50%{content:'Exhale'}
-  75%{content:'Hold'}
-  100%{content:'Inhale'}
-}
 
 .breathing-478{animation:none}
-.breathing-478 .breath-circle{animation:breathe478 18s infinite ease-in-out}
+.breathing-478 .breath-circle{ /* animation moved to .breathing-478.active */ }
 @keyframes breathe478{
   0%{transform:scale(1);opacity:0.6}
   14.28%{transform:scale(1.35);opacity:1}
@@ -92,12 +89,11 @@ body{
 }
 
 .breathing-diaphragm{animation:none}
-.breathing-diaphragm .breath-circle{animation:breatheDiaphragm 10s infinite ease-in-out}
+.breathing-diaphragm .breath-circle{ /* animation moved to .breathing-diaphragm.active */ }
 @keyframes breatheDiaphragm{
-  0%{transform:scale(1);opacity:0.6}
-  30%{transform:scale(1.4);opacity:1}
-  70%{transform:scale(1);opacity:0.6}
-  100%{transform:scale(1);opacity:0.6}
+  0%{transform:scale(1);opacity:0.65}
+  40%{transform:scale(1.25);opacity:1}
+  100%{transform:scale(1);opacity:0.65}
 }
 
 /* Affirmations Section */
