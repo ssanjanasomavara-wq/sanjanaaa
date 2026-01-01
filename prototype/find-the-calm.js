@@ -260,7 +260,6 @@ const affirmations = [
 ];
 
 let currentAffirmationIndex = 0;
-let activeBreathingExercise = null;
 
 // Initialize affirmations
 function initAffirmations(){
@@ -355,7 +354,9 @@ function startBreathingExercise(exerciseKey){
   }
 
   const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
-  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
+  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
+  const visual = document.querySelector(`.${visualClass}`);
 
   if (!btn || !visual) return;
 
@@ -388,7 +389,9 @@ function startBreathingExercise(exerciseKey){
 
 function stopBreathingExercise(exerciseKey){
   const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
-  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
+  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
+  const visual = document.querySelector(`.${visualClass}`);
   if (btn){
     btn.classList.remove('active');
     btn.textContent = 'Start Exercise';
@@ -421,7 +424,9 @@ function stopBreathingExercise(exerciseKey){
 // Create a label sequence based on exercise instructions and loop it
 function startLabelCycle(exerciseKey){
   const exercise = breathingExercises[exerciseKey];
-  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
+  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
+  const visual = document.querySelector(`.${visualClass}`);
   if (!visual || !exercise) return;
   const labelEl = visual.querySelector('.breath-label');
   if (!labelEl) return;
