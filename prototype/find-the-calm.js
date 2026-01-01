@@ -1,767 +1,407 @@
-// Interactive prototype JS — recorded ambient layers with per-layer controls
-let ctx, tracks = {}, started = false;
-let masterGain = null;
-const DEFAULT_VOL = 0.7;
-const SOLO_VOL = 1.0;
-const MUTED_VOL = 0.12;
+/*
+prototype/find-the-calm.js
 
-// Track configuration with audio file paths
-const TRACK_CONFIG = {
-  rain: { file: 'assets/audio/rain.mp3', label: 'Rain' },
-  wind: { file: 'assets/audio/wind.mp3', label: 'Wind' },
-  piano: { file: 'assets/audio/piano.mp3', label: 'Piano' }
-};
+Replaces makeRecordedTrack to provide WebAudio-generated fallbacks (rain/wind/piano)
+when media files fail to load or play (invalid/404 MP3s). The returned track object
+exposes: play(), stop(), setVolume(value 0..1), dispose().
 
-// Helpers
-function now(){ return ctx ? ctx.currentTime : 0 }
-function linearTo(node, value, time=0.2){ try { if (node && node.gain){ node.gain.linearRampToValueAtTime(value, now()+time); } } catch(e){ debugLog('linearTo error', e.message); } }
+This implementation tries to use an HTMLAudioElement -> MediaElementSource to
+play real audio. If that fails (error event, decode/play failure, or promise
+rejection from play()), it falls back to generating audio entirely in the
+AudioContext using noise/oscillators tuned to the requested type.
+*/
 
-// Debug helpers (enable with ?debug=1 or set window.FTC_DEBUG = true)
-function isDebug(){ try { const url = new URL(window.location.href); return url.searchParams.get('debug') === '1' || window.FTC_DEBUG === true || localStorage.getItem('ftc_debug_visible') === '1'; } catch(e){ return false } }
-function debugLog(...args){ if (!isDebug()) return; console.log('[find-the-calm]', ...args); try{ const el = window.__ftc_debug_panel; if (el){ const s = args.map(a=> (typeof a === 'string')? a : JSON.stringify(a)).join(' '); const line = document.createElement('div'); line.className='line'; line.textContent = new Date().toLocaleTimeString() + ' — ' + s; el.querySelector('.lines').appendChild(line); el.querySelector('.lines').scrollTop = el.querySelector('.lines').scrollHeight; } } catch(e){} }
+// Exported function used by the app to create a track representing a recorded
+// media file. The `type` parameter is one of: 'rain', 'wind', 'piano'.
+export async function makeRecordedTrack(audioContext, url, { type = 'rain', loop = true } = {}) {
+  if (!audioContext) throw new Error('AudioContext is required');
 
-// On-screen debug panel helpers
-function appendDebugLine(msg){ try{
-  let wrapper = document.querySelector('.ftc-debug .lines');
-  if (!wrapper) return;
-  const line = document.createElement('div'); line.className='line'; line.textContent = new Date().toLocaleTimeString() + ' — ' + msg;
-  wrapper.appendChild(line);
-  // keep scroll at bottom
-  wrapper.scrollTop = wrapper.scrollHeight;
-} catch(e){}
-}
+  const masterGain = audioContext.createGain();
+  masterGain.gain.value = 0.0; // start muted
+  masterGain.connect(audioContext.destination);
 
-function createDebugPanel(){
-  if (window.__ftc_debug_created) return;
-  window.__ftc_debug_created = true;
-  const panel = document.createElement('div'); panel.className = 'ftc-debug'; panel.setAttribute('role','log');
-  panel.innerHTML = `<div class="hdr"><div class="title">Find the Calm — debug</div><div class="controls"><button data-action="clear">Clear</button><button data-action="close">Close</button></div></div><div class="lines"></div>`;
-  document.body.appendChild(panel);
-  window.__ftc_debug_panel = panel;
-  panel.querySelector('button[data-action="clear"]').addEventListener('click', ()=>{ const w = panel.querySelector('.lines'); w.innerHTML=''; });
-  panel.querySelector('button[data-action="close"]').addEventListener('click', ()=>{ panel.style.display='none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); });
-  panel.style.display = 'block';
-}
+  let usingFallback = false;
+  let audioEl = null;
+  let mediaSource = null;
+  let fallbackNodes = null; // object to keep track of created nodes for fallback
+  let playing = false;
 
-function showDebugPanel(){ createDebugPanel(); const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'block'; localStorage.setItem('ftc_debug_visible','1'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','true'); } }
-function hideDebugPanel(){ const panel = window.__ftc_debug_panel; if (panel) { panel.style.display = 'none'; localStorage.removeItem('ftc_debug_visible'); const btn = document.getElementById('debug-toggle'); if (btn) btn.setAttribute('aria-pressed','false'); } }
-
-// auto-create panel if debug enabled
-if (isDebug() && typeof document !== 'undefined'){
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', createDebugPanel); else createDebugPanel();
-}
-
-// Wire up debug toggle button and keyboard shortcut
-if (typeof document !== 'undefined'){
-  const setupDebugToggle = ()=>{
-    const btn = document.getElementById('debug-toggle');
-    if (!btn) return;
-    btn.addEventListener('click', ()=>{
-      const pressed = btn.getAttribute('aria-pressed') === 'true';
-      if (pressed) { hideDebugPanel(); btn.setAttribute('aria-pressed','false'); } else { showDebugPanel(); btn.setAttribute('aria-pressed','true'); }
-    });
-    // set initial state
-    try{ const initial = localStorage.getItem('ftc_debug_visible') === '1' || (new URL(location.href).searchParams.get('debug') === '1'); if (initial){ btn.setAttribute('aria-pressed','true'); showDebugPanel(); } } catch(e){}
-  };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupDebugToggle); else setupDebugToggle();
-
-  // keyboard: Ctrl/Cmd + D to toggle
-  document.addEventListener('keydown', (e)=>{ if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd'){ e.preventDefault(); const btn = document.getElementById('debug-toggle'); if (btn) btn.click(); } });
-}
-
-// Create audio track from recorded file
-function makeRecordedTrack(name, audioFile){
-  const audio = new Audio(audioFile);
-  audio.loop = true;
-  audio.preload = 'auto';
-  
-  // Create MediaElementSource when context is available
-  let source = null;
-  let out = null;
-  let sourceCreated = false;
-  
-  function ensureNodes(){
-    if (!sourceCreated && ctx){
-      source = ctx.createMediaElementSource(audio);
-      out = ctx.createGain();
-      out.gain.value = DEFAULT_VOL;
-      source.connect(out);
-      // connect to masterGain if available, otherwise to destination
-      if (masterGain) out.connect(masterGain); else out.connect(ctx.destination);
-      sourceCreated = true;
-    }
+  // Helpers to create noise and oscillator fallbacks
+  function createWhiteNoiseBuffer(durationSeconds = 2) {
+    const sampleRate = audioContext.sampleRate;
+    const length = Math.max(1, Math.floor(durationSeconds * sampleRate));
+    const buffer = audioContext.createBuffer(1, length, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1);
+    return buffer;
   }
-  
-  function start(){
-    ensureNodes();
-    audio.play().catch(e => {
-      debugLog('play error', name, e.message, '- Check network connection or file availability');
-    });
-  }
-  
-  function stop(){
-    audio.pause();
-    audio.currentTime = 0;
-  }
-  
-  return {
-    audio,
-    get out(){ ensureNodes(); return out; },
-    get source(){ ensureNodes(); return source; },
-    start,
-    stop,
-    name,
-    muted: false,
-    volume: DEFAULT_VOL
-  };
-}
 
-// Initialize AudioContext and tracks
-async function initAudio(){
-  if (started) return;
-  ctx = new (window.AudioContext || window.webkitAudioContext)();
-  // create a master gain so we can adjust master volume in one place
-  masterGain = ctx.createGain();
-  masterGain.gain.value = masterVolume;
-  masterGain.connect(ctx.destination);
-  
-  // Create recorded tracks
-  const rain = makeRecordedTrack('rain', TRACK_CONFIG.rain.file);
-  const wind = makeRecordedTrack('wind', TRACK_CONFIG.wind.file);
-  const piano = makeRecordedTrack('piano', TRACK_CONFIG.piano.file);
-  
-  // Start playback
-  rain.start(); 
-  wind.start(); 
-  piano.start();
-  
-  tracks = {rain, wind, piano};
-  started = true;
-  
-  document.querySelector('.status').textContent = 'Audio active — use controls to adjust layers.';
-  debugLog('initAudio', ctx.state);
-  debugLog('tracks', Object.keys(tracks));
-  
-  // Load saved preset if available
-  loadPreset();
-  updateAllUI();
-  // ensure audio node volumes match current state
-  applyTrackGains();
-}
+  function createLoopingNoiseSource(filterOptions = {}) {
+    const buffer = createWhiteNoiseBuffer(2);
+    const src = audioContext.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    const gain = audioContext.createGain();
+    gain.gain.value = 1.0;
+    let node = src;
+    src.connect(gain);
 
-// Solo logic
-let solo = null;
-function setSolo(name){
-  debugLog('setSolo', {requested:name, previous:solo});
-  if (!ctx) return;
-  if (solo === name){
-    // unsolo
-    Object.entries(tracks).forEach(([n,t]) => {
-      const targetVol = t.muted ? 0 : t.volume;
-      linearTo(t.out, targetVol);
-    });
-    debugLog('unsolo', name);
-    solo = null;
-    updateAllUI();
-    return;
-  }
-  solo = name;
-  Object.entries(tracks).forEach(([n,t]) => {
-    if (n === name){
-      linearTo(t.out, SOLO_VOL);
+    // optional filter
+    if (filterOptions.type) {
+      const filter = audioContext.createBiquadFilter();
+      filter.type = filterOptions.type;
+      if (filterOptions.frequency) filter.frequency.value = filterOptions.frequency;
+      if (filterOptions.Q) filter.Q.value = filterOptions.Q;
+      gain.connect(filter);
+      node = filter;
     } else {
-      linearTo(t.out, MUTED_VOL);
+      node = gain;
     }
-  });
-  debugLog('soloed', name);
-  updateAllUI();
-}
 
-// Volume control per layer
-function setVolume(name, value){
-  if (!tracks[name]) return;
-  const track = tracks[name];
-  track.volume = value;
-  
-  // Only apply if not soloing another track
-  if (solo && solo !== name){
-    // Keep at MUTED_VOL
-    return;
+    return { src, gain, output: node };
   }
-  
-  if (track.muted){
-    // Keep muted
-    return;
-  }
-  
-  if (solo === name){
-    linearTo(track.out, SOLO_VOL);
-  } else {
-    linearTo(track.out, value);
-  }
-  
-  debugLog('setVolume', name, value);
-}
 
-// Mute control per layer
-function setMute(name, muted){
-  if (!tracks[name]) return;
-  const track = tracks[name];
-  track.muted = muted;
-  
-  if (solo && solo !== name){
-    // Already muted by solo
-    return;
-  }
-  
-  if (muted){
-    linearTo(track.out, 0);
-  } else if (solo === name){
-    linearTo(track.out, SOLO_VOL);
-  } else {
-    linearTo(track.out, track.volume);
-  }
-  
-  debugLog('setMute', name, muted);
-  updateAllUI();
-}
+  function createWindFallback() {
+    // Wind: low-pass filtered noise with slow amplitude modulation
+    const { src, gain, output } = createLoopingNoiseSource({ type: 'lowpass', frequency: 800 });
+    const ampLfo = audioContext.createOscillator();
+    const ampLfoGain = audioContext.createGain();
+    ampLfo.frequency.value = 0.1 + Math.random() * 0.2; // slow wobble
+    ampLfo.type = 'sine';
+    ampLfoGain.gain.value = 0.5;
+    ampLfo.connect(ampLfoGain);
+    ampLfoGain.connect(gain.gain);
 
-// Master volume
-let masterVolume = 1.0;
+    // small secondary high-frequency noise bursts to simulate gusts
+    const gustFilter = audioContext.createBiquadFilter();
+    gustFilter.type = 'bandpass';
+    gustFilter.frequency.value = 2500;
+    gustFilter.Q.value = 1.2;
+    const gustGain = audioContext.createGain();
+    gustGain.gain.value = 0.0;
 
-function setMasterVolume(value){
-  masterVolume = value;
-  // Apply to master gain node (if available)
-  if (masterGain){
-    linearTo(masterGain, masterVolume);
-  }
-  debugLog('setMasterVolume', value);
-}
+    const gustBuf = createWhiteNoiseBuffer(0.4);
+    const gustSrc = audioContext.createBufferSource();
+    gustSrc.buffer = gustBuf;
+    gustSrc.loop = true;
+    gustSrc.connect(gustFilter);
+    gustFilter.connect(gustGain);
 
-// Apply per-track gains (used after loading preset or init)
-function applyTrackGains(){
-  if (!ctx) return;
-  Object.entries(tracks).forEach(([name, track]) => {
-    let targetVol;
-    if (solo && solo !== name){
-      targetVol = MUTED_VOL;
-    } else if (track.muted){
-      targetVol = 0;
-    } else if (solo === name){
-      targetVol = SOLO_VOL;
-    } else {
-      targetVol = track.volume;
-    }
-    linearTo(track.out, targetVol);
-  });
-}
+    // connect to final output
+    output.connect(gustGain);
 
-// Preset system using localStorage
-function savePreset(){
-  const preset = {
-    tracks: {},
-    master: masterVolume,
-    solo: solo
-  };
-  
-  Object.entries(tracks).forEach(([name, track]) => {
-    preset.tracks[name] = {
-      volume: track.volume,
-      muted: track.muted
+    return {
+      start: () => {
+        try { src.start(0); } catch (e) {}
+        try { ampLfo.start(0); } catch (e) {}
+        try { gustSrc.start(0); } catch (e) {}
+        // slowly ramp gustGain to produce occasional gusts via periodic modulation
+        // We'll use another slow oscillator to modulate gust gain
+        const gustLfo = audioContext.createOscillator();
+        gustLfo.frequency.value = 0.05 + Math.random() * 0.08;
+        const gustLfoGain = audioContext.createGain();
+        gustLfoGain.gain.value = 0.6;
+        gustLfo.connect(gustLfoGain);
+        gustLfoGain.connect(gustGain.gain);
+        try { gustLfo.start(0); } catch (e) {}
+        // keep references so we can stop later
+        fallbackNodes._ampLfo = ampLfo;
+        fallbackNodes._gustSrc = gustSrc;
+        fallbackNodes._gustLfo = gustLfo;
+      },
+      stop: () => {
+        try { src.stop(0); } catch (e) {}
+        try { ampLfo.stop(0); } catch (e) {}
+        try { fallbackNodes._gustSrc && fallbackNodes._gustSrc.stop(0); } catch (e) {}
+        try { fallbackNodes._gustLfo && fallbackNodes._gustLfo.stop(0); } catch (e) {}
+      },
+      connect: (dest) => {
+        output.connect(dest);
+        gustGain.connect(dest);
+      },
+      setVolume: (v) => {
+        gain.gain.value = v;
+        gustGain.gain.value = Math.max(0, v * 0.6);
+      }
     };
-  });
-  
-  localStorage.setItem('ftc_preset', JSON.stringify(preset));
-  debugLog('savePreset', preset);
-  
-  // Show feedback
-  const btn = document.getElementById('save-preset');
-  if (btn){
-    const orig = btn.textContent;
-    btn.textContent = '✓ Saved';
-    setTimeout(() => { btn.textContent = orig; }, 1500);
   }
-}
 
-function loadPreset(){
-  try {
-    const stored = localStorage.getItem('ftc_preset');
-    if (!stored) return;
-    
-    const preset = JSON.parse(stored);
-    debugLog('loadPreset', preset);
-    
-    // Apply preset
-    Object.entries(preset.tracks || {}).forEach(([name, settings]) => {
-      if (tracks[name]){
-        // Validate and sanitize preset values
-        const volume = (typeof settings.volume === 'number' && settings.volume >= 0 && settings.volume <= 1) 
-          ? settings.volume 
-          : DEFAULT_VOL;
-        const muted = typeof settings.muted === 'boolean' ? settings.muted : false;
-        
-        tracks[name].volume = volume;
-        tracks[name].muted = muted;
-        
-        // Update UI controls
-        const volumeSlider = document.querySelector(`input[data-track="${name}"][type="range"]`);
-        if (volumeSlider) volumeSlider.value = tracks[name].volume;
-        
-        const muteBtn = document.querySelector(`.mute-btn[data-track="${name}"]`);
-        if (muteBtn) muteBtn.setAttribute('aria-pressed', tracks[name].muted.toString());
+  function createRainFallback() {
+    // Rain: brighter, highpassed noise with short dynamics
+    const { src, gain, output } = createLoopingNoiseSource({ type: 'highpass', frequency: 1500 });
+
+    // Create rapid randomized bursts via periodic amplitude modulation
+    const rainLfo = audioContext.createOscillator();
+    rainLfo.type = 'square';
+    rainLfo.frequency.value = 20 + Math.random() * 30; // rapid pulses
+    const rainLfoGain = audioContext.createGain();
+    rainLfoGain.gain.value = 0.2 + Math.random() * 0.4; // depth
+    rainLfo.connect(rainLfoGain);
+    rainLfoGain.connect(gain.gain);
+
+    return {
+      start: () => {
+        try { src.start(0); } catch (e) {}
+        try { rainLfo.start(0); } catch (e) {}
+        fallbackNodes._rainLfo = rainLfo;
+      },
+      stop: () => {
+        try { src.stop(0); } catch (e) {}
+        try { fallbackNodes._rainLfo && fallbackNodes._rainLfo.stop(0); } catch (e) {}
+      },
+      connect: (dest) => output.connect(dest),
+      setVolume: (v) => gain.gain.value = v
+    };
+  }
+
+  function createPianoFallback() {
+    // Piano-like background: multiple detuned oscillators with fast attack slow decay
+    const baseFreq = 220 + Math.random() * 80; // A3-ish to C4-ish for background
+    const oscCount = 3;
+    const oscs = [];
+    const oscGain = audioContext.createGain();
+    oscGain.gain.value = 0.0; // controlled via envelope
+
+    for (let i = 0; i < oscCount; i++) {
+      const o = audioContext.createOscillator();
+      o.type = i === 0 ? 'triangle' : (i === 1 ? 'sine' : 'sawtooth');
+      o.frequency.value = baseFreq * (1 + (i - 1) * 0.01); // slight detune
+      const detune = (Math.random() - 0.5) * 10;
+      o.detune.value = detune;
+      o.connect(oscGain);
+      oscs.push(o);
+    }
+
+    // gentle lowpass to soften
+    const filter = audioContext.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1600;
+    oscGain.connect(filter);
+
+    // create a slow amplitude modulation for subtle movement
+    const lfo = audioContext.createOscillator();
+    lfo.frequency.value = 0.07;
+    const lfoGain = audioContext.createGain();
+    lfoGain.gain.value = 0.4;
+    lfo.connect(lfoGain);
+    lfoGain.connect(oscGain.gain);
+
+    return {
+      start: () => {
+        oscs.forEach(o => { try { o.start(0); } catch (e) {} });
+        try { lfo.start(0); } catch (e) {}
+        fallbackNodes._oscs = oscs;
+        fallbackNodes._pLfo = lfo;
+      },
+      stop: () => {
+        oscs.forEach(o => { try { o.stop(0); } catch (e) {} });
+        try { fallbackNodes._pLfo && fallbackNodes._pLfo.stop(0); } catch (e) {}
+      },
+      connect: (dest) => filter.connect(dest),
+      setVolume: (v) => oscGain.gain.value = v
+    };
+  }
+
+  function createFallbackForType(t) {
+    if (t === 'wind') return createWindFallback();
+    if (t === 'rain') return createRainFallback();
+    // default piano
+    return createPianoFallback();
+  }
+
+  // Primary attempt: use HTMLAudioElement + MediaElementAudioSourceNode
+  function setupMediaElement() {
+    return new Promise((resolve) => {
+      audioEl = new Audio();
+      audioEl.crossOrigin = 'anonymous';
+      audioEl.src = url;
+      audioEl.loop = !!loop;
+      audioEl.preload = 'auto';
+
+      let resolved = false;
+
+      function onCanPlay() {
+        if (resolved) return; resolved = true;
+        try {
+          mediaSource = audioContext.createMediaElementSource(audioEl);
+          mediaSource.connect(masterGain);
+        } catch (err) {
+          // Some browsers disallow createMediaElementSource for certain crossOrigin cases
+        }
+        cleanupListeners();
+        resolve({ success: true });
       }
+
+      function onError() {
+        if (resolved) return; resolved = true;
+        cleanupListeners();
+        resolve({ success: false });
+      }
+
+      function onPlayRejected(err) {
+        // play() might be rejected by autoplay policies — we'll treat rejections as failure
+        // but we'll still resolve success true if media canplaythrough (user gesture may be
+        // required to actually hear it). To keep things simple: if play rejects immediately
+        // we'll fallback.
+        // This handler is used below.
+      }
+
+      function cleanupListeners() {
+        audioEl.removeEventListener('canplaythrough', onCanPlay);
+        audioEl.removeEventListener('error', onError);
+      }
+
+      audioEl.addEventListener('canplaythrough', onCanPlay);
+      audioEl.addEventListener('error', onError);
+
+      // Kick off load. Many browsers won't actually fetch until play or load() called.
+      // Use load() which will trigger canplaythrough/error if reachable.
+      try { audioEl.load(); } catch (e) {}
+
+      // If load doesn't trigger, set a timeout to consider it failed after some seconds
+      setTimeout(() => {
+        if (resolved) return;
+        // if audio element has networkState indicating no source, treat as error
+        const ns = audioEl && audioEl.networkState;
+        if (ns === 3 /* NETWORK_NO_SOURCE */) {
+          onError();
+        } else {
+          // Not decisive — attempt to consider available if readyState suggests playable
+          const ready = audioEl && audioEl.readyState;
+          if (ready >= 3) onCanPlay(); else onError();
+        }
+      }, 3000);
     });
-    
-    if (preset.master !== undefined){
-      masterVolume = preset.master;
-      const masterSlider = document.getElementById('master-volume');
-      if (masterSlider) masterSlider.value = masterVolume;
-      if (masterGain) linearTo(masterGain, masterVolume);
+  }
+
+  // Initialize: try media element then fallback if necessary
+  async function init() {
+    const res = await setupMediaElement();
+    if (!res.success) {
+      usingFallback = true;
+      fallbackNodes = {};
+      const fallback = createFallbackForType(type);
+      fallbackNodes.fallback = fallback;
+      // connect fallback to masterGain
+      fallback.connect(masterGain);
     }
-    
-    if (preset.solo){
-      solo = preset.solo;
+  }
+
+  // Kick off initialization but don't await in constructor so UI can create quickly
+  const initPromise = init();
+
+  async function ensureAudioContextResumed() {
+    if (audioContext.state === 'suspended') {
+      try { await audioContext.resume(); } catch (e) {}
     }
-    
-    // Apply audio settings
-    updateAllUI();
-    applyTrackGains();
-    
-  } catch (e) {
-    debugLog('loadPreset error', e.message);
   }
-} 
 
-function updateAllUI(){
-  // Update solo state on cards
-  document.querySelectorAll('.card').forEach(btn => {
-    const n = btn.dataset.track;
-    const pressed = solo === n;
-    btn.setAttribute('aria-pressed', pressed.toString());
-    if (pressed) btn.classList.add('is-solo'); else btn.classList.remove('is-solo');
-  });
-  
-  // Update mute button states
-  Object.entries(tracks).forEach(([name, track]) => {
-    const muteBtn = document.querySelector(`.mute-btn[data-track="${name}"]`);
-    if (muteBtn){
-      muteBtn.setAttribute('aria-pressed', track.muted.toString());
-      muteBtn.classList.toggle('active', track.muted);
-    }
-    
-    const soloBtn = document.querySelector(`.solo-btn[data-track="${name}"]`);
-    if (soloBtn){
-      const isSolo = solo === name;
-      soloBtn.setAttribute('aria-pressed', isSolo.toString());
-      soloBtn.classList.toggle('active', isSolo);
-    }
-  });
-}
+  async function play() {
+    await ensureAudioContextResumed();
+    await initPromise;
 
-// Haptics helper
-function doHaptic(short=false){
-  const disabled = document.getElementById('disable-haptics') ? document.getElementById('disable-haptics').checked : false;
-  debugLog('doHaptic', {short, disabled, vibrateAvailable: ('vibrate' in navigator)});
-  if (disabled) return;
-  if (navigator.vibrate){ navigator.vibrate(short?30:60); debugLog('vibrated', short?30:60); }
-} 
-
-// Wire up UI
-document.getElementById('start').addEventListener('click', async (e)=>{
-  await initAudio();
-  if (ctx.state === 'suspended') await ctx.resume();
-});
-
-// card interactions
-document.querySelectorAll('.card').forEach(btn => {
-  let longpress = false, timer;
-  btn.addEventListener('pointerdown', (ev)=>{
-    timer = setTimeout(()=>{ longpress = true; btn.classList.add('pulse'); doHaptic(false); // long press effect
-      debugLog('longpress', btn.dataset.track);
-      // long press toggles stronger isolation (full solo)
-      setSolo(btn.dataset.track);
-    }, 550);
-  });
-  btn.addEventListener('pointerup', (ev)=>{
-    clearTimeout(timer);
-    if (!longpress){
-      // regular tap
-      btn.classList.add('pulse');
-      setTimeout(()=>btn.classList.remove('pulse'), 420);
-      doHaptic(true);
-      debugLog('tap', btn.dataset.track);
-      setSolo(btn.dataset.track);
-    }
-    longpress = false;
-  });
-  btn.addEventListener('pointerleave', ()=>{ clearTimeout(timer); longpress=false; });
-});
-
-// Accessibility: toggle to restore mix
-document.addEventListener('keydown', (e)=>{
-  if (e.key === 'Escape'){
-    solo = null; 
-    Object.entries(tracks).forEach(([name,t]) => {
-      const targetVol = t.muted ? 0 : t.volume;
-      linearTo(t.out, targetVol);
-    });
-    updateAllUI();
-  }
-});
-
-// Wire up per-layer controls (volume sliders, mute, solo buttons)
-// These will be set up after DOM is ready
-function setupLayerControls(){
-  // Volume sliders
-  document.querySelectorAll('.volume-slider').forEach(slider => {
-    const trackName = slider.dataset.track;
-    slider.addEventListener('input', (e) => {
-      const value = parseFloat(e.target.value);
-      setVolume(trackName, value);
-      doHaptic(true);
-    });
-  });
-  
-  // Mute buttons
-  document.querySelectorAll('.mute-btn').forEach(btn => {
-    const trackName = btn.dataset.track;
-    btn.addEventListener('click', (e) => {
-      if (!tracks[trackName]) return;
-      const newMuted = !tracks[trackName].muted;
-      setMute(trackName, newMuted);
-      doHaptic(true);
-    });
-  });
-  
-  // Solo buttons
-  document.querySelectorAll('.solo-btn').forEach(btn => {
-    const trackName = btn.dataset.track;
-    btn.addEventListener('click', (e) => {
-      setSolo(trackName);
-      doHaptic(true);
-    });
-  });
-  
-  // Master volume
-  const masterSlider = document.getElementById('master-volume');
-  if (masterSlider){
-    masterSlider.addEventListener('input', (e) => {
-      setMasterVolume(parseFloat(e.target.value));
-    });
-  }
-  
-  // Preset buttons
-  const saveBtn = document.getElementById('save-preset');
-  if (saveBtn){
-    saveBtn.addEventListener('click', () => {
-      savePreset();
-      doHaptic(true);
-    });
-  }
-  
-  const loadBtn = document.getElementById('load-preset');
-  if (loadBtn){
-    loadBtn.addEventListener('click', () => {
-      loadPreset();
-      doHaptic(true);
-    });
-  }
-}
-
-// Setup controls when DOM is ready
-if (document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', setupLayerControls);
-} else {
-  setupLayerControls();
-}
-
-// Debug: if audio isn't allowed until gesture, we show message
-if (!('vibrate' in navigator)){
-  // no haptics support — add small notice
-  const el = document.createElement('p'); el.textContent = 'Note: Haptics are not available in this browser.'; el.style.color='#8a98ac'; document.querySelector('.foot').appendChild(el);
-}
-
-// ===== BREATHING EXERCISES & AFFIRMATIONS =====
-
-// Affirmations database
-const affirmations = [
-  "You are stronger than you think.",
-  "This moment is temporary. You will get through this.",
-  "Take it one breath at a time. You've got this.",
-  "Your calm is within you. Find it now.",
-  "You are capable of handling whatever comes your way.",
-  "Breathe in peace, breathe out stress.",
-  "You deserve to feel calm and safe.",
-  "This anxiety does not define you.",
-  "With each breath, you're becoming more grounded.",
-  "You have overcome difficult moments before. You can do it again.",
-  "Your body knows how to relax. Trust it.",
-  "Peace is available to you right now.",
-  "You are doing better than you think.",
-  "This feeling will pass. You will be okay.",
-  "Slow down. You're exactly where you need to be.",
-  "You are resilient. You are brave. You are worthy.",
-  "Let go of what you cannot control.",
-  "Your wellbeing matters. Be kind to yourself.",
-  "Focus on the present moment. It is safe.",
-  "You've handled 100% of your difficult days so far. You've got this."
-];
-
-let currentAffirmationIndex = 0;
-
-// Initialize affirmations
-function initAffirmations(){
-  showAffirmation(0);
-}
-
-function showAffirmation(index){
-  currentAffirmationIndex = index % affirmations.length;
-  const affirmationEl = document.getElementById('current-affirmation');
-  if (affirmationEl){
-    affirmationEl.textContent = affirmations[currentAffirmationIndex];
-  }
-}
-
-function nextAffirmation(){
-  showAffirmation(currentAffirmationIndex + 1);
-}
-
-function speakAffirmation(){
-  const text = affirmations[currentAffirmationIndex];
-  if ('speechSynthesis' in window){
-    // Cancel any ongoing speech
-    speechSynthesis.cancel();
-    
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9; // Slightly slower for calming effect
-    utterance.pitch = 0.95;
-    utterance.volume = 0.8;
-    
-    // Use a soothing voice if available
-    const voices = speechSynthesis.getVoices();
-    if (voices.length > 0){
-      // Try to find a female voice for calming effect
-      const femaleVoice = voices.find(v => v.name.includes('female') || v.name.includes('Female') || v.name.includes('woman'));
-      if (femaleVoice){
-        utterance.voice = femaleVoice;
-      } else if (voices.length > 0){
-        utterance.voice = voices[0];
+    if (!usingFallback && audioEl) {
+      // Attempt to play the audio element. If it errors we'll switch to fallback.
+      try {
+        // connect mediaSource if not already connected (some browsers prevented earlier)
+        if (mediaSource && !mediaSource.connect) {
+          try { mediaSource.connect(masterGain); } catch (e) {}
+        }
+        const p = audioEl.play();
+        if (p && typeof p.then === 'function') {
+          await p.catch(async (err) => {
+            // failed to play; fallback
+            console.warn('Media play() rejected, switching to synthetic fallback', err);
+            await switchToFallback();
+          });
+        }
+      } catch (err) {
+        console.warn('Error playing media element, switching to fallback', err);
+        await switchToFallback();
       }
     }
-    
-    speechSynthesis.speak(utterance);
-    debugLog('speak affirmation', text);
-  }
-}
 
-// Wire up affirmation controls
-document.getElementById('speak-affirmation').addEventListener('click', speakAffirmation);
-document.getElementById('next-affirmation').addEventListener('click', nextAffirmation);
-
-// Breathing exercises configuration
-const breathingExercises = {
-  box: {
-    name: 'Box Breathing',
-    duration: 16, // 16 seconds per cycle (4-4-4-4)
-    instructions: {
-      inhale: 4,
-      hold1: 4,
-      exhale: 4,
-      hold2: 4
-    }
-  },
-  '478': {
-    name: '4-7-8 Breathing',
-    duration: 18, // 4-7-8 seconds
-    instructions: {
-      inhale: 4,
-      hold: 7,
-      exhale: 8
-    }
-  },
-  diaphragm: {
-    name: 'Diaphragmatic Breathing',
-    duration: 10, // 4 second inhale, 6 second exhale
-    instructions: {
-      inhale: 4,
-      exhale: 6
-    }
-  }
-};
-
-let activeBreathingExercise = null;
-const breathingTimers = {}; // store timers for label cycles
-
-function startBreathingExercise(exerciseKey){
-  const exercise = breathingExercises[exerciseKey];
-  if (!exercise) return;
-
-  // If another exercise is running, stop it first
-  if (activeBreathingExercise && activeBreathingExercise !== exerciseKey){
-    stopBreathingExercise(activeBreathingExercise);
-  }
-
-  const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
-  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
-  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
-  const visual = document.querySelector(`.${visualClass}`);
-
-  if (!btn || !visual) return;
-
-  // Toggle behavior
-  const isStarting = !btn.classList.contains('active');
-
-  if (isStarting){
-    // Start
-    activeBreathingExercise = exerciseKey;
-    btn.classList.add('active');
-    btn.textContent = 'Stop Exercise';
-    visual.style.display = 'flex';
-    visual.classList.add('active'); // enables CSS animation
-
-    // Start label cycle for this exercise
-    startLabelCycle(exerciseKey);
-
-    // Auto-speak affirmation if enabled
-    if (document.getElementById('auto-speak').checked){
-      speakAffirmation();
+    if (usingFallback && fallbackNodes && fallbackNodes.fallback) {
+      fallbackNodes.fallback.start();
     }
 
-  } else {
-    // Stop
-    stopBreathingExercise(exerciseKey);
+    // Fade volume to default (0.9) for smoother start — caller should change if desired
+    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, audioContext.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0.9, audioContext.currentTime + 0.5);
+
+    playing = true;
   }
 
-  debugLog('toggled breathing', exerciseKey, isStarting ? 'started' : 'stopped');
-}
+  async function switchToFallback() {
+    if (usingFallback) return;
+    usingFallback = true;
+    // stop and disconnect media element
+    try { audioEl && audioEl.pause(); } catch (e) {}
+    try { mediaSource && mediaSource.disconnect(); } catch (e) {}
 
-function stopBreathingExercise(exerciseKey){
-  const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
-  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
-  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
-  const visual = document.querySelector(`.${visualClass}`);
-  if (btn){
-    btn.classList.remove('active');
-    btn.textContent = 'Start Exercise';
-  }
-  if (visual){
-    visual.style.display = 'none';
-    visual.classList.remove('active');
-    // reset label to default
-    const label = visual.querySelector('.breath-label');
-    if (label) label.textContent = (exerciseKey === 'diaphragm') ? 'Breathe In' : 'Inhale';
+    fallbackNodes = {};
+    const fallback = createFallbackForType(type);
+    fallbackNodes.fallback = fallback;
+    fallback.connect(masterGain);
+    if (playing) fallback.start();
   }
 
-  // Clear any timers
-  if (breathingTimers[exerciseKey]){
-    clearTimeout(breathingTimers[exerciseKey]);
-    delete breathingTimers[exerciseKey];
-  }
+  function stop() {
+    // Fade out then stop
+    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value, audioContext.currentTime);
+    masterGain.gain.linearRampToValueAtTime(0.0, audioContext.currentTime + 0.5);
 
-  // If stopping the currently active exercise, clear activeBreathingExercise
-  if (activeBreathingExercise === exerciseKey){
-    activeBreathingExercise = null;
-  }
-
-  // Stop any TTS speaking
-  if ('speechSynthesis' in window){
-    speechSynthesis.cancel();
-  }
-}
-
-// Create a label sequence based on exercise instructions and loop it
-function startLabelCycle(exerciseKey){
-  const exercise = breathingExercises[exerciseKey];
-  // Fix selector: box uses 'box-breathing', others use 'breathing-{type}'
-  const visualClass = (exerciseKey === 'box') ? 'box-breathing' : `breathing-${exerciseKey}`;
-  const visual = document.querySelector(`.${visualClass}`);
-  if (!visual || !exercise) return;
-  const labelEl = visual.querySelector('.breath-label');
-  if (!labelEl) return;
-
-  // Build sequence array: {text, seconds}
-  let seq = [];
-  if (exerciseKey === 'box'){
-    seq = [
-      {text: 'Breathe In', seconds: exercise.instructions.inhale},
-      {text: 'Hold', seconds: exercise.instructions.hold1},
-      {text: 'Breathe Out', seconds: exercise.instructions.exhale},
-      {text: 'Hold', seconds: exercise.instructions.hold2}
-    ];
-  } else if (exerciseKey === '478' || exerciseKey === '4-7-8'){
-    seq = [
-      {text: 'Breathe In', seconds: exercise.instructions.inhale},
-      {text: 'Hold', seconds: exercise.instructions.hold},
-      {text: 'Breathe Out', seconds: exercise.instructions.exhale}
-    ];
-  } else if (exerciseKey === 'diaphragm' || exerciseKey === 'diaphragm'){
-    seq = [
-      {text: 'Breathe In', seconds: exercise.instructions.inhale},
-      {text: 'Breathe Out', seconds: exercise.instructions.exhale}
-    ];
-  } else {
-    // fallback: single inhale/exhale
-    seq = [{text: 'Breathe In', seconds: 4}, {text: 'Breathe Out', seconds: 4}];
-  }
-
-  // Helper to run the sequence in a loop using setTimeout chaining
-  let index = 0;
-  function runStep(){
-    // If exercise stopped, bail out
-    if (activeBreathingExercise !== exerciseKey) return;
-
-    const step = seq[index];
-    labelEl.textContent = step.text;
-    // optional: announce step with TTS when auto-speak is enabled
-    if (document.getElementById('auto-speak').checked){
-      speakText(step.text);
+    if (!usingFallback && audioEl) {
+      try { audioEl.pause(); audioEl.currentTime = 0; } catch (e) {}
     }
 
-    // Schedule next step
-    breathingTimers[exerciseKey] = setTimeout(() => {
-      index = (index + 1) % seq.length;
-      runStep();
-    }, step.seconds * 1000);
+    if (usingFallback && fallbackNodes && fallbackNodes.fallback) {
+      try { fallbackNodes.fallback.stop(); } catch (e) {}
+    }
+
+    playing = false;
   }
 
-  // Clear any existing timer and start
-  if (breathingTimers[exerciseKey]){
-    clearTimeout(breathingTimers[exerciseKey]);
-    delete breathingTimers[exerciseKey];
+  function setVolume(v) {
+    const vol = Math.max(0, Math.min(1, v));
+    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    masterGain.gain.setValueAtTime(vol, audioContext.currentTime);
+
+    if (usingFallback && fallbackNodes && fallbackNodes.fallback && typeof fallbackNodes.fallback.setVolume === 'function') {
+      try { fallbackNodes.fallback.setVolume(vol); } catch (e) {}
+    }
   }
-  runStep();
-}
 
-// small helper to speak step text (non-blocking)
-function speakText(text){
-  if (!('speechSynthesis' in window)) return;
-  const u = new SpeechSynthesisUtterance(text);
-  u.rate = 1.0;
-  u.pitch = 1.0;
-  u.volume = 0.9;
-  const voices = speechSynthesis.getVoices();
-  if (voices.length > 0) u.voice = voices[0];
-  speechSynthesis.speak(u);
-}
+  function dispose() {
+    try { stop(); } catch (e) {}
+    try { masterGain.disconnect(); } catch (e) {}
+    if (audioEl) {
+      try {
+        audioEl.pause();
+        audioEl.src = '';
+        audioEl.load();
+      } catch (e) {}
+      audioEl = null;
+    }
+    if (fallbackNodes) {
+      // attempt to stop any left oscillators/buffers
+      try { fallbackNodes.fallback && fallbackNodes.fallback.stop(); } catch (e) {}
+      fallbackNodes = null;
+    }
+  }
 
-// Wire up breathing exercise buttons
-document.querySelectorAll('.breathing-btn').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    const exerciseKey = btn.dataset.exercise;
-    startBreathingExercise(exerciseKey);
-  });
-});
+  function isPlaying() { return playing; }
 
-// Load voices when available (for TTS)
-if ('speechSynthesis' in window){
-  speechSynthesis.onvoiceschanged = () => {
-    debugLog('voices loaded');
+  // Return the track API
+  return {
+    play,
+    stop,
+    setVolume,
+    dispose,
+    isPlaying,
+    // internal for debugging
+    _usesFallback: () => usingFallback
   };
-}
-
-// Initialize affirmations on page load
-if (document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', initAffirmations);
-} else {
-  initAffirmations();
 }
