@@ -1,8 +1,15 @@
-// Interactive prototype JS — synth-based ambient layers
+// Interactive prototype JS — recorded ambient layers with per-layer controls
 let ctx, tracks = {}, started = false;
 const DEFAULT_VOL = 0.7;
 const SOLO_VOL = 1.0;
 const MUTED_VOL = 0.12;
+
+// Track configuration with audio file paths
+const TRACK_CONFIG = {
+  rain: { file: 'assets/audio/rain.mp3', label: 'Rain' },
+  wind: { file: 'assets/audio/wind.mp3', label: 'Wind' },
+  piano: { file: 'assets/audio/piano.mp3', label: 'Piano' }
+};
 
 // Helpers
 function now(){ return ctx.currentTime }
@@ -61,94 +68,75 @@ if (typeof document !== 'undefined'){
   document.addEventListener('keydown', (e)=>{ if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd'){ e.preventDefault(); const btn = document.getElementById('debug-toggle'); if (btn) btn.click(); }});
 }
 
-// Create noise buffer
-function createNoiseBuffer(duration=1){
-  const sr = ctx.sampleRate;
-  const buf = ctx.createBuffer(1, sr*duration, sr);
-  const data = buf.getChannelData(0);
-  for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1) * (Math.random()*0.5);
-  return buf;
-}
-
-// Rain: filtered white noise + light amplitude modulation
-function makeRain(){
-  const out = ctx.createGain(); out.gain.value = DEFAULT_VOL;
-  const buff = createNoiseBuffer(2);
-  const src = ctx.createBufferSource(); src.buffer = buff; src.loop = true;
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 500;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 3000; lp.Q.value = 0.8;
-  // gentle tremolo
-  const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.5;
-  const lfoGain = ctx.createGain(); lfoGain.gain.value = 0.25; // depth
-  lfo.connect(lfoGain); lfoGain.connect(out.gain);
-
-  src.connect(hp); hp.connect(lp); lp.connect(out);
-  function start(){ src.start(); lfo.start(); }
-  function stop(){ try{ src.stop() }catch{}; try{ lfo.stop() }catch{} }
-  return {out, start, stop};
-}
-
-// Wind: filtered noise with lowcut and slow evolving filter
-function makeWind(){
-  const out = ctx.createGain(); out.gain.value = DEFAULT_VOL * 0.85;
-  const buff = createNoiseBuffer(3);
-  const src = ctx.createBufferSource(); src.buffer = buff; src.loop = true;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1200;
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 80;
-  src.connect(lp); lp.connect(hp); hp.connect(out);
-  // slow filter sweep
-  const sweep = () => {
-    const f = 800 + Math.random()*800;
-    lp.frequency.linearRampToValueAtTime(f, now()+6 + Math.random()*4);
+// Create audio track from recorded file
+function makeRecordedTrack(name, audioFile){
+  const audio = new Audio(audioFile);
+  audio.loop = true;
+  audio.preload = 'auto';
+  
+  // Create MediaElementSource when context is available
+  let source = null;
+  let out = null;
+  
+  function ensureNodes(){
+    if (!source && ctx){
+      source = ctx.createMediaElementSource(audio);
+      out = ctx.createGain();
+      out.gain.value = DEFAULT_VOL;
+      source.connect(out);
+      out.connect(ctx.destination);
+    }
   }
-  let sweepInterval;
-  function start(){ src.start(); sweepInterval = setInterval(sweep, 4000); sweep(); }
-  function stop(){ clearInterval(sweepInterval); try{ src.stop() }catch{} }
-  return {out, start, stop};
-}
-
-// Piano: sparse plucked notes using oscillators + envelope
-function makePiano(){
-  const master = ctx.createGain(); master.gain.value = DEFAULT_VOL * 0.9;
-  let intervalId;
-  const notes = [220, 262, 196, 330, 246]; // A3, C4, G3, E4, B3
-  function playNote(freq){
-    const osc = ctx.createOscillator(); osc.type = 'triangle';
-    const g = ctx.createGain();
-    osc.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, now());
-    g.gain.exponentialRampToValueAtTime(0.2, now()+0.02);
-    g.gain.exponentialRampToValueAtTime(0.0001, now()+1.2);
-    osc.connect(g); g.connect(master);
-    osc.start(); osc.stop(now()+1.3);
-  }
+  
   function start(){
-    intervalId = setInterval(()=>{
-      const n = notes[Math.floor(Math.random()*notes.length)];
-      playNote(n * (0.5 + Math.random()*1.0));
-    }, 700 + Math.random()*700);
+    ensureNodes();
+    audio.play().catch(e => {
+      debugLog('play error', name, e.message);
+    });
   }
-  function stop(){ clearInterval(intervalId); }
-  return {out: master, start, stop};
+  
+  function stop(){
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  
+  return {
+    audio,
+    get out(){ ensureNodes(); return out; },
+    get source(){ ensureNodes(); return source; },
+    start,
+    stop,
+    name,
+    muted: false,
+    volume: DEFAULT_VOL
+  };
 }
 
 // Initialize AudioContext and tracks
 async function initAudio(){
   if (started) return;
   ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const rain = makeRain();
-  const wind = makeWind();
-  const piano = makePiano();
-  // connect to destination
-  rain.out.connect(ctx.destination);
-  wind.out.connect(ctx.destination);
-  piano.out.connect(ctx.destination);
-  rain.start(); wind.start(); piano.start();
+  
+  // Create recorded tracks
+  const rain = makeRecordedTrack('rain', TRACK_CONFIG.rain.file);
+  const wind = makeRecordedTrack('wind', TRACK_CONFIG.wind.file);
+  const piano = makeRecordedTrack('piano', TRACK_CONFIG.piano.file);
+  
+  // Start playback
+  rain.start(); 
+  wind.start(); 
+  piano.start();
+  
   tracks = {rain, wind, piano};
   started = true;
-  document.querySelector('.status').textContent = 'Audio active — tap a card to isolate a sound.';
+  
+  document.querySelector('.status').textContent = 'Audio active — use controls to adjust layers.';
   debugLog('initAudio', ctx.state);
   debugLog('tracks', Object.keys(tracks));
+  
+  // Load saved preset if available
+  loadPreset();
+  updateAllUI();
 }
 
 // Solo logic
@@ -158,26 +146,185 @@ function setSolo(name){
   if (!ctx) return;
   if (solo === name){
     // unsolo
-    Object.values(tracks).forEach(t => linearTo(t.out, DEFAULT_VOL));
+    Object.entries(tracks).forEach(([n,t]) => {
+      const targetVol = t.muted ? 0 : t.volume;
+      linearTo(t.out, targetVol);
+    });
     debugLog('unsolo', name);
     solo = null;
-    updateUI();
+    updateAllUI();
     return;
   }
   solo = name;
   Object.entries(tracks).forEach(([n,t]) => {
-    linearTo(t.out, n===name?SOLO_VOL:MUTED_VOL);
+    if (n === name){
+      linearTo(t.out, SOLO_VOL);
+    } else {
+      linearTo(t.out, MUTED_VOL);
+    }
   });
   debugLog('soloed', name);
-  updateUI();
+  updateAllUI();
+}
+
+// Volume control per layer
+function setVolume(name, value){
+  if (!tracks[name]) return;
+  const track = tracks[name];
+  track.volume = value;
+  
+  // Only apply if not soloing another track
+  if (solo && solo !== name){
+    // Keep at MUTED_VOL
+    return;
+  }
+  
+  if (track.muted){
+    // Keep muted
+    return;
+  }
+  
+  if (solo === name){
+    linearTo(track.out, SOLO_VOL);
+  } else {
+    linearTo(track.out, value);
+  }
+  
+  debugLog('setVolume', name, value);
+}
+
+// Mute control per layer
+function setMute(name, muted){
+  if (!tracks[name]) return;
+  const track = tracks[name];
+  track.muted = muted;
+  
+  if (solo && solo !== name){
+    // Already muted by solo
+    return;
+  }
+  
+  if (muted){
+    linearTo(track.out, 0);
+  } else if (solo === name){
+    linearTo(track.out, SOLO_VOL);
+  } else {
+    linearTo(track.out, track.volume);
+  }
+  
+  debugLog('setMute', name, muted);
+  updateAllUI();
+}
+
+// Master volume
+let masterVolume = 1.0;
+let masterGain = null;
+
+function setMasterVolume(value){
+  masterVolume = value;
+  if (ctx && ctx.destination){
+    // Apply master volume by adjusting individual tracks
+    // (since we can't control destination gain directly)
+    Object.entries(tracks).forEach(([name, track]) => {
+      const currentGain = track.out.gain.value;
+      // Scale the current gain by master volume
+      track.out.gain.value = currentGain * masterVolume;
+    });
+  }
+  debugLog('setMasterVolume', value);
+}
+
+// Preset system using localStorage
+function savePreset(){
+  const preset = {
+    tracks: {},
+    master: masterVolume,
+    solo: solo
+  };
+  
+  Object.entries(tracks).forEach(([name, track]) => {
+    preset.tracks[name] = {
+      volume: track.volume,
+      muted: track.muted
+    };
+  });
+  
+  localStorage.setItem('ftc_preset', JSON.stringify(preset));
+  debugLog('savePreset', preset);
+  
+  // Show feedback
+  const btn = document.getElementById('save-preset');
+  if (btn){
+    const orig = btn.textContent;
+    btn.textContent = '✓ Saved';
+    setTimeout(() => { btn.textContent = orig; }, 1500);
+  }
+}
+
+function loadPreset(){
+  try {
+    const stored = localStorage.getItem('ftc_preset');
+    if (!stored) return;
+    
+    const preset = JSON.parse(stored);
+    debugLog('loadPreset', preset);
+    
+    // Apply preset
+    Object.entries(preset.tracks || {}).forEach(([name, settings]) => {
+      if (tracks[name]){
+        tracks[name].volume = settings.volume ?? DEFAULT_VOL;
+        tracks[name].muted = settings.muted ?? false;
+        
+        // Update UI controls
+        const volumeSlider = document.querySelector(`input[data-track="${name}"][type="range"]`);
+        if (volumeSlider) volumeSlider.value = tracks[name].volume;
+        
+        const muteBtn = document.querySelector(`.mute-btn[data-track="${name}"]`);
+        if (muteBtn) muteBtn.setAttribute('aria-pressed', tracks[name].muted.toString());
+      }
+    });
+    
+    if (preset.master !== undefined){
+      masterVolume = preset.master;
+      const masterSlider = document.getElementById('master-volume');
+      if (masterSlider) masterSlider.value = masterVolume;
+    }
+    
+    if (preset.solo){
+      solo = preset.solo;
+    }
+    
+    // Apply audio settings
+    updateAllUI();
+    
+  } catch (e) {
+    debugLog('loadPreset error', e.message);
+  }
 } 
 
-function updateUI(){
+function updateAllUI(){
+  // Update solo state on cards
   document.querySelectorAll('.card').forEach(btn => {
     const n = btn.dataset.track;
     const pressed = solo === n;
     btn.setAttribute('aria-pressed', pressed.toString());
     if (pressed) btn.classList.add('is-solo'); else btn.classList.remove('is-solo');
+  });
+  
+  // Update mute button states
+  Object.entries(tracks).forEach(([name, track]) => {
+    const muteBtn = document.querySelector(`.mute-btn[data-track="${name}"]`);
+    if (muteBtn){
+      muteBtn.setAttribute('aria-pressed', track.muted.toString());
+      muteBtn.classList.toggle('active', track.muted);
+    }
+    
+    const soloBtn = document.querySelector(`.solo-btn[data-track="${name}"]`);
+    if (soloBtn){
+      const isSolo = solo === name;
+      soloBtn.setAttribute('aria-pressed', isSolo.toString());
+      soloBtn.classList.toggle('active', isSolo);
+    }
   });
 }
 
@@ -223,9 +370,80 @@ document.querySelectorAll('.card').forEach(btn => {
 // Accessibility: toggle to restore mix
 document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){
-    solo = null; Object.values(tracks).forEach(t => linearTo(t.out, DEFAULT_VOL)); updateUI();
+    solo = null; 
+    Object.entries(tracks).forEach(([name,t]) => {
+      const targetVol = t.muted ? 0 : t.volume;
+      linearTo(t.out, targetVol);
+    });
+    updateAllUI();
   }
 });
+
+// Wire up per-layer controls (volume sliders, mute, solo buttons)
+// These will be set up after DOM is ready
+function setupLayerControls(){
+  // Volume sliders
+  document.querySelectorAll('.volume-slider').forEach(slider => {
+    const trackName = slider.dataset.track;
+    slider.addEventListener('input', (e) => {
+      const value = parseFloat(e.target.value);
+      setVolume(trackName, value);
+      doHaptic(true);
+    });
+  });
+  
+  // Mute buttons
+  document.querySelectorAll('.mute-btn').forEach(btn => {
+    const trackName = btn.dataset.track;
+    btn.addEventListener('click', (e) => {
+      if (!tracks[trackName]) return;
+      const newMuted = !tracks[trackName].muted;
+      setMute(trackName, newMuted);
+      doHaptic(true);
+    });
+  });
+  
+  // Solo buttons
+  document.querySelectorAll('.solo-btn').forEach(btn => {
+    const trackName = btn.dataset.track;
+    btn.addEventListener('click', (e) => {
+      setSolo(trackName);
+      doHaptic(true);
+    });
+  });
+  
+  // Master volume
+  const masterSlider = document.getElementById('master-volume');
+  if (masterSlider){
+    masterSlider.addEventListener('input', (e) => {
+      setMasterVolume(parseFloat(e.target.value));
+    });
+  }
+  
+  // Preset buttons
+  const saveBtn = document.getElementById('save-preset');
+  if (saveBtn){
+    saveBtn.addEventListener('click', () => {
+      savePreset();
+      doHaptic(true);
+    });
+  }
+  
+  const loadBtn = document.getElementById('load-preset');
+  if (loadBtn){
+    loadBtn.addEventListener('click', () => {
+      loadPreset();
+      doHaptic(true);
+    });
+  }
+}
+
+// Setup controls when DOM is ready
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', setupLayerControls);
+} else {
+  setupLayerControls();
+}
 
 // Debug: if audio isn't allowed until gesture, we show message
 if (!('vibrate' in navigator)){
