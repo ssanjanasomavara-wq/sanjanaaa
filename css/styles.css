@@ -1,42 +1,107 @@
-/* styles.css - moved into css/ */
 :root{
-  --bg:#fbfbfe;
-  --card:#ffffff;
+  --accent:#5a5adb;
   --muted:#6b7280;
-  --accent:#6b5ce6;
-  --border:#e6e7ee;
+  --bg:#f6f7fb;
+  --card:#fff;
+  --radius:14px;
+  --max-width:1100px;
 }
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg);color:#111}
-.container{max-width:980px;margin:0 auto;padding:20px}
-header{background:transparent;padding:16px 0}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#7c6cff,#5ad0ff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
-nav{margin-left:auto;display:flex;gap:12px;align-items:center}
-nav a{color:inherit;text-decoration:none;padding:8px}
-nav a.cta{background:var(--accent);color:#fff;border-radius:8px;padding:8px 12px}
-.hero{display:flex;gap:28px;padding:40px 20px}
-.hero-card{flex:1}
-.preview{width:360px}
-.card{background:var(--card);padding:18px;border-radius:12px;border:1px solid var(--border)}
-.center{text-align:center}
+
+/* Reset & layout */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg, var(--bg) 0%, #eef2ff 100%);
+  color:#111827;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  line-height:1.4;
+
+  /* center page content horizontally and allow vertical flow */
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  min-height:100vh;
+  padding:24px;
+}
+
+/* Constrain content and center */
+.container{
+  width:100%;
+  max-width:var(--max-width);
+  margin:0 auto;
+  padding:8px 18px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+header{width:100%;}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{background:var(--accent);color:white;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:10px;font-weight:700;font-size:20px;box-shadow: 0 6px 18px rgba(90,90,219,0.14)}
+nav{margin-left:auto}
+nav a{color:var(--muted);text-decoration:none;margin-left:18px;font-weight:600}
+nav a.cta{background:var(--accent);color:white;padding:10px 14px;border-radius:12px;margin-left:18px;box-shadow: 0 6px 18px rgba(90,90,219,0.12)}
+
+/* Hero — center aligned */
+.hero{
+  width:100%;
+  max-width:var(--max-width);
+  margin:36px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:28px;
+  padding:18px;
+}
+.hero-card{flex:1;max-width:720px}
+.preview{width:360px;flex:0 0 360px}
+
+/* Card and content */
+.card{background:var(--card);padding:18px;border-radius:12px;box-shadow: 0 8px 28px rgba(11,22,77,0.04);border:1px solid rgba(10,10,10,0.03)}
 .lead{color:var(--muted)}
-.features{display:flex;gap:8px;margin-top:12px}
-.feature{background:#f5f6fb;padding:8px 12px;border-radius:8px;font-size:13px}
-.cta-row{display:flex;gap:8px;margin-top:12px}
-.btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--accent);border:1px solid var(--border)}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-textarea{width:100%;min-height:120px;padding:10px;border-radius:8px;border:1px solid var(--border);resize:vertical}
-.save-btn{background:var(--accent);color:#fff;padding:8px 12px;border-radius:8px;border:0;cursor:pointer}
-.save-btn.secondary{background:transparent;border:1px solid var(--border);color:var(--muted)}
-h1{margin:0 0 8px 0}
-h2{margin:0 0 8px 0}
-h3{margin:0 0 6px 0}
-footer{padding:24px;text-align:center;color:var(--muted)}
-.mood-scale button{font-size:20px;padding:8px;border-radius:8px;border:1px solid var(--border);background:#fff;cursor:pointer}
+.features{display:flex;gap:10px;margin:12px 0;flex-wrap:wrap;justify-content:center}
+.feature{background:#fff;border-radius:12px;padding:8px 12px;box-shadow: 0 6px 14px rgba(9,10,27,0.04);font-weight:600;color:#0f1724;font-size:14px}
+.cta-row{display:flex;gap:12px;align-items:center;justify-content:center}
+.btn{background:var(--accent);color:white;border:none;padding:12px 18px;border-radius:12px;cursor:pointer;font-weight:700;box-shadow: 0 8px 24px rgba(90,90,219,0.12)}
+.btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(15,23,36,0.06)}
+
+/* Main & demo */
+main{width:100%;max-width:var(--max-width);margin:18px auto;padding:12px;display:block}
+.center{text-align:center}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.app textarea{width:100%;height:120px;padding:10px;border-radius:10px;border:1px solid #e6e7ee;resize:vertical;font-family:inherit}
+.app .mood-scale{display:flex;gap:8px;justify-content:center}
+.app .mood-scale button{font-size:26px;margin:0;padding:6px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.05);background:#fff;cursor:pointer}
+.app canvas{width:100%;max-width:420px;height:auto;border:2px dashed #e2e8f0;border-radius:12px;touch-action:none;background:linear-gradient(90deg, rgba(250,250,255,1), rgba(245,247,255,1))}
+.save-btn{background:var(--accent);color:white;border:none;padding:10px 18px;border-radius:12px;cursor:pointer;font-weight:700}
+.save-btn.secondary{background:transparent;border:1px solid #e6e7ee;color:var(--muted)}
+
+footer{width:100%;max-width:var(--max-width);margin:18px auto;padding:18px;color:var(--muted);text-align:center}
+
+/* Center align text for narrower viewports */
+.card, .hero-card, .preview, main{display:block;margin-left:auto;margin-right:auto}
+
+/* Responsive adjustments */
+@media (max-width:1100px){
+  .preview{flex:0 0 300px}
+}
 @media (max-width:880px){
-  .hero{flex-direction:column}
-  .grid-2{grid-template-columns:1fr}
+  .container{padding:8px 12px}
+  .hero{flex-direction:column;gap:20px;padding:12px}
+  .preview{width:100%;max-width:420px}
+  .hero-card{width:100%}
   nav{display:none}
+  .grid-2{grid-template-columns:1fr}
+  .features{justify-content:flex-start}
+  .cta-row{justify-content:flex-start}
+}
+
+@media (max-width:520px){
+  body{padding:16px}
+  .logo{width:40px;height:40px}
+  .btn{padding:10px 14px}
+  .feature{font-size:13px}
+  .app canvas{height:220px}
 }
