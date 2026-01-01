@@ -1,495 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Mood Diary — Track • Reflect • Doodle</title>
+    <meta charset="UTF-8">
+    <title>Mental Health Support 	6 India</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+        }
 
-  <style>
-    :root{
-      --accent:#5a5adb;
-      --muted:#6b7280;
-      --bg:#f6f7fb;
-      --card:#fff;
-      --radius:14px;
-      --glass: rgba(255,255,255,0.6);
-    }
+        .site-header { background:#2c3e50; color:#fff; padding:12px 20px; border-radius:6px; margin-bottom:18px; display:flex; align-items:center; justify-content:space-between }
+        .site-header a { color:#fff; text-decoration:none; margin-left:12px; font-weight:700 }
 
-    /* Basic reset */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body {
-      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: linear-gradient(180deg, #f6f7fb 0%, #eef2ff 100%);
-      color:#111827;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      line-height:1.4;
-    }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
 
-    /* Header / Nav */
-    header{
-      position:sticky;
-      top:0;
-      backdrop-filter: blur(6px);
-      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));
-      border-bottom: 1px solid rgba(0,0,0,0.04);
-      z-index:20;
-    }
-    .container{
-      max-width:1100px;
-      margin:0 auto;
-      padding:18px;
-      display:flex;
-      align-items:center;
-      gap:16px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-    }
-    .logo{
-      background:var(--accent);
-      color:white;
-      width:44px;
-      height:44px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:10px;
-      font-weight:700;
-      font-size:20px;
-      box-shadow: 0 6px 18px rgba(90,90,219,0.14);
-    }
-    nav{margin-left:auto}
-    nav a{
-      color:var(--muted);
-      text-decoration:none;
-      margin-left:18px;
-      font-weight:600;
-    }
-    nav a.cta{
-      background:var(--accent);
-      color:white;
-      padding:10px 14px;
-      border-radius:12px;
-      margin-left:18px;
-      box-shadow: 0 6px 18px rgba(90,90,219,0.12);
-    }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
 
-    /* Hero */
-    .hero{
-      max-width:1100px;
-      margin:36px auto 18px;
-      display:grid;
-      grid-template-columns: 1fr 420px;
-      gap:28px;
-      align-items:center;
-      padding:18px;
-    }
-    .hero-card{
-      background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.85));
-      border-radius:var(--radius);
-      padding:28px;
-      box-shadow: 0 10px 30px rgba(11,22,77,0.06);
-    }
-    h1{
-      font-size:32px;
-      color:var(--accent);
-      margin-bottom:8px;
-    }
-    p.lead{
-      color:var(--muted);
-      margin-bottom:18px;
-    }
-    .features{
-      display:flex;
-      gap:10px;
-      margin-bottom:18px;
-      flex-wrap:wrap;
-    }
-    .feature{
-      background: #fff;
-      border-radius:12px;
-      padding:10px 12px;
-      box-shadow: 0 6px 14px rgba(9,10,27,0.04);
-      font-weight:600;
-      color:#0f1724;
-      font-size:14px;
-    }
-    .cta-row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-    }
-    .btn{
-      background:var(--accent);
-      color:white;
-      border:none;
-      padding:12px 18px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:700;
-      box-shadow: 0 8px 24px rgba(90,90,219,0.12);
-    }
-    .btn.secondary{
-      background:transparent;
-      color:var(--muted);
-      border:1px solid rgba(15,23,36,0.06);
-    }
+        p {
+            text-align: center;
+            color: #555;
+        }
 
-    /* Right column preview */
-    .preview{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px;
-    }
+        .hotline {
+            background: #eef3f7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
 
-    /* Main content areas */
-    main{ max-width:1100px; margin:18px auto; padding:12px; display:grid; gap:18px; }
+        .hotline h3 {
+            margin: 0;
+            color: #1a5276;
+        }
 
-    .card {
-      background: var(--card);
-      padding:18px;
-      border-radius:12px;
-      box-shadow: 0 8px 28px rgba(11,22,77,0.04);
-    }
+        .hotline a {
+            text-decoration: none;
+            color: #0b5345;
+            font-weight: bold;
+        }
 
-    /* Reused app styles (kept from original but scoped) */
-    .app .mood-scale button {
-      font-size:26px;
-      margin:5px;
-      border:none;
-      background:none;
-      cursor:pointer;
-    }
-    .app textarea {
-      width:100%;
-      height:120px;
-      padding:10px;
-      border-radius:10px;
-      border:1px solid #e6e7ee;
-      resize:none;
-      font-family:inherit;
-      font-size:15px;
-    }
-    .app canvas {
-      width:100%;
-      max-width:420px;
-      height:300px;
-      border:2px dashed #e2e8f0;
-      border-radius:12px;
-      touch-action:none;
-      background:linear-gradient(90deg, rgba(250,250,255,1), rgba(245,247,255,1));
-    }
-    .save-btn {
-      background:var(--accent);
-      color:white;
-      border:none;
-      padding:10px 18px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:700;
-    }
-
-    /* Layout helpers */
-    .grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
-    .center{ text-align:center }
-
-    footer{
-      max-width:1100px;margin:18px auto;padding:18px;color:var(--muted);font-size:14px;text-align:center;
-    }
-
-    /* Responsive */
-    @media (max-width:980px){
-      .hero{grid-template-columns:1fr; padding:12px}
-      nav{display:none}
-      .preview{order:2}
-    }
-  </style>
+        .emergency {
+            text-align: center;
+            margin-top: 25px;
+            color: #c0392b;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<header>
-  <div class="container">
-    <div class="brand">
-      <div class="logo">MD</div>
-      <div>
-        <div style="font-weight:800">Mood Diary</div>
-        <div style="font-size:12px;color:var(--muted)">Track • Reflect • Doodle</div>
-      </div>
-    </div>
-
-    <nav>
-      <a href="#features">Features</a>
-      <a href="#demo">Try Demo</a>
-      <a href="#faq">FAQ</a>
-      <a href="#demo" class="cta">Open App</a>
-    </nav>
-  </div>
+<header class="site-header">
+  <div class="brand"><a href="index.html" aria-label="Home">Home</a></div>
+  <nav class="primary-nav" aria-label="Primary navigation">
+    <a href="helpline.html">Helpline</a>
+  </nav>
 </header>
 
-<section class="hero">
-  <div class="hero-card">
-    <h1>Know your mood. Capture your day.</h1>
-    <p class="lead">Mood Diary helps you track daily moods, journal, and doodle to understand patterns and build self-awareness — all private and browser-first.</p>
+<div class="container">
+    <h1>Need to Talk to a Human?</h1>
+    <p>You are not alone. If you need immediate emotional support, please reach out to one of these helplines.</p>
 
-    <div class="features">
-      <div class="feature">Daily mood tracking</div>
-      <div class="feature">Secure local storage</div>
-      <div class="feature">Doodle & ink support</div>
-      <div class="feature">Simple mood analytics</div>
+    <div class="hotline">
+        <h3>KIRAN (24/7 Government Mental Health Helpline)</h3>
+        <p>📞 <a href="tel:18005990019">1800-599-0019</a></p>
     </div>
 
-    <div class="cta-row">
-      <button class="btn" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try the demo — it's free</button>
-      <button class="btn secondary" onclick="alert('Download/unlock features coming soon ✨')">Get updates</button>
+    <div class="hotline">
+        <h3>AASRA Suicide Prevention Helpline</h3>
+        <p>📞 <a href="tel:+919820466726">+91 9820466726</a></p>
+        <p>Available 24/7</p>
     </div>
 
-    <p style="margin-top:14px;color:var(--muted)">Built for personal reflection. Your entries stay in your browser unless you export them.</p>
-  </div>
-
-  <div class="preview card center" aria-hidden="true">
-    <div style="max-width:320px;">
-      <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Today</div>
-      <div style="display:flex;align-items:center;gap:12px;justify-content:center">
-        <div style="font-size:40px">🙂</div>
-        <div style="text-align:left">
-          <div style="font-weight:700">Feeling calm</div>
-          <div style="font-size:13px;color:var(--muted)">A short reflection about a small win</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<main>
-  <!-- Features -->
-  <section id="features" class="card">
-    <h2>Features</h2>
-    <div style="margin-top:12px;color:var(--muted)">
-      <ul>
-        <li><strong>Quick mood pickers:</strong> five emotive levels so logging takes seconds.</li>
-        <li><strong>Private journal:</strong> write your thoughts locally — no servers required.</li>
-        <li><strong>Doodle canvas:</strong> draw or ink feelings with pointer pressure support.</li>
-        <li><strong>Simple insights:</strong> see recent mood history as a chart.</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Demo / App (original app embedded here, adapted) -->
-  <section id="demo" class="card app">
-    <h2 class="center">Try the Mood Diary — Demo</h2>
-
-    <!-- Mood -->
-    <div style="margin-top:12px">
-      <h3>How do you feel today?</h3>
-      <div class="mood-scale center" style="margin-bottom:8px">
-        <button onclick="selectMood('😢',1)">😢</button>
-        <button onclick="selectMood('😕',2)">😕</button>
-        <button onclick="selectMood('😐',3)">😐</button>
-        <button onclick="selectMood('🙂',4)">🙂</button>
-        <button onclick="selectMood('😁',5)">😁</button>
-      </div>
-      <p id="moodDisplay" class="center" style="color:var(--muted)">Selected Mood: None</p>
+    <div class="hotline">
+        <h3>iCALL (TISS)</h3>
+        <p>📞 <a href="tel:+919152987821">+91 9152987821</a></p>
+        <p>Monday 	6 Saturday, 10am	68pm</p>
     </div>
 
-    <div class="grid-2" style="margin-top:12px">
-      <!-- Journal -->
-      <div>
-        <h3>Journal</h3>
-        <textarea id="journal" placeholder="Write a short reflection..."></textarea>
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
-          <button class="save-btn secondary" onclick="exportEntries()" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Export JSON</button>
-        </div>
-      </div>
-
-      <!-- Doodle -->
-      <div>
-        <h3>Doodle Your Feelings</h3>
-        <canvas id="drawCanvas" width="420" height="300"></canvas>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button onclick="clearDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Clear</button>
-          <button onclick="downloadDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Download</button>
-        </div>
-      </div>
+    <div class="hotline">
+        <h3>Sneha Foundation</h3>
+        <p>📞 <a href="tel:04424640050">044-2464-0050</a></p>
+        <p>24/7 Support</p>
     </div>
 
-    <!-- Chart -->
-    <div style="margin-top:18px">
-      <h3>Mood History</h3>
-      <canvas id="chartCanvas" width="420" height="200"></canvas>
-      <div style="margin-top:8px;color:var(--muted);font-size:13px">Showing last 10 entries (stored locally)</div>
+    <div class="emergency">
+        If you are in immediate danger, please call your local emergency number or go to the nearest hospital.
     </div>
-  </section>
+</div>
 
-  <!-- FAQ -->
-  <section id="faq" class="card">
-    <h2>FAQ</h2>
-    <div style="margin-top:10px;color:var(--muted)">
-      <p><strong>Where is my data stored?</strong> Entries are saved in your browser's localStorage. They stay on your device unless you export and share them.</p>
-      <p><strong>Can I delete data?</strong> Yes — open your browser storage or clear entries using developer tools. (We'll add an in-app manager in a future update.)</p>
-      <p><strong>Want more features?</strong> Use the "Get updates" button to be notified when we release export/import and cloud sync options.</p>
-    </div>
-  </section>
-</main>
+<footer id="site-footer" class="site-footer" role="contentinfo"></footer>
 
-<footer>
-  <div>Made with care — Mood Diary • Local-first • 2026</div>
-</footer>
-
-<script>
-/* ===== Scoped App Script (adapted from provided index.html) ===== */
-
-/* ===== Mood Tracking ===== */
-let moodValue = null;
-let moodEmoji = "";
-const moodDisplay = document.getElementById("moodDisplay");
-
-function selectMood(emoji, value) {
-  moodEmoji = emoji;
-  moodValue = value;
-  moodDisplay.textContent = "Selected Mood: " + emoji;
-}
-
-/* ===== Save Entry ===== */
-function saveEntry() {
-  if (!moodValue) {
-    alert("Please select a mood first 💭");
-    return;
-  }
-
-  const journalText = document.getElementById("journal").value.trim();
-  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
-
-  history.push({
-    mood: moodValue,
-    emoji: moodEmoji,
-    note: journalText,
-    date: new Date().toISOString()
-  });
-
-  localStorage.setItem("moodHistory", JSON.stringify(history));
-  document.getElementById("journal").value = "";
-  drawChart();
-  alert("Saved 🌱");
-}
-
-/* ===== Export Entries ===== */
-function exportEntries() {
-  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
-  const a = document.createElement('a');
-  a.setAttribute('href', dataStr);
-  a.setAttribute('download', 'mood-history.json');
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-/* ===== Mood Chart ===== */
-const chartCanvas = document.getElementById("chartCanvas");
-const cctx = chartCanvas.getContext("2d");
-
-function drawChart() {
-  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
-  cctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);
-
-  // background grid
-  cctx.fillStyle = "#fff";
-  cctx.fillRect(0, 0, chartCanvas.width, chartCanvas.height);
-
-  const visible = history.slice(-10);
-  const maxBars = 10;
-  const w = chartCanvas.width;
-  const h = chartCanvas.height;
-  const paddingLeft = 20;
-  const paddingBottom = 20;
-  const barAreaW = w - paddingLeft - 20;
-  const step = barAreaW / maxBars;
-  const barWidth = Math.min(32, step * 0.6);
-
-  visible.forEach((entry, i) => {
-    const x = paddingLeft + i*step + (step - barWidth)/2;
-    const height = (entry.mood/5) * (h - 60);
-    cctx.fillStyle = "rgba(90,90,219,0.95)";
-    cctx.fillRect(x, h - paddingBottom - height, barWidth, height);
-
-    cctx.font = "20px serif";
-    cctx.textBaseline = "top";
-    cctx.fillText(entry.emoji || '', x, h - paddingBottom + 4);
-  });
-}
-
-/* ===== Doodle (Touch + Ink) ===== */
-const drawCanvas = document.getElementById("drawCanvas");
-const dctx = drawCanvas.getContext("2d", { willReadFrequently: true });
-let drawing = false;
-
-function resizeCanvasForDisplay() {
-  // ensure canvas internal resolution matches CSS pixels for crispness
-  [drawCanvas].forEach(c => {
-    const ratio = window.devicePixelRatio || 1;
-    const w = c.clientWidth;
-    const h = c.clientHeight;
-    if (c.width !== Math.floor(w*ratio) || c.height !== Math.floor(h*ratio)) {
-      c.width = Math.floor(w*ratio);
-      c.height = Math.floor(h*ratio);
-      const ctx = c.getContext('2d');
-      ctx.scale(ratio, ratio);
-    }
-  });
-}
-window.addEventListener('resize', resizeCanvasForDisplay);
-resizeCanvasForDisplay();
-
-drawCanvas.addEventListener("pointerdown", e => {
-  drawing = true;
-  dctx.beginPath();
-  dctx.lineWidth = (e.pressure && e.pressure > 0 ? e.pressure : 0.35) * 8;
-  dctx.moveTo(e.offsetX, e.offsetY);
-  drawCanvas.setPointerCapture(e.pointerId);
-});
-
-drawCanvas.addEventListener("pointerup", e => {
-  drawing = false;
-  dctx.beginPath();
-  try { drawCanvas.releasePointerCapture(e.pointerId); } catch(e){}
-});
-
-drawCanvas.addEventListener("pointercancel", () => { drawing = false; dctx.beginPath(); });
-
-drawCanvas.addEventListener("pointermove", e => {
-  if (!drawing) return;
-  dctx.lineCap = "round";
-  dctx.strokeStyle = "#111827";
-  dctx.lineWidth = (e.pressure && e.pressure > 0 ? e.pressure : 0.35) * 8;
-  dctx.lineTo(e.offsetX, e.offsetY);
-  dctx.stroke();
-  dctx.beginPath();
-  dctx.moveTo(e.offsetX, e.offsetY);
-});
-
-function clearDoodle() {
-  dctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
-}
-
-function downloadDoodle() {
-  const url = drawCanvas.toDataURL('image/png');
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'doodle.png';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-/* Initialize */
-drawChart();
-</script>
+<script src="assets/footer-inject.js"></script>
 
 </body>
 </html>
