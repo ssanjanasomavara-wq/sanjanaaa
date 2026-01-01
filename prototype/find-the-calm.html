@@ -24,7 +24,7 @@
     </header>
 
     <section class="grid" aria-label="Sound layers">
-      <button class="card" data-track="rain" aria-pressed="false">
+      <div class="card" data-track="rain" role="group" aria-label="Rain sound" tabindex="0">
         <svg class="icon" viewBox="0 0 64 64" aria-hidden>
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
             <path d="M21 32a9 9 0 0118 0" />
@@ -34,9 +34,13 @@
         </svg>
         <div class="label">Rain</div>
         <div class="meta">Calm, steady • ambient</div>
-      </button>
+        <div class="card-controls">
+          <button class="play-btn btn" aria-pressed="false">Play</button>
+          <button class="stop-btn btn btn-ghost">Stop</button>
+        </div>
+      </div>
 
-      <button class="card" data-track="wind" aria-pressed="false">
+      <div class="card" data-track="wind" role="group" aria-label="Wind sound" tabindex="0">
         <svg class="icon" viewBox="0 0 64 64" aria-hidden>
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
             <path d="M8 28c6-3 14-3 20 0s14 3 20 0" />
@@ -46,9 +50,13 @@
         </svg>
         <div class="label">Wind</div>
         <div class="meta">Gentle whoosh • airy</div>
-      </button>
+        <div class="card-controls">
+          <button class="play-btn btn" aria-pressed="false">Play</button>
+          <button class="stop-btn btn btn-ghost">Stop</button>
+        </div>
+      </div>
 
-      <button class="card" data-track="piano" aria-pressed="false">
+      <div class="card" data-track="piano" role="group" aria-label="Piano sound" tabindex="0">
         <svg class="icon" viewBox="0 0 64 64" aria-hidden>
           <g fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2">
             <rect x="6" y="16" width="52" height="20" rx="2"/>
@@ -58,7 +66,11 @@
         </svg>
         <div class="label">Piano</div>
         <div class="meta">Soft keys • sparse notes</div>
-      </button>
+        <div class="card-controls">
+          <button class="play-btn btn" aria-pressed="false">Play</button>
+          <button class="stop-btn btn btn-ghost">Stop</button>
+        </div>
+      </div>
     </section>
 
     <section class="breathing-section">
