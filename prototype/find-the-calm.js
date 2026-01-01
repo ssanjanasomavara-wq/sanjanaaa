@@ -77,14 +77,16 @@ function makeRecordedTrack(name, audioFile){
   // Create MediaElementSource when context is available
   let source = null;
   let out = null;
+  let sourceCreated = false;
   
   function ensureNodes(){
-    if (!source && ctx){
+    if (!sourceCreated && ctx){
       source = ctx.createMediaElementSource(audio);
       out = ctx.createGain();
       out.gain.value = DEFAULT_VOL;
       source.connect(out);
       out.connect(ctx.destination);
+      sourceCreated = true;
     }
   }
   
@@ -147,7 +149,7 @@ function setSolo(name){
   if (solo === name){
     // unsolo
     Object.entries(tracks).forEach(([n,t]) => {
-      const targetVol = t.muted ? 0 : t.volume;
+      const targetVol = t.muted ? 0 : t.volume * masterVolume;
       linearTo(t.out, targetVol);
     });
     debugLog('unsolo', name);
@@ -158,9 +160,9 @@ function setSolo(name){
   solo = name;
   Object.entries(tracks).forEach(([n,t]) => {
     if (n === name){
-      linearTo(t.out, SOLO_VOL);
+      linearTo(t.out, SOLO_VOL * masterVolume);
     } else {
-      linearTo(t.out, MUTED_VOL);
+      linearTo(t.out, MUTED_VOL * masterVolume);
     }
   });
   debugLog('soloed', name);
@@ -185,9 +187,9 @@ function setVolume(name, value){
   }
   
   if (solo === name){
-    linearTo(track.out, SOLO_VOL);
+    linearTo(track.out, SOLO_VOL * masterVolume);
   } else {
-    linearTo(track.out, value);
+    linearTo(track.out, value * masterVolume);
   }
   
   debugLog('setVolume', name, value);
@@ -207,9 +209,9 @@ function setMute(name, muted){
   if (muted){
     linearTo(track.out, 0);
   } else if (solo === name){
-    linearTo(track.out, SOLO_VOL);
+    linearTo(track.out, SOLO_VOL * masterVolume);
   } else {
-    linearTo(track.out, track.volume);
+    linearTo(track.out, track.volume * masterVolume);
   }
   
   debugLog('setMute', name, muted);
@@ -218,17 +220,25 @@ function setMute(name, muted){
 
 // Master volume
 let masterVolume = 1.0;
-let masterGain = null;
 
 function setMasterVolume(value){
   masterVolume = value;
-  if (ctx && ctx.destination){
-    // Apply master volume by adjusting individual tracks
-    // (since we can't control destination gain directly)
+  // Re-apply current volume levels with master scaling
+  if (ctx){
     Object.entries(tracks).forEach(([name, track]) => {
-      const currentGain = track.out.gain.value;
-      // Scale the current gain by master volume
-      track.out.gain.value = currentGain * masterVolume;
+      // Calculate the target volume based on current state
+      let targetVol;
+      if (solo && solo !== name){
+        targetVol = MUTED_VOL;
+      } else if (track.muted){
+        targetVol = 0;
+      } else if (solo === name){
+        targetVol = SOLO_VOL;
+      } else {
+        targetVol = track.volume;
+      }
+      // Apply with master volume scaling
+      linearTo(track.out, targetVol * masterVolume);
     });
   }
   debugLog('setMasterVolume', value);
@@ -372,7 +382,7 @@ document.addEventListener('keydown', (e)=>{
   if (e.key === 'Escape'){
     solo = null; 
     Object.entries(tracks).forEach(([name,t]) => {
-      const targetVol = t.muted ? 0 : t.volume;
+      const targetVol = t.muted ? 0 : t.volume * masterVolume;
       linearTo(t.out, targetVol);
     });
     updateAllUI();
