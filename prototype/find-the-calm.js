@@ -93,7 +93,7 @@ function makeRecordedTrack(name, audioFile){
   function start(){
     ensureNodes();
     audio.play().catch(e => {
-      debugLog('play error', name, e.message);
+      debugLog('play error', name, e.message, '- Check network connection or file availability');
     });
   }
   
@@ -282,8 +282,8 @@ function loadPreset(){
     // Apply preset
     Object.entries(preset.tracks || {}).forEach(([name, settings]) => {
       if (tracks[name]){
-        tracks[name].volume = settings.volume ?? DEFAULT_VOL;
-        tracks[name].muted = settings.muted ?? false;
+        tracks[name].volume = settings.volume !== undefined ? settings.volume : DEFAULT_VOL;
+        tracks[name].muted = settings.muted !== undefined ? settings.muted : false;
         
         // Update UI controls
         const volumeSlider = document.querySelector(`input[data-track="${name}"][type="range"]`);

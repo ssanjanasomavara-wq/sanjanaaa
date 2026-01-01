@@ -13,7 +13,9 @@ try {
   console.log('Creating placeholder MP3 files instead...');
   
   // Create minimal valid MP3 files (silence)
-  // MP3 header for a minimal valid file
+  // MP3 frame header bytes: 0xFF 0xFB (sync word) + 0x90 0x00 (MPEG-1 Layer 3, 44.1kHz, mono)
+  // Note: This is a minimal/invalid MP3 for placeholder purposes only
+  // For production, use proper audio recording tools or libraries
   const mp3Header = Buffer.from([
     0xFF, 0xFB, 0x90, 0x00, // MP3 sync word and header
   ]);
