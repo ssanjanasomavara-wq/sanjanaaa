@@ -1,74 +1,83 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Helpline — MoodDiary</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Helpline — Mood Diary</title>
   <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-  <!-- Header (keeps same structure/styling as landing page) -->
-  <header class="site-header">
-    <div class="container">
-      <a class="logo" href="/">MoodDiary</a>
-      <nav class="main-nav">
-        <a href="/">Home</a>
-        <a href="/about.html">About</a>
-        <a href="/helpline.html" aria-current="page">Helpline</a>
-        <a href="/contact.html">Contact</a>
-      </nav>
-    </div>
-  </header>
 
-  <main class="container content">
-    <h1>Immediate Helplines & Support</h1>
-
-    <section class="helpline-card">
-      <h2>KIRAN (24/7 Government Mental Health Helpline)</h2>
-      <p class="phone">📞 <a href="tel:18005990019">1800-599-0019</a></p>
-    </section>
-
-    <section class="helpline-card">
-      <h2>AASRA Suicide Prevention Helpline</h2>
-      <p class="phone">📞 <a href="tel:+919820466726">+91 98204 66726</a></p>
-      <p class="availability">Available 24/7</p>
-    </section>
-
-    <section class="helpline-card">
-      <h2>iCALL (TISS)</h2>
-      <p class="phone">📞 <a href="tel:+919152987821">+91 91529 87821</a></p>
-      <p class="availability">Monday – Saturday, 10am–8pm</p>
-    </section>
-
-    <section class="helpline-card">
-      <h2>Sneha Foundation</h2>
-      <p class="phone">📞 <a href="tel:04424640050">044-2464-0050</a></p>
-      <p class="availability">24/7 Support</p>
-    </section>
-
-    <div class="actions">
-      <a class="btn btn-call" href="tel:18005990019" aria-label="Call KIRAN now">Call KIRAN Now</a>
-      <a class="btn btn-email" href="mailto:support@mooddiary.example" aria-label="Email support">Email Support</a>
+<header>
+  <div class="container">
+    <div class="brand">
+      <div class="logo">MD</div>
+      <div>
+        <div style="font-weight:800">Mood Diary</div>
+        <div style="font-size:12px;color:var(--muted)">Track • Reflect • Doodle</div>
+      </div>
     </div>
 
-    <aside class="emergency-note">
-      <strong>Emergency:</strong>
-      <p>If you are in immediate danger, please call your local emergency number or go to the nearest hospital.</p>
-    </aside>
+    <nav>
+      <a href="/">Home</a>
+      <a href="#features">Features</a>
+      <a href="#demo">Try Demo</a>
+      <a href="#faq">FAQ</a>
+      <a href="/helpline.html" class="cta">Helpline</a>
+    </nav>
+  </div>
+</header>
 
-  </main>
+<main style="max-width:1100px;margin:36px auto;padding:12px;">
+  <section class="card" style="text-align:center;">
+    <h1>Helpline & Support</h1>
+    <p class="lead" style="margin-top:8px">Find immediate support options below.</p>
 
-  <!-- Footer (keeps same structure/styling as landing page) -->
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; 2026 MoodDiary</p>
-      <nav class="footer-nav">
-        <a href="/privacy.html">Privacy</a>
-        <a href="/terms.html">Terms</a>
-      </nav>
+    <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px;align-items:center;">
+
+      <div style="width:100%;max-width:760px;text-align:left;background:var(--card);padding:18px;border-radius:12px;box-shadow: 0 8px 28px rgba(11,22,77,0.04)">
+        <h3 style="margin:0 0 6px 0">KIRAN (24/7 Government Mental Health Helpline)</h3>
+        <p style="margin:4px 0;font-size:18px"><strong>Phone:</strong> <a href="tel:18005990019">1800-599-0019</a></p>
+        <div style="margin-top:8px;display:flex;gap:10px">
+          <a class="btn" href="tel:18005990019">Call KIRAN Now</a>
+          <a class="btn secondary" href="mailto:support@mooddiary.example">Email Support</a>
+        </div>
+      </div>
+
+      <div style="width:100%;max-width:760px;text-align:left;background:var(--card);padding:18px;border-radius:12px;box-shadow: 0 8px 28px rgba(11,22,77,0.04)">
+        <h3 style="margin:0 0 6px 0">AASRA Suicide Prevention Helpline</h3>
+        <p style="margin:4px 0;font-size:18px"><strong>Phone:</strong> <a href="tel:+919820466726">+91 98204 66726</a></p>
+        <p style="color:var(--muted);margin-top:6px">Available 24/7</p>
+        <div style="margin-top:8px"><a class="btn" href="tel:+919820466726">Call AASRA</a></div>
+      </div>
+
+      <div style="width:100%;max-width:760px;text-align:left;background:var(--card);padding:18px;border-radius:12px;box-shadow: 0 8px 28px rgba(11,22,77,0.04)">
+        <h3 style="margin:0 0 6px 0">iCALL (TISS)</h3>
+        <p style="margin:4px 0;font-size:18px"><strong>Phone:</strong> <a href="tel:+919152987821">+91 91529 87821</a></p>
+        <p style="color:var(--muted);margin-top:6px">Monday – Saturday, 10am–8pm</p>
+        <div style="margin-top:8px"><a class="btn" href="tel:+919152987821">Call iCALL</a></div>
+      </div>
+
+      <div style="width:100%;max-width:760px;text-align:left;background:var(--card);padding:18px;border-radius:12px;box-shadow: 0 8px 28px rgba(11,22,77,0.04)">
+        <h3 style="margin:0 0 6px 0">Sneha Foundation</h3>
+        <p style="margin:4px 0;font-size:18px"><strong>Phone:</strong> <a href="tel:+914424640050">044-2464-0050</a></p>
+        <p style="color:var(--muted);margin-top:6px">24/7 Support</p>
+        <div style="margin-top:8px"><a class="btn" href="tel:+914424640050">Call Sneha</a></div>
+      </div>
+
+      <p style="max-width:760px;color:var(--muted);text-align:center;margin-top:6px">If you are in immediate danger, please call your local emergency number or go to the nearest hospital.</p>
+
+      <p style="margin-top:8px"><a class="btn secondary" href="/">← Back to Mood Diary</a></p>
     </div>
-  </footer>
+  </section>
+</main>
 
-  <script src="/js/app.js"></script>
+<footer>
+  <div class="container" style="text-align:center;padding:18px;color:var(--muted)">
+    Made with care — Mood Diary • Local-first • 2026 — <a href="/helpline.html">Helpline: +1-800-555-0199</a>
+  </div>
+</footer>
+
+<script src="/js/app.js"></script>
 </body>
 </html>
