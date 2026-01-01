@@ -23,7 +23,7 @@ body{
 .btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(224,122,95,0.12)}
 .btn-ghost{background:transparent;color:var(--accent);border:1px solid rgba(216,98,73,0.12);padding:8px 12px;box-shadow:none}
 .toggle{display:inline-flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-top:8px;margin-bottom:32px}
 .card{background:var(--card);border-radius:14px;padding:18px;box-shadow:var(--shadow);border:1px solid rgba(30,40,55,0.04);display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;transition:transform 220ms cubic-bezier(.2,.9,.3,1),box-shadow 200ms ease,border-color 200ms ease}
 .card:active{transform:scale(.997)}
 .card .icon{width:56px;height:56px;color:var(--accent);opacity:1}
@@ -37,6 +37,76 @@ body{
 .foot{margin-top:20px;color:var(--muted)}
 .status{font-size:0.95rem}
 
+/* Breathing Exercises Section */
+.breathing-section{margin-bottom:32px}
+.breathing-section h2{font-size:1.3rem;font-weight:700;margin:24px 0 16px 0;color:var(--text)}
+.breathing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.breathing-card{background:var(--card);border-radius:14px;padding:20px;box-shadow:var(--shadow);border:1px solid rgba(30,40,55,0.04);display:flex;flex-direction:column;gap:12px}
+.breathing-card h3{margin:0;font-size:1.1rem;color:var(--text)}
+.breathing-desc{margin:0;font-size:0.9rem;color:var(--muted)}
+.breathing-btn{background:var(--accent);color:#fff;border:0;padding:10px 14px;border-radius:10px;cursor:pointer;box-shadow:0 6px 18px rgba(224,122,95,0.12);font-weight:600;transition:transform 200ms ease,box-shadow 200ms ease}
+.breathing-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(224,122,95,0.18)}
+.breathing-btn:active{transform:scale(.98)}
+.breathing-btn.active{background:#10B981}
+
+/* Breathing Visual */
+.breathing-visual{display:flex !important;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:16px}
+.breath-circle{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 30% 30%, rgba(216,98,73,0.2), rgba(216,98,73,0.05));border:3px solid var(--accent);animation:breathe 8s infinite ease-in-out}
+.breath-label{font-size:1.1rem;font-weight:600;color:var(--accent);letter-spacing:1px}
+
+@keyframes breathe{
+  0%{transform:scale(1);opacity:0.6}
+  25%{transform:scale(1.2);opacity:1}
+  50%{transform:scale(1.3);opacity:0.8}
+  75%{transform:scale(1.1);opacity:0.7}
+  100%{transform:scale(1);opacity:0.6}
+}
+
+.box-breathing{animation:none}
+.box-breathing .breath-circle{animation:breatheBox 16s infinite ease-in-out}
+@keyframes breatheBox{
+  0%{transform:scale(1);opacity:0.6}
+  20%{transform:scale(1.3);opacity:1}
+  25%{transform:scale(1.3);opacity:1}
+  50%{transform:scale(1.05);opacity:0.7}
+  75%{transform:scale(1.25);opacity:1}
+  100%{transform:scale(1);opacity:0.6}
+}
+.box-breathing .breath-label{animation:breatheBoxLabel 16s infinite}
+@keyframes breatheBoxLabel{
+  0%{content:'Inhale'}
+  25%{content:'Hold'}
+  50%{content:'Exhale'}
+  75%{content:'Hold'}
+  100%{content:'Inhale'}
+}
+
+.breathing-478{animation:none}
+.breathing-478 .breath-circle{animation:breathe478 18s infinite ease-in-out}
+@keyframes breathe478{
+  0%{transform:scale(1);opacity:0.6}
+  14.28%{transform:scale(1.35);opacity:1}
+  28.56%{transform:scale(1.2);opacity:0.8}
+  57.12%{transform:scale(1.05);opacity:0.5}
+  100%{transform:scale(1);opacity:0.6}
+}
+
+.breathing-diaphragm{animation:none}
+.breathing-diaphragm .breath-circle{animation:breatheDiaphragm 10s infinite ease-in-out}
+@keyframes breatheDiaphragm{
+  0%{transform:scale(1);opacity:0.6}
+  30%{transform:scale(1.4);opacity:1}
+  70%{transform:scale(1);opacity:0.6}
+  100%{transform:scale(1);opacity:0.6}
+}
+
+/* Affirmations Section */
+.affirmations-section{margin-bottom:32px}
+.affirmations-section h2{font-size:1.3rem;font-weight:700;margin:24px 0 16px 0;color:var(--text)}
+.affirmations-controls{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+.affirmation-display{background:var(--card);border-radius:14px;padding:24px;box-shadow:var(--shadow);border:1px solid rgba(30,40,55,0.04);min-height:100px;display:flex;align-items:center;justify-content:center}
+.affirmation-text{margin:0;font-size:1.2rem;font-weight:500;color:var(--text);text-align:center;line-height:1.6;font-style:italic}
+
 /* On-screen debug panel (visible when ?debug=1) */
 .ftc-debug{position:fixed;left:14px;bottom:14px;max-width:320px;max-height:40vh;overflow:auto;background:rgba(26,26,26,0.9);color:#fff;padding:10px;border-radius:10px;font-family:monospace;font-size:12px;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,0.35);}
 .ftc-debug .hdr{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px}
@@ -46,4 +116,4 @@ body{
 .ftc-debug .line{padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0.95}
 @media (prefers-reduced-motion: reduce){.ftc-debug{transition:none}}
 
-@media (prefers-reduced-motion: reduce){.card{transition:none;animation:none}}
+@media (prefers-reduced-motion: reduce){.card{transition:none;animation:none}.breathing-card{transition:none}.breathing-visual{animation:none}.breath-circle{animation:none}}

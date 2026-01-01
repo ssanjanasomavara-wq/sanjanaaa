@@ -61,6 +61,56 @@
       </button>
     </section>
 
+    <section class="breathing-section">
+      <h2>Breathing Exercises</h2>
+      <div class="breathing-grid">
+        <div class="breathing-card">
+          <h3>Box Breathing</h3>
+          <p class="breathing-desc">Equal breathing pattern • 4 counts each</p>
+          <button class="breathing-btn" data-exercise="box">Start Exercise</button>
+          <div class="breathing-visual box-breathing" style="display:none;">
+            <div class="breath-circle"></div>
+            <div class="breath-label">Inhale</div>
+          </div>
+        </div>
+
+        <div class="breathing-card">
+          <h3>4-7-8 Breathing</h3>
+          <p class="breathing-desc">Calming pattern • for deep relaxation</p>
+          <button class="breathing-btn" data-exercise="478">Start Exercise</button>
+          <div class="breathing-visual breathing-478" style="display:none;">
+            <div class="breath-circle"></div>
+            <div class="breath-label">Inhale</div>
+          </div>
+        </div>
+
+        <div class="breathing-card">
+          <h3>Diaphragmatic Breathing</h3>
+          <p class="breathing-desc">Deep belly breathing • ground yourself</p>
+          <button class="breathing-btn" data-exercise="diaphragm">Start Exercise</button>
+          <div class="breathing-visual breathing-diaphragm" style="display:none;">
+            <div class="breath-circle"></div>
+            <div class="breath-label">Breathe In</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="affirmations-section">
+      <h2>Motivational Affirmations</h2>
+      <div class="affirmations-controls">
+        <button id="speak-affirmation" class="btn">🔊 Speak Affirmation</button>
+        <button id="next-affirmation" class="btn btn-ghost">Next Message</button>
+        <label class="toggle">
+          <input type="checkbox" id="auto-speak">
+          <span>Auto-speak during breathing</span>
+        </label>
+      </div>
+      <div class="affirmation-display">
+        <p id="current-affirmation" class="affirmation-text"></p>
+      </div>
+    </section>
+
     <footer class="foot">
       <p class="status">Audio is not started.</p>
     </footer>

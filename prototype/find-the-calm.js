@@ -232,3 +232,162 @@ if (!('vibrate' in navigator)){
   // no haptics support — add small notice
   const el = document.createElement('p'); el.textContent = 'Note: Haptics are not available in this browser.'; el.style.color='#8a98ac'; document.querySelector('.foot').appendChild(el);
 }
+
+// ===== BREATHING EXERCISES & AFFIRMATIONS =====
+
+// Affirmations database
+const affirmations = [
+  "You are stronger than you think.",
+  "This moment is temporary. You will get through this.",
+  "Take it one breath at a time. You've got this.",
+  "Your calm is within you. Find it now.",
+  "You are capable of handling whatever comes your way.",
+  "Breathe in peace, breathe out stress.",
+  "You deserve to feel calm and safe.",
+  "This anxiety does not define you.",
+  "With each breath, you're becoming more grounded.",
+  "You have overcome difficult moments before. You can do it again.",
+  "Your body knows how to relax. Trust it.",
+  "Peace is available to you right now.",
+  "You are doing better than you think.",
+  "This feeling will pass. You will be okay.",
+  "Slow down. You're exactly where you need to be.",
+  "You are resilient. You are brave. You are worthy.",
+  "Let go of what you cannot control.",
+  "Your wellbeing matters. Be kind to yourself.",
+  "Focus on the present moment. It is safe.",
+  "You've handled 100% of your difficult days so far. You've got this."
+];
+
+let currentAffirmationIndex = 0;
+let activeBreathingExercise = null;
+
+// Initialize affirmations
+function initAffirmations(){
+  showAffirmation(0);
+}
+
+function showAffirmation(index){
+  currentAffirmationIndex = index % affirmations.length;
+  const affirmationEl = document.getElementById('current-affirmation');
+  if (affirmationEl){
+    affirmationEl.textContent = affirmations[currentAffirmationIndex];
+  }
+}
+
+function nextAffirmation(){
+  showAffirmation(currentAffirmationIndex + 1);
+}
+
+function speakAffirmation(){
+  const text = affirmations[currentAffirmationIndex];
+  if ('speechSynthesis' in window){
+    // Cancel any ongoing speech
+    speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.9; // Slightly slower for calming effect
+    utterance.pitch = 0.95;
+    utterance.volume = 0.8;
+    
+    // Use a soothing voice if available
+    const voices = speechSynthesis.getVoices();
+    if (voices.length > 0){
+      // Try to find a female voice for calming effect
+      const femaleVoice = voices.find(v => v.name.includes('female') || v.name.includes('Female') || v.name.includes('woman'));
+      if (femaleVoice){
+        utterance.voice = femaleVoice;
+      } else if (voices.length > 0){
+        utterance.voice = voices[0];
+      }
+    }
+    
+    speechSynthesis.speak(utterance);
+    debugLog('speak affirmation', text);
+  }
+}
+
+// Wire up affirmation controls
+document.getElementById('speak-affirmation').addEventListener('click', speakAffirmation);
+document.getElementById('next-affirmation').addEventListener('click', nextAffirmation);
+
+// Breathing exercises
+const breathingExercises = {
+  box: {
+    name: 'Box Breathing',
+    duration: 16, // 16 seconds per cycle (4-4-4-4)
+    instructions: {
+      inhale: 4,
+      hold1: 4,
+      exhale: 4,
+      hold2: 4
+    }
+  },
+  '478': {
+    name: '4-7-8 Breathing',
+    duration: 18, // 4-7-8 seconds
+    instructions: {
+      inhale: 4,
+      hold: 7,
+      exhale: 8
+    }
+  },
+  diaphragm: {
+    name: 'Diaphragmatic Breathing',
+    duration: 10, // 4 second inhale, 6 second exhale
+    instructions: {
+      inhale: 4,
+      exhale: 6
+    }
+  }
+};
+
+function startBreathingExercise(exerciseKey){
+  const exercise = breathingExercises[exerciseKey];
+  if (!exercise) return;
+  
+  activeBreathingExercise = exerciseKey;
+  debugLog('started breathing', exerciseKey);
+  
+  const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
+  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  
+  if (btn && !btn.classList.contains('active')){
+    btn.classList.add('active');
+    btn.textContent = 'Stop Exercise';
+    if (visual) visual.style.display = 'flex';
+    
+    // Auto-speak affirmations during breathing if enabled
+    if (document.getElementById('auto-speak').checked){
+      speakAffirmation();
+    }
+  } else if (btn && btn.classList.contains('active')){
+    btn.classList.remove('active');
+    btn.textContent = 'Start Exercise';
+    if (visual) visual.style.display = 'none';
+    activeBreathingExercise = null;
+    speechSynthesis.cancel();
+  }
+}
+
+// Wire up breathing exercise buttons
+document.querySelectorAll('.breathing-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    const exerciseKey = btn.dataset.exercise;
+    startBreathingExercise(exerciseKey);
+  });
+});
+
+// Load voices when available (for TTS)
+if ('speechSynthesis' in window){
+  speechSynthesis.onvoiceschanged = () => {
+    debugLog('voices loaded');
+  };
+}
+
+// Initialize affirmations on page load
+if (document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initAffirmations);
+} else {
+  initAffirmations();
+}
