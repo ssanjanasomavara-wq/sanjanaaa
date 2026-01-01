@@ -1,190 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mood Diary</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f6f7fb;
-  text-align: center;
-  padding: 20px;
-}
-
-h1 { color: #5a5adb; }
-.subtitle { color: #555; margin-bottom: 25px; }
-
-.card {
-  background: white;
-  padding: 20px;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 520px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.mood-scale button {
-  font-size: 30px;
-  margin: 5px;
-  border: none;
-  background: none;
-  cursor: pointer;
-}
-
-textarea {
-  width: 100%;
-  height: 120px;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  resize: none;
-}
-
-canvas {
-  width: 100%;
-  max-width: 420px;
-  height: 300px;
-  border: 2px dashed #aaa;
-  border-radius: 12px;
-  touch-action: none;
-}
-
-.save-btn {
-  background: #5a5adb;
-  color: white;
-  border: none;
-  padding: 12px 30px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 16px;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mood Diary — Track • Reflect • Doodle</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
-
 <body>
 
-<h1>📝 Mood Diary</h1>
-<p class="subtitle">Track • Reflect • Doodle</p>
+<header>
+  <div class="container">
+    <div class="brand">
+      <div class="logo">MD</div>
+      <div>
+        <div style="font-weight:800">Mood Diary</div>
+        <div style="font-size:12px;color:var(--muted)">Track • Reflect • Doodle</div>
+      </div>
+    </div>
 
-<!-- Mood -->
-<section class="card">
-  <h2>How do you feel today?</h2>
-  <div class="mood-scale">
-    <button onclick="selectMood('😢',1)">😢</button>
-    <button onclick="selectMood('😕',2)">😕</button>
-    <button onclick="selectMood('😐',3)">😐</button>
-    <button onclick="selectMood('🙂',4)">🙂</button>
-    <button onclick="selectMood('😁',5)">😁</button>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#demo">Try Demo</a>
+      <a href="#faq">FAQ</a>
+      <a href="#demo" class="cta">Open App</a>
+    </nav>
   </div>
-  <p id="moodDisplay">Selected Mood: None</p>
+</header>
+
+<section class="hero">
+  <div class="hero-card">
+    <h1>Know your mood. Capture your day.</h1>
+    <p class="lead">Mood Diary helps you track daily moods, journal, and doodle to understand patterns and build self-awareness — all private and browser-first.</p>
+
+    <div class="features">
+      <div class="feature">Daily mood tracking</div>
+      <div class="feature">Secure local storage</div>
+      <div class="feature">Doodle & ink support</div>
+      <div class="feature">Simple mood analytics</div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn" onclick="document.getElementById('demo').scrollIntoView({behavior:'smooth'})">Try the demo — it's free</button>
+      <button class="btn secondary" onclick="alert('Download/unlock features coming soon ✨')">Get updates</button>
+    </div>
+
+    <p style="margin-top:14px;color:var(--muted)">Built for personal reflection. Your entries stay in your browser unless you export them.</p>
+  </div>
+
+  <div class="preview card center" aria-hidden="true">
+    <div style="max-width:320px;">
+      <div style="font-size:14px;color:var(--muted);margin-bottom:8px">Today</div>
+      <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+        <div style="font-size:40px">🙂</div>
+        <div style="text-align:left">
+          <div style="font-weight:700">Feeling calm</div>
+          <div style="font-size:13px;color:var(--muted)">A short reflection about a small win</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
-<!-- Journal -->
-<section class="card">
-  <h2>Journal</h2>
-  <textarea id="journal" placeholder="Write your thoughts..."></textarea>
-</section>
+<main>
+  <section id="features" class="card">
+    <h2>Features</h2>
+    <div style="margin-top:12px;color:var(--muted)">
+      <ul>
+        <li><strong>Quick mood pickers:</strong> five emotive levels so logging takes seconds.</li>
+        <li><strong>Private journal:</strong> write your thoughts locally — no servers required.</li>
+        <li><strong>Doodle canvas:</strong> draw or ink feelings with pointer pressure support.</li>
+        <li><strong>Simple insights:</strong> see recent mood history as a chart.</li>
+      </ul>
+    </div>
+  </section>
 
-<!-- Doodle -->
-<section class="card">
-  <h2>Doodle Your Feelings</h2>
-  <canvas id="drawCanvas" width="420" height="300"></canvas><br>
-  <button onclick="clearDoodle()">Clear</button>
-</section>
+  <section id="demo" class="card app">
+    <h2 class="center">Try the Mood Diary — Demo</h2>
 
-<!-- Chart -->
-<section class="card">
-  <h2>Mood History</h2>
-  <canvas id="chartCanvas" width="420" height="200"></canvas>
-</section>
+    <div style="margin-top:12px">
+      <h3>How do you feel today?</h3>
+      <div class="mood-scale center" style="margin-bottom:8px">
+        <button onclick="selectMood('😢',1)">😢</button>
+        <button onclick="selectMood('😕',2)">😕</button>
+        <button onclick="selectMood('😐',3)">😐</button>
+        <button onclick="selectMood('🙂',4)">🙂</button>
+        <button onclick="selectMood('😁',5)">😁</button>
+      </div>
+      <p id="moodDisplay" class="center" style="color:var(--muted)">Selected Mood: None</p>
+    </div>
 
-<button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
+    <div class="grid-2" style="margin-top:12px">
+      <div>
+        <h3>Journal</h3>
+        <textarea id="journal" placeholder="Write a short reflection..."></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="save-btn" onclick="saveEntry()">Save Entry 💾</button>
+          <button class="save-btn secondary" onclick="exportEntries()" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Export JSON</button>
+        </div>
+      </div>
 
-<script>
-/* ===== Mood Tracking ===== */
-let moodValue = null;
-let moodEmoji = "";
-const moodDisplay = document.getElementById("moodDisplay");
+      <div>
+        <h3>Doodle Your Feelings</h3>
+        <canvas id="drawCanvas" width="420" height="300"></canvas>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button onclick="clearDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Clear</button>
+          <button onclick="downloadDoodle()" class="save-btn secondary" style="background:transparent;border:1px solid #e6e7ee;color:var(--muted)">Download</button>
+        </div>
+      </div>
+    </div>
 
-function selectMood(emoji, value) {
-  moodEmoji = emoji;
-  moodValue = value;
-  moodDisplay.textContent = "Selected Mood: " + emoji;
-}
+    <div style="margin-top:18px">
+      <h3>Mood History</h3>
+      <canvas id="chartCanvas" width="420" height="200"></canvas>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">Showing last 10 entries (stored locally)</div>
+    </div>
+  </section>
 
-/* ===== Save Entry ===== */
-function saveEntry() {
-  if (!moodValue) {
-    alert("Please select a mood first 💭");
-    return;
-  }
+  <section id="faq" class="card">
+    <h2>FAQ</h2>
+    <div style="margin-top:10px;color:var(--muted)">
+      <p><strong>Where is my data stored?</strong> Entries are saved in your browser's localStorage. They stay on your device unless you export and share them.</p>
+      <p><strong>Can I delete data?</strong> Yes — open your browser storage or clear entries using developer tools. (We'll add an in-app manager in a future update.)</p>
+      <p><strong>Want more features?</strong> Use the "Get updates" button to be notified when we release export/import and cloud sync options.</p>
+    </div>
+  </section>
+</main>
 
-  const journal = document.getElementById("journal").value;
-  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
+<footer>
+  <div>Made with care — Mood Diary • Local-first • 2026</div>
+</footer>
 
-  history.push({
-    mood: moodValue,
-    emoji: moodEmoji,
-    date: new Date().toLocaleDateString()
-  });
-
-  localStorage.setItem("moodHistory", JSON.stringify(history));
-  drawChart();
-  alert("Saved 🌱");
-}
-
-/* ===== Mood Chart ===== */
-const chartCanvas = document.getElementById("chartCanvas");
-const cctx = chartCanvas.getContext("2d");
-
-function drawChart() {
-  const history = JSON.parse(localStorage.getItem("moodHistory")) || [];
-  cctx.clearRect(0,0,chartCanvas.width,chartCanvas.height);
-
-  const barWidth = 30;
-  history.slice(-10).forEach((entry, i) => {
-    const height = entry.mood * 30;
-    cctx.fillStyle = "#5a5adb";
-    cctx.fillRect(40 + i*40, 180 - height, barWidth, height);
-    cctx.fillText(entry.emoji, 45 + i*40, 195);
-  });
-}
-
-drawChart();
-
-/* ===== Doodle (Touch + Ink) ===== */
-const drawCanvas = document.getElementById("drawCanvas");
-const dctx = drawCanvas.getContext("2d");
-let drawing = false;
-
-drawCanvas.addEventListener("pointerdown", e => {
-  drawing = true;
-  dctx.beginPath();
-  dctx.moveTo(e.offsetX, e.offsetY);
-});
-
-drawCanvas.addEventListener("pointerup", () => {
-  drawing = false;
-  dctx.beginPath();
-});
-
-drawCanvas.addEventListener("pointermove", e => {
-  if (!drawing) return;
-  dctx.lineWidth = e.pressure ? e.pressure * 10 : 4;
-  dctx.lineCap = "round";
-  dctx.strokeStyle = "#000";
-  dctx.lineTo(e.offsetX, e.offsetY);
-  dctx.stroke();
-  dctx.beginPath();
-  dctx.moveTo(e.offsetX, e.offsetY);
-});
-
-function clearDoodle() {
-  dctx.clearRect(0,0,drawCanvas.width,drawCanvas.height);
-}
-</script>
-
+<script src="/app.js"></script>
 </body>
 </html>
