@@ -311,7 +311,7 @@ function speakAffirmation(){
 document.getElementById('speak-affirmation').addEventListener('click', speakAffirmation);
 document.getElementById('next-affirmation').addEventListener('click', nextAffirmation);
 
-// Breathing exercises
+// Breathing exercises configuration
 const breathingExercises = {
   box: {
     name: 'Box Breathing',
@@ -342,32 +342,153 @@ const breathingExercises = {
   }
 };
 
+let activeBreathingExercise = null;
+const breathingTimers = {}; // store timers for label cycles
+
 function startBreathingExercise(exerciseKey){
   const exercise = breathingExercises[exerciseKey];
   if (!exercise) return;
-  
-  activeBreathingExercise = exerciseKey;
-  debugLog('started breathing', exerciseKey);
-  
+
+  // If another exercise is running, stop it first
+  if (activeBreathingExercise && activeBreathingExercise !== exerciseKey){
+    stopBreathingExercise(activeBreathingExercise);
+  }
+
   const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
   const visual = document.querySelector(`.breathing-${exerciseKey}`);
-  
-  if (btn && !btn.classList.contains('active')){
+
+  if (!btn || !visual) return;
+
+  // Toggle behavior
+  const isStarting = !btn.classList.contains('active');
+
+  if (isStarting){
+    // Start
+    activeBreathingExercise = exerciseKey;
     btn.classList.add('active');
     btn.textContent = 'Stop Exercise';
-    if (visual) visual.style.display = 'flex';
-    
-    // Auto-speak affirmations during breathing if enabled
+    visual.style.display = 'flex';
+    visual.classList.add('active'); // enables CSS animation
+
+    // Start label cycle for this exercise
+    startLabelCycle(exerciseKey);
+
+    // Auto-speak affirmation if enabled
     if (document.getElementById('auto-speak').checked){
       speakAffirmation();
     }
-  } else if (btn && btn.classList.contains('active')){
+
+  } else {
+    // Stop
+    stopBreathingExercise(exerciseKey);
+  }
+
+  debugLog('toggled breathing', exerciseKey, isStarting ? 'started' : 'stopped');
+}
+
+function stopBreathingExercise(exerciseKey){
+  const btn = document.querySelector(`.breathing-btn[data-exercise="${exerciseKey}"]`);
+  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  if (btn){
     btn.classList.remove('active');
     btn.textContent = 'Start Exercise';
-    if (visual) visual.style.display = 'none';
+  }
+  if (visual){
+    visual.style.display = 'none';
+    visual.classList.remove('active');
+    // reset label to default
+    const label = visual.querySelector('.breath-label');
+    if (label) label.textContent = (exerciseKey === 'diaphragm') ? 'Breathe In' : 'Inhale';
+  }
+
+  // Clear any timers
+  if (breathingTimers[exerciseKey]){
+    clearTimeout(breathingTimers[exerciseKey]);
+    delete breathingTimers[exerciseKey];
+  }
+
+  // If stopping the currently active exercise, clear activeBreathingExercise
+  if (activeBreathingExercise === exerciseKey){
     activeBreathingExercise = null;
+  }
+
+  // Stop any TTS speaking
+  if ('speechSynthesis' in window){
     speechSynthesis.cancel();
   }
+}
+
+// Create a label sequence based on exercise instructions and loop it
+function startLabelCycle(exerciseKey){
+  const exercise = breathingExercises[exerciseKey];
+  const visual = document.querySelector(`.breathing-${exerciseKey}`);
+  if (!visual || !exercise) return;
+  const labelEl = visual.querySelector('.breath-label');
+  if (!labelEl) return;
+
+  // Build sequence array: {text, seconds}
+  let seq = [];
+  if (exerciseKey === 'box'){
+    seq = [
+      {text: 'Breathe In', seconds: exercise.instructions.inhale},
+      {text: 'Hold', seconds: exercise.instructions.hold1},
+      {text: 'Breathe Out', seconds: exercise.instructions.exhale},
+      {text: 'Hold', seconds: exercise.instructions.hold2}
+    ];
+  } else if (exerciseKey === '478' || exerciseKey === '4-7-8'){
+    seq = [
+      {text: 'Breathe In', seconds: exercise.instructions.inhale},
+      {text: 'Hold', seconds: exercise.instructions.hold},
+      {text: 'Breathe Out', seconds: exercise.instructions.exhale}
+    ];
+  } else if (exerciseKey === 'diaphragm' || exerciseKey === 'diaphragm'){
+    seq = [
+      {text: 'Breathe In', seconds: exercise.instructions.inhale},
+      {text: 'Breathe Out', seconds: exercise.instructions.exhale}
+    ];
+  } else {
+    // fallback: single inhale/exhale
+    seq = [{text: 'Breathe In', seconds: 4}, {text: 'Breathe Out', seconds: 4}];
+  }
+
+  // Helper to run the sequence in a loop using setTimeout chaining
+  let index = 0;
+  function runStep(){
+    // If exercise stopped, bail out
+    if (activeBreathingExercise !== exerciseKey) return;
+
+    const step = seq[index];
+    labelEl.textContent = step.text;
+    // optional: announce step with TTS when auto-speak is enabled
+    if (document.getElementById('auto-speak').checked){
+      speakText(step.text);
+    }
+
+    // Schedule next step
+    breathingTimers[exerciseKey] = setTimeout(() => {
+      index = (index + 1) % seq.length;
+      runStep();
+    }, step.seconds * 1000);
+  }
+
+  // Clear any existing timer and start
+  if (breathingTimers[exerciseKey]){
+    clearTimeout(breathingTimers[exerciseKey]);
+    delete breathingTimers[exerciseKey];
+  }
+  runStep();
+}
+
+// small helper to speak step text (non-blocking)
+function speakText(text){
+  if (!('speechSynthesis' in window)) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.0;
+  u.pitch = 1.0;
+  u.volume = 0.9;
+  const voices = speechSynthesis.getVoices();
+  if (voices.length > 0) u.voice = voices[0];
+  speechSynthesis.speak(u);
 }
 
 // Wire up breathing exercise buttons
