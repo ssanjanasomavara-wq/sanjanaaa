@@ -282,8 +282,14 @@ function loadPreset(){
     // Apply preset
     Object.entries(preset.tracks || {}).forEach(([name, settings]) => {
       if (tracks[name]){
-        tracks[name].volume = settings.volume !== undefined ? settings.volume : DEFAULT_VOL;
-        tracks[name].muted = settings.muted !== undefined ? settings.muted : false;
+        // Validate and sanitize preset values
+        const volume = (typeof settings.volume === 'number' && settings.volume >= 0 && settings.volume <= 1) 
+          ? settings.volume 
+          : DEFAULT_VOL;
+        const muted = typeof settings.muted === 'boolean' ? settings.muted : false;
+        
+        tracks[name].volume = volume;
+        tracks[name].muted = muted;
         
         // Update UI controls
         const volumeSlider = document.querySelector(`input[data-track="${name}"][type="range"]`);
