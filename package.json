@@ -1,0 +1,20 @@
+{
+  "name": "semicolonic-app",
+  "version": "1.0.0",
+  "description": "Semi;colonic - A mental wellness app with Next.js and iron-session",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "iron-session": "^8.0.1",
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
