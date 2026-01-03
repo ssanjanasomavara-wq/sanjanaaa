@@ -1,18 +1,28 @@
-// API route to get current session
-// This is a minimal demo implementation
-// Production: Use HttpOnly secure cookies and consider server-side session store
+import { getIronSession } from 'iron-session';
 
-import { getIronSession } from "iron-session";
-import { sessionOptions } from "../../lib/sessionOptions";
+// Session configuration for iron-session
+const sessionOptions = {
+  password: process.env.IRON_SESSION_PASSWORD || 'complex_password_at_least_32_characters_long_change_in_production',
+  cookieName: 'iron-session',
+  cookieOptions: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge: 60 * 60 * 24 * 7, // 7 days
+  },
+};
 
-export default async function handler(req, res) {
+export default async function sessionHandler(req, res) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+  }
+
   const session = await getIronSession(req, res, sessionOptions);
 
+  // Check if user session exists
   if (session.user) {
-    // User is authenticated
-    res.status(200).json({ ok: true, user: session.user });
-  } else {
-    // No session found
-    res.status(200).json({ ok: false });
+    return res.status(200).json({ ok: true, user: session.user });
   }
+
+  return res.status(200).json({ ok: false, user: null });
 }

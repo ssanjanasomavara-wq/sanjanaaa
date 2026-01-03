@@ -1,206 +1,179 @@
-// Login page for Semi‑Colonic
-import Head from 'next/head';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 
 export default function Login() {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [message, setMessage] = useState('');
-
-  // Helper to handle successful login
-  const handleLoginSuccess = (user) => {
-    // Save user to sessionStorage per requirements for client-side sync
-    // Note: Only non-sensitive display data (name, email) is stored
-    // Server session (iron-session) is the authoritative source
-    sessionStorage.setItem('user', JSON.stringify(user));
-    router.push('/dashboard');
-  };
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setMessage('Logging in...');
+    setMessage('');
+    setLoading(true);
 
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name, email }),
-      });
-
-      const data = await response.json();
-
-      if (data.ok) {
-        handleLoginSuccess(data.user);
-      } else {
-        setMessage('Login failed. Please try again.');
-      }
-    } catch (error) {
-      setMessage('Error: ' + error.message);
+    if (!email) {
+      setMessage('Please enter your email');
+      setLoading(false);
+      return;
     }
-  };
-
-  const handleDemoLogin = async () => {
-    setMessage('Logging in as demo user...');
 
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         credentials: 'include',
-        body: JSON.stringify({}), // Use demo values
+        body: JSON.stringify({ email, name }),
       });
 
       const data = await response.json();
 
       if (data.ok) {
-        handleLoginSuccess(data.user);
+        // Store user in sessionStorage for client-side access
+        sessionStorage.setItem('user', JSON.stringify(data.user));
+        setMessage('Login successful! Redirecting...');
+        setTimeout(() => router.push('/dashboard'), 500);
       } else {
-        setMessage('Login failed. Please try again.');
+        setMessage(data.error || 'Login failed');
+        setLoading(false);
       }
     } catch (error) {
-      setMessage('Error: ' + error.message);
+      setMessage('Login error: ' + error.message);
+      setLoading(false);
     }
   };
 
   return (
     <>
       <Head>
-        <title>Login — Semi‑Colonic</title>
+        <title>Login — Semi;colonic</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="/styles.css" />
       </Head>
 
-      <div style={{ 
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: 'radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), #0b1324',
-        color: '#eef1ff',
-        padding: '24px'
-      }}>
-        <div style={{ maxWidth: '420px', width: '100%' }}>
-          <div style={{ 
-            textAlign: 'center',
-            marginBottom: '24px'
-          }}>
-            <div style={{ 
-              fontSize: '0.85rem',
-              letterSpacing: '0.6px',
-              color: '#9aa6d9',
-              marginBottom: '8px'
-            }}>
-              Not the end—just a moment to rest.
-            </div>
-            <div style={{ 
-              fontSize: '2.2rem',
-              fontWeight: '600'
-            }}>
-              semi<span style={{ color: '#7aa2ff' }}>;</span>colonic
-            </div>
-          </div>
+      <style jsx>{`
+        body {
+          background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), #0b1324;
+          color: #eef1ff;
+        }
+        .login-container {
+          width: 100%;
+          max-width: 420px;
+          padding: 26px;
+          text-align: center;
+          margin: 0 auto;
+          animation: fadeIn 1.2s ease;
+        }
+        .logo {
+          font-size: 2.6rem;
+          font-weight: 600;
+          margin-bottom: 10px;
+          color: #eef1ff;
+        }
+        .logo span {
+          color: #7aa2ff;
+        }
+        .subtitle {
+          font-size: 0.85rem;
+          letter-spacing: 0.6px;
+          color: #9aa6d9;
+          margin-bottom: 20px;
+        }
+        .card {
+          background: linear-gradient(180deg, #16204a, #121b34);
+          border-radius: 22px;
+          padding: 26px 22px;
+          box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+        }
+        input {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 10px;
+          border-radius: 12px;
+          border: none;
+          background: #0f1733;
+          color: #eef1ff;
+          font-size: 0.95rem;
+        }
+        input::placeholder {
+          color: #9aa6d9;
+        }
+        button {
+          width: 100%;
+          padding: 14px;
+          border-radius: 16px;
+          border: none;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          margin-top: 10px;
+          background: linear-gradient(90deg, #7aa2ff, #a9c0ff);
+          color: #ffffff;
+        }
+        button:hover:not(:disabled) {
+          opacity: 0.9;
+        }
+        button:disabled {
+          opacity: 0.6;
+          cursor: not-allowed;
+        }
+        .message {
+          margin-top: 10px;
+          font-size: 0.9rem;
+          color: #a9c0ff;
+        }
+        .footer {
+          margin-top: 16px;
+          font-size: 0.75rem;
+          opacity: 0.8;
+        }
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
 
-          <div style={{
-            background: 'linear-gradient(180deg, #16204a, #121b34)',
-            borderRadius: '22px',
-            padding: '26px 22px',
-            boxShadow: '0 18px 45px rgba(0,0,0,0.45)'
-          }}>
-            <form onSubmit={handleLogin}>
-              <input
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginBottom: '12px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: '#0f1733',
-                  color: '#eef1ff',
-                  fontSize: '0.95rem'
-                }}
-              />
-              
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginBottom: '12px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: '#0f1733',
-                  color: '#eef1ff',
-                  fontSize: '0.95rem'
-                }}
-              />
-
-              <button
-                type="submit"
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '16px',
-                  border: 'none',
-                  background: 'linear-gradient(90deg, #7aa2ff, #a9c0ff)',
-                  color: '#ffffff',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  marginBottom: '10px'
-                }}
-              >
-                Log in
-              </button>
-
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255,255,255,0.06)',
-                  background: 'transparent',
-                  color: 'inherit',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                Demo Login
-              </button>
-
-              {message && (
-                <div style={{ 
-                  marginTop: '14px', 
-                  fontSize: '0.9rem',
-                  textAlign: 'center'
-                }}>
-                  {message}
-                </div>
-              )}
-            </form>
-          </div>
-
-          <div style={{ 
-            marginTop: '16px',
-            fontSize: '0.75rem',
-            textAlign: 'center',
-            opacity: 0.8
-          }}>
-            You're safe to pause here.
-          </div>
+      <div className="login-container">
+        <div className="subtitle">Not the end—just a moment to rest.</div>
+        <div className="logo">
+          semi<span>;</span>colonic
         </div>
+
+        <div className="card">
+          <form onSubmit={handleLogin}>
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              disabled={loading}
+            />
+            <input
+              type="text"
+              placeholder="Display Name (optional)"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoComplete="name"
+              disabled={loading}
+            />
+            <button type="submit" disabled={loading}>
+              {loading ? 'Logging in...' : 'Log in (Demo)'}
+            </button>
+          </form>
+          {message && <div className="message">{message}</div>}
+        </div>
+        <div className="footer">You're safe to pause here.</div>
       </div>
     </>
   );
