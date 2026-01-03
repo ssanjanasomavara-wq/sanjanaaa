@@ -35,7 +35,7 @@
     .login button { background: linear-gradient(90deg,var(--blue),var(--blue-soft)); color:#0b1025; }
     .login .link { color: var(--blue-soft); }
     body.home { background: radial-gradient(800px 500px at 50% -10%, var(--foam), transparent), linear-gradient(180deg,var(--sea),#4e8fae); color:var(--earth-text); }
-    .home .card { background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75)); backdrop-filter: blur(6px); border-radius:22px; padding:26px 22px; box-shadow:0 18px 45px rgba(0,0,0,0.25); }
+    .home .card { background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75)); backdrop-filter: blur(6px); border-radius:22px; padding:26px 22px; box-shadow:0 18px 45px rgba(0,[...]
     .home .logo { color:#1f3f57; font-size:2.2rem; }
     .home strong { color: var(--clay); }
     .home button { background: linear-gradient(90deg,var(--sand),var(--clay)); color:#fff; }
@@ -74,7 +74,7 @@
       <input id="signup-email" type="email" placeholder="Email" autocomplete="email" />
       <input id="signup-password" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password" />
       <input id="signup-password-confirm" type="password" placeholder="Confirm password" autocomplete="new-password" />
-      <button onclick="signUp()">Create account</button>
+      <button id="create-account-btn" onclick="signUp()">Create account</button>
       <div class="row" style="margin-top:8px;">
         <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(0,0,0,0.05);">Back</button>
       </div>
@@ -98,7 +98,7 @@
       </p>
       <div class="row">
         <button id="enter-app" onclick="enterApp()">Enter app</button>
-        <button style="background:#eee;color:#222" onclick="signOutUser()">Sign out</button>
+        <button id="sign-out-btn" style="background:#eee;color:#222" onclick="signOutUser()">Sign out</button>
       </div>
       <div class="message small" id="user-info"></div>
     </div>
@@ -123,6 +123,23 @@
     function clearMessages(){ authMessage.textContent=''; signupMessage.textContent=''; userInfo.textContent=''; }
     function guestEnter(){ showHome(); userInfo.textContent = 'Guest — limited access.'; }
     function enterApp(){ alert('Entering the app — wire this up to your SPA / routing.'); }
+
+    // --- Safe placeholders so clicking buttons before Firebase loads won't throw ---
+    // These will be replaced by the real functions inside initFirebase() once initialization finishes.
+    window.signUp = function() {
+      signupMessage.textContent = 'Initializing authentication — please wait...';
+      // Keep focus on signup view so user understands initialization is pending.
+      showSignUp();
+    };
+    window.signIn = function() {
+      authMessage.textContent = 'Initializing authentication — please wait...';
+      showLoginView();
+    };
+    window.signOutUser = function() {
+      // During initialization there's nothing to sign out from; show a gentle message.
+      alert('Initializing authentication — please wait before signing out.');
+    };
+    // -------------------------------------------------------------------------
 
     // firebase instances after init
     let auth, db;
