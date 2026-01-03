@@ -1,28 +1,15 @@
-import { getIronSession } from 'iron-session';
+// pages/api/session.js
+// Use getIronSession (imported from "iron-session") to avoid subpath export issues.
+import { getIronSession } from "iron-session";
+import { sessionOptions } from "../../lib/sessionOptions";
 
-// Session configuration for iron-session
-const sessionOptions = {
-  password: process.env.IRON_SESSION_PASSWORD || 'complex_password_at_least_32_characters_long_change_in_production',
-  cookieName: 'iron-session',
-  cookieOptions: {
-    secure: process.env.NODE_ENV === 'production',
-    httpOnly: true,
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 7, // 7 days
-  },
-};
-
-export default async function sessionHandler(req, res) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+export default async function handler(req, res) {
+  try {
+    const session = await getIronSession(req, res, sessionOptions);
+    const user = session?.user || null;
+    return res.status(200).json({ ok: !!user, user: user || null });
+    catch (err) {
+    console.error("Error reading session:", err);
+    return res.status(500).json({ ok: false, error: "Server error" });
   }
-
-  const session = await getIronSession(req, res, sessionOptions);
-
-  // Check if user session exists
-  if (session.user) {
-    return res.status(200).json({ ok: true, user: session.user });
-  }
-
-  return res.status(200).json({ ok: false, user: null });
 }
