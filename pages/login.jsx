@@ -9,6 +9,15 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
+  // Helper to handle successful login
+  const handleLoginSuccess = (user) => {
+    // Save user to sessionStorage per requirements for client-side sync
+    // Note: Only non-sensitive display data (name, email) is stored
+    // Server session (iron-session) is the authoritative source
+    sessionStorage.setItem('user', JSON.stringify(user));
+    router.push('/dashboard');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setMessage('Logging in...');
@@ -24,13 +33,7 @@ export default function Login() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save user to sessionStorage per requirements for client-side sync
-        // Note: Only non-sensitive display data (name, email) is stored
-        // Server session (iron-session) is the authoritative source
-        sessionStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Redirect to dashboard
-        router.push('/dashboard');
+        handleLoginSuccess(data.user);
       } else {
         setMessage('Login failed. Please try again.');
       }
@@ -53,13 +56,7 @@ export default function Login() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save user to sessionStorage per requirements for client-side sync
-        // Note: Only non-sensitive display data (name, email) is stored
-        // Server session (iron-session) is the authoritative source
-        sessionStorage.setItem('user', JSON.stringify(data.user));
-        
-        // Redirect to dashboard
-        router.push('/dashboard');
+        handleLoginSuccess(data.user);
       } else {
         setMessage('Login failed. Please try again.');
       }

@@ -21,7 +21,12 @@ export default function Dashboard() {
         // First, try to read from sessionStorage for fast initial display
         const storedUser = sessionStorage.getItem('user');
         if (storedUser) {
-          setUser(JSON.parse(storedUser));
+          try {
+            setUser(JSON.parse(storedUser));
+          } catch (parseError) {
+            // Handle corrupted sessionStorage data
+            sessionStorage.removeItem('user');
+          }
         }
 
         // Always validate with server session (source of truth)
@@ -66,10 +71,10 @@ export default function Dashboard() {
   const getInitials = (name) => {
     if (!name || name.trim() === '') return '?';
     const parts = name.trim().split(' ').filter(p => p.length > 0);
-    if (parts.length >= 2 && parts[0].length > 0 && parts[1].length > 0) {
+    if (parts.length >= 2) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    if (parts.length > 0 && parts[0].length > 0) {
+    if (parts.length > 0) {
       return parts[0].substring(0, Math.min(2, parts[0].length)).toUpperCase();
     }
     return '?';
