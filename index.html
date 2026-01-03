@@ -6,7 +6,6 @@
   <title>Semi‑Colonic — Home</title>
 
   <style>
-    /* ---------- LOGIN (BLUE / BLACK) ---------- */
     :root {
       --night-bg: #0b1324;
       --night-card: #121b34;
@@ -14,166 +13,47 @@
       --blue-soft: #a9c0ff;
       --text-light: #eef1ff;
       --muted-light: #9aa6d9;
-
-      /* ---------- HOME (WATER / EARTH) ---------- */
       --sea: #6fa9c9;
       --foam: #d6ecf6;
       --sand: #e2b07a;
       --clay: #c87a3c;
       --earth-text: #2a2a2a;
     }
-
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-    }
-
-    /* ---------- SHARED ---------- */
-    .container {
-      width: 100%;
-      max-width: 420px;
-      padding: 26px;
-      text-align: center;
-      animation: fadeIn 1.2s ease;
-    }
-
-    .logo {
-      font-size: 2.6rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
+    body { margin:0; min-height:100vh; font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display:flex; align-items:center; justify-content:center; padding:24px; }
+    .container { width:100%; max-width:420px; padding:26px; text-align:center; animation:fadeIn 1.2s ease; }
+    .logo { font-size:2.6rem; font-weight:600; margin-bottom:10px; }
     .logo span { color: currentColor; }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      border-radius: 16px;
-      border: none;
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .link {
-      margin-top: 14px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .message {
-      margin-top: 10px;
-      font-size: 0.9rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 12px;
-      border: none;
-      background: rgba(255,255,255,0.05);
-    }
-
-    /* ---------- LOGIN PAGE ---------- */
-    body.login {
-      background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), var(--night-bg);
-      color: var(--text-light);
-    }
-
-    .login .subtitle {
-      font-size: 0.85rem;
-      letter-spacing: 0.6px;
-      color: var(--muted-light);
-      margin-bottom: 6px;
-    }
-
-    .login .card {
-      background: linear-gradient(180deg, #16204a, var(--night-card));
-      border-radius: 22px;
-      padding: 26px 22px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.45);
-    }
-
-    .login input {
-      background: #0f1733;
-      color: var(--text-light);
-    }
-
-    .login button {
-      background: linear-gradient(90deg, var(--blue), var(--blue-soft));
-      color: #0b1025;
-    }
-
+    button { width:100%; padding:14px; border-radius:16px; border:none; font-size:0.95rem; font-weight:600; cursor:pointer; margin-top:10px; }
+    .link { margin-top:14px; font-size:0.85rem; cursor:pointer; text-decoration:underline; }
+    .message { margin-top:10px; font-size:0.9rem; }
+    input { width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:rgba(255,255,255,0.05); }
+    body.login { background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), var(--night-bg); color: var(--text-light); }
+    .login .subtitle { font-size:0.85rem; letter-spacing:0.6px; color:var(--muted-light); margin-bottom:6px; }
+    .login .card { background: linear-gradient(180deg,#16204a,var(--night-card)); border-radius:22px; padding:26px 22px; box-shadow:0 18px 45px rgba(0,0,0,0.45); }
+    .login input { background:#0f1733; color:var(--text-light); }
+    .login button { background: linear-gradient(90deg,var(--blue),var(--blue-soft)); color:#0b1025; }
     .login .link { color: var(--blue-soft); }
-
-    /* ---------- HOME / ABOUT PAGE ---------- */
-    body.home {
-      background:
-        radial-gradient(800px 500px at 50% -10%, var(--foam), transparent),
-        linear-gradient(180deg, var(--sea), #4e8fae);
-      color: var(--earth-text);
-    }
-
-    .home .card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75));
-      backdrop-filter: blur(6px);
-      border-radius: 22px;
-      padding: 26px 22px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.25);
-    }
-
-    .home .logo {
-      color: #1f3f57;
-      font-size: 2.2rem;
-    }
-
+    body.home { background: radial-gradient(800px 500px at 50% -10%, var(--foam), transparent), linear-gradient(180deg,var(--sea),#4e8fae); color:var(--earth-text); }
+    .home .card { background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75)); backdrop-filter: blur(6px); border-radius:22px; padding:26px 22px; box-shadow:0 18px 45px rgba(0,0,0,0.25); }
+    .home .logo { color:#1f3f57; font-size:2.2rem; }
     .home strong { color: var(--clay); }
-
-    .home button {
-      background: linear-gradient(90deg, var(--sand), var(--clay));
-      color: #fff;
-    }
-
-    .footer {
-      margin-top: 16px;
-      font-size: 0.75rem;
-      opacity: 0.8;
-    }
-
-    .small {
-      font-size: 0.85rem;
-    }
-
+    .home button { background: linear-gradient(90deg,var(--sand),var(--clay)); color:#fff; }
+    .footer { margin-top:16px; font-size:0.75rem; opacity:0.8; }
+    .small { font-size:0.85rem; }
     .row { display:flex; gap:8px; }
     .row button { flex:1; }
-
     .hidden { display:none !important; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
   </style>
 </head>
 <body class="login">
 
-  <!-- LOGIN PAGE -->
   <div class="container" id="login">
     <div class="subtitle">Not the end—just a moment to rest.</div>
     <div class="logo">semi<span>;</span>colonic</div>
 
     <div class="card" id="login-card">
-      <!-- Sign-in form -->
       <input id="email" type="email" placeholder="Email" autocomplete="username" />
       <input id="password" type="password" placeholder="Password" autocomplete="current-password" />
       <button id="sign-in-btn" onclick="signIn()">Log in</button>
@@ -185,214 +65,171 @@
 
       <div class="message" id="auth-message" aria-live="polite"></div>
     </div>
-    <div class="footer">You're safe to pause here.</div>
+    <div class="footer">You’re safe to pause here.</div>
   </div>
 
-  <!-- SIGN UP PAGE (hidden by default) -->
   <div class="container hidden" id="signup">
     <div class="logo">semi<span>;</span>colonic</div>
-
     <div class="card">
       <input id="signup-email" type="email" placeholder="Email" autocomplete="email" />
       <input id="signup-password" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password" />
       <input id="signup-password-confirm" type="password" placeholder="Confirm password" autocomplete="new-password" />
       <button onclick="signUp()">Create account</button>
-
       <div class="row" style="margin-top:8px;">
-        <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(0,0,0,0.2);">Back</button>
+        <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(0,0,0,0.05);">Back</button>
       </div>
-
       <div class="message" id="signup-message" aria-live="polite"></div>
     </div>
-
     <div class="footer">You can come back anytime.</div>
   </div>
 
-  <!-- HOME / ABOUT PAGE -->
   <div class="container hidden" id="home">
     <div class="logo">semi<span>;</span>colonic</div>
-
     <div class="card">
       <p>
         <strong>What does a semicolon mean?</strong><br><br>
-        A semicolon is used when a sentence could end — but doesn't.
+        A semicolon is used when a sentence could end — but doesn’t.
         It represents choosing to continue, even when stopping feels easier.
         <br><br>
         <strong>What is semi‑colonic?</strong><br><br>
         Semi‑colonic lives in the pause before that choice.
         This app is not about fixing yourself or being productive.
-        It's a place to rest, reflect, and continue gently.
+        It’s a place to rest, reflect, and continue gently.
       </p>
-
       <div class="row">
         <button id="enter-app" onclick="enterApp()">Enter app</button>
         <button style="background:#eee;color:#222" onclick="signOutUser()">Sign out</button>
       </div>
+      <div class="message small" id="user-info"></div>
     </div>
-
     <div class="footer">The tide goes out. The tide comes back.</div>
   </div>
 
-  <!-- Firebase + Auth logic -->
+  <!-- Runtime Firebase bootstrap: fetch config from /api/firebase-config then import SDKs.
+       Uses Firebase Authentication + Realtime Database (client-side modular SDK). -->
   <script type="module">
-    // NOTE: Replace the config fields below with your Firebase project configuration.
-    // You can find this in the Firebase console -> Project settings -> Your apps (Web).
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
-    import {
-      getAuth,
-      createUserWithEmailAndPassword,
-      signInWithEmailAndPassword,
-      signOut,
-      onAuthStateChanged
-    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
-    import {
-      getFirestore,
-      doc,
-      setDoc,
-      serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "REPLACE_WITH_YOUR_API_KEY",
-      authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-      projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-      // Optional: storageBucket, messagingSenderId, appId, measurementId
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // UI helpers
+    // UI refs & helpers
     const loginEl = document.getElementById('login');
     const signupEl = document.getElementById('signup');
     const homeEl = document.getElementById('home');
     const authMessage = document.getElementById('auth-message');
     const signupMessage = document.getElementById('signup-message');
+    const userInfo = document.getElementById('user-info');
 
-    function showSignUp() {
-      loginEl.classList.add('hidden');
-      signupEl.classList.remove('hidden');
-      clearMessages();
-    }
-    function showLogin() {
-      signupEl.classList.add('hidden');
-      loginEl.classList.remove('hidden');
-      clearMessages();
-    }
-    function showHome() {
-      document.body.className = 'home';
-      loginEl.classList.add('hidden');
-      signupEl.classList.add('hidden');
-      homeEl.classList.remove('hidden');
-    }
-    function showLoginView() {
-      document.body.className = 'login';
-      homeEl.classList.add('hidden');
-      signupEl.classList.add('hidden');
-      loginEl.classList.remove('hidden');
-    }
+    function showSignUp(){ loginEl.classList.add('hidden'); signupEl.classList.remove('hidden'); clearMessages(); }
+    function showLogin(){ signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); clearMessages(); }
+    function showHome(){ document.body.className='home'; loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); homeEl.classList.remove('hidden'); }
+    function showLoginView(){ document.body.className='login'; homeEl.classList.add('hidden'); signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); }
+    function clearMessages(){ authMessage.textContent=''; signupMessage.textContent=''; userInfo.textContent=''; }
+    function guestEnter(){ showHome(); userInfo.textContent = 'Guest — limited access.'; }
+    function enterApp(){ alert('Entering the app — wire this up to your SPA / routing.'); }
 
-    function clearMessages() {
-      authMessage.textContent = '';
-      signupMessage.textContent = '';
-    }
+    // firebase instances after init
+    let auth, db;
 
-    async function signUp() {
-      const email = document.getElementById('signup-email').value.trim();
-      const password = document.getElementById('signup-password').value;
-      const confirm = document.getElementById('signup-password-confirm').value;
-
-      signupMessage.textContent = '';
-      if (!email || !password) {
-        signupMessage.textContent = 'Enter email and password.';
-        return;
-      }
-      if (password.length < 6) {
-        signupMessage.textContent = 'Password must be at least 6 characters.';
-        return;
-      }
-      if (password !== confirm) {
-        signupMessage.textContent = 'Passwords do not match.';
-        return;
-      }
-
+    // Initialize Firebase by fetching config from serverless endpoint (Vercel)
+    (async function initFirebase() {
       try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
+        const resp = await fetch('/api/firebase-config', { cache: 'no-store' });
+        if (!resp.ok) throw new Error('Failed to fetch firebase config: ' + resp.status);
+        const firebaseConfig = await resp.json();
 
-        // Create a minimal profile in Firestore (we do NOT store passwords or sensitive info here).
-        await setDoc(doc(db, 'users', user.uid), {
-          email: user.email,
-          createdAt: serverTimestamp()
-        }, { merge: true });
+        // Dynamic import of modular SDKs
+        const [{ initializeApp }, authMod, dbMod] = await Promise.all([
+          import('https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js'),
+          import('https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js'),
+          import('https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js')
+        ]);
 
-        signupMessage.textContent = 'Account created — signing in...';
-        // show home view
-        showHome();
+        const app = initializeApp(firebaseConfig);
+        auth = authMod.getAuth(app);
+        db = dbMod.getDatabase(app);
+
+        // Auth & Realtime DB helpers we'll use
+        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = authMod;
+        const { ref, set, get, serverTimestamp } = dbMod;
+
+        // Expose signUp, signIn, signOutUser to UI (they use auth/db from closure)
+        window.signUp = async function signUp() {
+          const email = document.getElementById('signup-email').value.trim();
+          const password = document.getElementById('signup-password').value;
+          const confirm = document.getElementById('signup-password-confirm').value;
+          signupMessage.textContent = '';
+          if (!email || !password) { signupMessage.textContent = 'Enter email and password.'; return; }
+          if (password.length < 6) { signupMessage.textContent = 'Password must be at least 6 characters.'; return; }
+          if (password !== confirm) { signupMessage.textContent = 'Passwords do not match.'; return; }
+
+          try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Create a minimal profile in Realtime Database under /users/{uid}
+            // Use serverTimestamp() for createdAt if supported; otherwise fallback to Date.now()
+            const createdAt = (typeof serverTimestamp === 'function') ? serverTimestamp() : Date.now();
+            await set(ref(db, `users/${user.uid}`), { email: user.email, createdAt });
+
+            signupMessage.textContent = 'Account created — signing in...';
+            // UI will be updated by onAuthStateChanged
+          } catch (err) {
+            signupMessage.textContent = err.message || 'Sign up failed';
+          }
+        };
+
+        window.signIn = async function signIn() {
+          const email = document.getElementById('email').value.trim();
+          const password = document.getElementById('password').value;
+          authMessage.textContent = '';
+          if (!email || !password) { authMessage.textContent = 'Enter email and password.'; return; }
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            authMessage.textContent = 'Signed in — redirecting...';
+            // UI will be updated by onAuthStateChanged
+          } catch (err) {
+            authMessage.textContent = err.message || 'Sign in failed';
+          }
+        };
+
+        window.signOutUser = async function signOutUser() {
+          try {
+            await signOut(auth);
+            showLoginView();
+          } catch (err) {
+            alert('Sign out error: ' + (err.message || err));
+          }
+        };
+
+        // Read profile from Realtime DB and display minimal info
+        async function loadUserProfile(uid) {
+          try {
+            const snapshot = await get(ref(db, `users/${uid}`));
+            if (snapshot && snapshot.exists()) {
+              const data = snapshot.val();
+              const created = data.createdAt ? (typeof data.createdAt === 'number' ? new Date(data.createdAt).toLocaleString() : '[server timestamp]') : '';
+              userInfo.textContent = `Signed in as ${data.email}${created ? ' — created ' + created : ''}`;
+            } else {
+              userInfo.textContent = 'Signed in — profile not found.';
+            }
+          } catch (err) {
+            console.error('Failed to load profile:', err);
+            userInfo.textContent = 'Signed in — failed to load profile.';
+          }
+        }
+
+        // Keep UI in sync with auth state
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            showHome();
+            loadUserProfile(user.uid);
+          } else {
+            showLoginView();
+          }
+        });
+
       } catch (err) {
-        signupMessage.textContent = err.message || 'Sign up failed';
+        console.error(err);
+        authMessage.textContent = 'Unable to initialize authentication. Check site configuration.';
       }
-    }
-
-    async function signIn() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-
-      authMessage.textContent = '';
-      if (!email || !password) {
-        authMessage.textContent = 'Enter email and password.';
-        return;
-      }
-
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        authMessage.textContent = 'Signed in — redirecting...';
-        showHome();
-      } catch (err) {
-        authMessage.textContent = err.message || 'Sign in failed';
-      }
-    }
-
-    async function signOutUser() {
-      try {
-        await signOut(auth);
-        showLoginView();
-      } catch (err) {
-        console.error('Sign out error:', err);
-        showLoginView(); // Still show login view even if sign out fails
-      }
-    }
-
-    function guestEnter() {
-      // Optional: navigate to home without auth (guest)
-      showHome();
-    }
-
-    function enterApp() {
-      // Placeholder for entering the rest of your app.
-      alert('Entering the app — wire this up to your real SPA / routing.');
-    }
-
-    // Expose functions to global scope for onclick handlers
-    window.showSignUp = showSignUp;
-    window.showLogin = showLogin;
-    window.signUp = signUp;
-    window.signIn = signIn;
-    window.signOutUser = signOutUser;
-    window.guestEnter = guestEnter;
-    window.enterApp = enterApp;
-
-    // Keep UI in sync with auth state
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // user is signed in
-        showHome();
-      } else {
-        // signed out
-        showLoginView();
-      }
-    });
+    })();
   </script>
 
 </body>
