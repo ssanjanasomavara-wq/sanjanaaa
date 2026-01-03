@@ -63,6 +63,10 @@
         <button onclick="guestEnter()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;">Guest</button>
       </div>
 
+      <div style="display:flex; justify-content:center; gap:8px; margin-top:8px;">
+        <button onclick="showForgot()" style="background:transparent;border:1px solid rgba(255,255,255,0.06);width:auto;padding:8px 12px;font-size:0.85rem;">Forgot?</button>
+      </div>
+
       <div class="message" id="auth-message" aria-live="polite"></div>
     </div>
     <div class="footer">You’re safe to pause here.</div>
@@ -81,6 +85,35 @@
       <div class="message" id="signup-message" aria-live="polite"></div>
     </div>
     <div class="footer">You can come back anytime.</div>
+  </div>
+
+  <div class="container hidden" id="forgot">
+    <div class="logo">semi<span>;</span>colonic</div>
+    <div class="card">
+      <p class="small">Enter your account email and we'll send a link to reset your password.</p>
+      <input id="forgot-email" type="email" placeholder="Email" autocomplete="email" />
+      <button onclick="sendResetEmail()">Send reset email</button>
+      <div class="row" style="margin-top:8px;">
+        <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(0,0,0,0.05);">Back</button>
+      </div>
+      <div class="message" id="forgot-message" aria-live="polite"></div>
+    </div>
+    <div class="footer">Check your inbox — and your spam folder just in case.</div>
+  </div>
+
+  <div class="container hidden" id="reset">
+    <div class="logo">semi<span>;</span>colonic</div>
+    <div class="card">
+      <p class="small" id="reset-desc">Choose a new password for your account.</p>
+      <input id="reset-password" type="password" placeholder="New password (min 6 chars)" />
+      <input id="reset-password-confirm" type="password" placeholder="Confirm new password" />
+      <button id="reset-password-btn" onclick="resetPassword()">Reset password</button>
+      <div class="row" style="margin-top:8px;">
+        <button onclick="showLogin()" style="background:transparent;border:1px solid rgba(0,0,0,0.05);">Back</button>
+      </div>
+      <div class="message" id="reset-message" aria-live="polite"></div>
+    </div>
+    <div class="footer">If the link is expired, request a new reset email from the login view.</div>
   </div>
 
   <div class="container hidden" id="home">
@@ -111,25 +144,38 @@
     // UI refs & helpers
     const loginEl = document.getElementById('login');
     const signupEl = document.getElementById('signup');
+    const forgotEl = document.getElementById('forgot');
+    const resetEl = document.getElementById('reset');
     const homeEl = document.getElementById('home');
     const authMessage = document.getElementById('auth-message');
     const signupMessage = document.getElementById('signup-message');
+    const forgotMessage = document.getElementById('forgot-message');
+    const resetMessage = document.getElementById('reset-message');
     const userInfo = document.getElementById('user-info');
+    const resetDesc = document.getElementById('reset-desc');
 
     // Expose UI functions to the global scope so inline onclick handlers work.
-    window.showSignUp = () => { loginEl.classList.add('hidden'); signupEl.classList.remove('hidden'); window.clearMessages(); };
-    window.showLogin = () => { signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); window.clearMessages(); };
-    window.showHome = () => { document.body.className='home'; loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); homeEl.classList.remove('hidden'); };
-    window.showLoginView = () => { document.body.className='login'; homeEl.classList.add('hidden'); signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); };
-    window.clearMessages = () => { authMessage.textContent=''; signupMessage.textContent=''; userInfo.textContent=''; };
+    window.showSignUp = () => { loginEl.classList.add('hidden'); signupEl.classList.remove('hidden'); forgotEl.classList.add('hidden'); resetEl.classList.add('hidden'); window.clearMessages(); };
+    window.showLogin = () => { signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); forgotEl.classList.add('hidden'); resetEl.classList.add('hidden'); window.clearMessages(); };
+    window.showHome = () => { document.body.className='home'; loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); homeEl.classList.remove('hidden'); forgotEl.classList.add('hidden'); resetEl.classList.add('hidden'); };
+    window.showLoginView = () => { document.body.className='login'; homeEl.classList.add('hidden'); signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); forgotEl.classList.add('hidden'); resetEl.classList.add('hidden'); };
+    window.showForgot = () => { loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); forgotEl.classList.remove('hidden'); resetEl.classList.add('hidden'); window.clearMessages(); };
+    window.showReset = () => { loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); forgotEl.classList.add('hidden'); resetEl.classList.remove('hidden'); window.clearMessages(); };
+
+    window.clearMessages = () => {
+      authMessage.textContent = '';
+      signupMessage.textContent = '';
+      forgotMessage.textContent = '';
+      resetMessage.textContent = '';
+      userInfo.textContent = '';
+    };
+
     window.guestEnter = () => { window.showHome(); userInfo.textContent = 'Guest — limited access.'; };
     window.enterApp = () => { alert('Entering the app — wire this up to your SPA / routing.'); };
 
     // --- Safe placeholders so clicking buttons before Firebase loads won't throw ---
-    // These will be replaced by the real functions inside initFirebase() once initialization finishes.
     window.signUp = function() {
       signupMessage.textContent = 'Initializing authentication — please wait...';
-      // Keep focus on signup view so user understands initialization is pending.
       window.showSignUp();
     };
     window.signIn = function() {
@@ -137,13 +183,20 @@
       window.showLoginView();
     };
     window.signOutUser = function() {
-      // During initialization there's nothing to sign out from; show a gentle message.
       alert('Initializing authentication — please wait before signing out.');
+    };
+    window.sendResetEmail = function() {
+      forgotMessage.textContent = 'Initializing authentication — please wait...';
+      window.showForgot();
+    };
+    window.resetPassword = function() {
+      resetMessage.textContent = 'Initializing authentication — please wait...';
+      window.showReset();
     };
     // -------------------------------------------------------------------------
 
     // firebase instances after init
-    let auth, db;
+    let auth, db, currentOobCode = null, resetEmail = null;
 
     // Initialize Firebase by fetching config from serverless endpoint (Vercel)
     (async function initFirebase() {
@@ -164,12 +217,12 @@
         db = dbMod.getDatabase(app);
 
         // Auth & Realtime DB helpers we'll use
-        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = authMod;
+        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+                sendPasswordResetEmail, verifyPasswordResetCode, confirmPasswordReset } = authMod;
         const { ref, set, get, serverTimestamp } = dbMod;
 
         // Friendly error messages for common Firebase auth failures
         function friendlyAuthError(err) {
-          // Prefer err.code; some environments include code inside the message as "Firebase: Error (auth/...)"
           const code = err && (err.code || (typeof err.message === 'string' && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
           const normalized = (code || '').toString().replace(/^.*(auth\/)/, 'auth/').replace(/[()]/g, '').trim();
 
@@ -189,10 +242,11 @@
               return 'Password is too weak. Use at least 6 characters.';
             case 'auth/network-request-failed':
               return 'Network error — check your connection and try again.';
+            case 'auth/expired-action-code':
+            case 'auth/invalid-action-code':
+              return 'The password reset link is invalid or has expired. Request a new link.';
             default:
-              // Fall back to the raw message, but strip the "Firebase: Error (...)." wrapper if present
               if (err && err.message) {
-                // Example raw: "Firebase: Error (auth/invalid-login-credentials)."
                 const match = err.message.match(/Firebase:\s*Error\s*\((auth\/[^\)]+)\)\.?\s*(.*)/);
                 if (match) return (match[2] && match[2].trim()) ? match[2].trim() : ('Authentication error: ' + match[1]);
                 return err.message;
@@ -216,7 +270,6 @@
             const user = userCredential.user;
 
             // Create a minimal profile in Realtime Database under /users/{uid}
-            // Use serverTimestamp() for createdAt if supported; otherwise fallback to Date.now()
             const createdAt = (typeof serverTimestamp === 'function') ? serverTimestamp() : Date.now();
             await set(ref(db, `users/${user.uid}`), { email: user.email, createdAt });
 
@@ -235,7 +288,6 @@
           try {
             await signInWithEmailAndPassword(auth, email, password);
             authMessage.textContent = 'Signed in — redirecting...';
-            // UI will be updated by onAuthStateChanged
           } catch (err) {
             authMessage.textContent = friendlyAuthError(err);
           }
@@ -247,6 +299,57 @@
             window.showLoginView();
           } catch (err) {
             alert('Sign out error: ' + (err.message || err));
+          }
+        };
+
+        // Send password reset email (in-app)
+        window.sendResetEmail = async function sendResetEmail() {
+          const email = document.getElementById('forgot-email').value.trim();
+          forgotMessage.textContent = '';
+          if (!email) { forgotMessage.textContent = 'Enter your email.'; return; }
+
+          try {
+            // actionCodeSettings directs user to this site with mode=resetPassword
+            const actionCodeSettings = {
+              url: location.origin + location.pathname + '?mode=resetPassword',
+              // If you want the reset to be handled in an iOS/Android app, configure here.
+            };
+            await sendPasswordResetEmail(auth, email, actionCodeSettings);
+            forgotMessage.textContent = 'Reset email sent. Check your inbox.';
+          } catch (err) {
+            forgotMessage.textContent = friendlyAuthError(err);
+          }
+        };
+
+        // Reset password using oobCode present in URL
+        window.resetPassword = async function resetPassword() {
+          const newPass = document.getElementById('reset-password').value;
+          const confirm = document.getElementById('reset-password-confirm').value;
+          resetMessage.textContent = '';
+          if (!currentOobCode) { resetMessage.textContent = 'Reset code missing or invalid.'; return; }
+          if (!newPass) { resetMessage.textContent = 'Enter a new password.'; return; }
+          if (newPass.length < 6) { resetMessage.textContent = 'Password must be at least 6 characters.'; return; }
+          if (newPass !== confirm) { resetMessage.textContent = 'Passwords do not match.'; return; }
+
+          try {
+            await confirmPasswordReset(auth, currentOobCode, newPass);
+            resetMessage.textContent = 'Password updated. Signing you in...';
+            // If we have the email from verifyPasswordResetCode, attempt to sign in automatically.
+            if (resetEmail) {
+              try {
+                await signInWithEmailAndPassword(auth, resetEmail, newPass);
+                resetMessage.textContent = 'Password updated and signed in.';
+              } catch (err) {
+                // If automatic sign-in fails, show a friendly message but not an error overlay.
+                resetMessage.textContent = 'Password updated. Please sign in.';
+              }
+            } else {
+              resetMessage.textContent = 'Password updated. Please sign in.';
+            }
+            // Push UI back to login after a short delay
+            setTimeout(() => { showLogin(); }, 1600);
+          } catch (err) {
+            resetMessage.textContent = friendlyAuthError(err);
           }
         };
 
@@ -273,9 +376,41 @@
             window.showHome();
             loadUserProfile(user.uid);
           } else {
-            window.showLoginView();
+            // If no auth session but URL contains reset info, we'll show reset view below.
+            // Otherwise show login view.
+            const params = new URLSearchParams(location.search);
+            const mode = params.get('mode');
+            const oobCode = params.get('oobCode');
+            if (mode === 'resetPassword' && oobCode) {
+              // handled below by URL processing code (verify code)
+            } else {
+              window.showLoginView();
+            }
           }
         });
+
+        // Handle incoming URL for in-app reset flow: ?mode=resetPassword&oobCode=...&apiKey=...
+        (async function handleUrlActions() {
+          const params = new URLSearchParams(location.search);
+          const mode = params.get('mode');
+          const oobCode = params.get('oobCode');
+
+          if (mode === 'resetPassword' && oobCode) {
+            // Store the code so resetPassword() can use it
+            currentOobCode = oobCode;
+            try {
+              // verifyPasswordResetCode returns the email address for that code
+              const email = await verifyPasswordResetCode(auth, oobCode);
+              resetEmail = email || null;
+              resetDesc.textContent = `Resetting password for ${email}. Choose a new password.`;
+              window.showReset();
+            } catch (err) {
+              // Show an error in reset view
+              resetMessage.textContent = friendlyAuthError(err);
+              window.showReset();
+            }
+          }
+        })();
 
       } catch (err) {
         console.error(err);
