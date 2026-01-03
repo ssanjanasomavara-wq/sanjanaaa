@@ -116,24 +116,25 @@
     const signupMessage = document.getElementById('signup-message');
     const userInfo = document.getElementById('user-info');
 
-    function showSignUp(){ loginEl.classList.add('hidden'); signupEl.classList.remove('hidden'); clearMessages(); }
-    function showLogin(){ signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); clearMessages(); }
-    function showHome(){ document.body.className='home'; loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); homeEl.classList.remove('hidden'); }
-    function showLoginView(){ document.body.className='login'; homeEl.classList.add('hidden'); signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); }
-    function clearMessages(){ authMessage.textContent=''; signupMessage.textContent=''; userInfo.textContent=''; }
-    function guestEnter(){ showHome(); userInfo.textContent = 'Guest — limited access.'; }
-    function enterApp(){ alert('Entering the app — wire this up to your SPA / routing.'); }
+    // Expose UI functions to the global scope so inline onclick handlers work.
+    window.showSignUp = () => { loginEl.classList.add('hidden'); signupEl.classList.remove('hidden'); window.clearMessages(); };
+    window.showLogin = () => { signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); window.clearMessages(); };
+    window.showHome = () => { document.body.className='home'; loginEl.classList.add('hidden'); signupEl.classList.add('hidden'); homeEl.classList.remove('hidden'); };
+    window.showLoginView = () => { document.body.className='login'; homeEl.classList.add('hidden'); signupEl.classList.add('hidden'); loginEl.classList.remove('hidden'); };
+    window.clearMessages = () => { authMessage.textContent=''; signupMessage.textContent=''; userInfo.textContent=''; };
+    window.guestEnter = () => { window.showHome(); userInfo.textContent = 'Guest — limited access.'; };
+    window.enterApp = () => { alert('Entering the app — wire this up to your SPA / routing.'); };
 
     // --- Safe placeholders so clicking buttons before Firebase loads won't throw ---
     // These will be replaced by the real functions inside initFirebase() once initialization finishes.
     window.signUp = function() {
       signupMessage.textContent = 'Initializing authentication — please wait...';
       // Keep focus on signup view so user understands initialization is pending.
-      showSignUp();
+      window.showSignUp();
     };
     window.signIn = function() {
       authMessage.textContent = 'Initializing authentication — please wait...';
-      showLoginView();
+      window.showLoginView();
     };
     window.signOutUser = function() {
       // During initialization there's nothing to sign out from; show a gentle message.
@@ -209,7 +210,7 @@
         window.signOutUser = async function signOutUser() {
           try {
             await signOut(auth);
-            showLoginView();
+            window.showLoginView();
           } catch (err) {
             alert('Sign out error: ' + (err.message || err));
           }
@@ -235,10 +236,10 @@
         // Keep UI in sync with auth state
         onAuthStateChanged(auth, (user) => {
           if (user) {
-            showHome();
+            window.showHome();
             loadUserProfile(user.uid);
           } else {
-            showLoginView();
+            window.showLoginView();
           }
         });
 
