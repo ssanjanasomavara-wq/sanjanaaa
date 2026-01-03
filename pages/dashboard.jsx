@@ -14,13 +14,17 @@ export default function Dashboard() {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        // First, try to read from sessionStorage
+        // Note: sessionStorage is used per requirements to provide faster initial render
+        // and sync with server session. The server session (iron-session) is the source of truth.
+        // sessionStorage only stores non-sensitive display data (name, email).
+        
+        // First, try to read from sessionStorage for fast initial display
         const storedUser = sessionStorage.getItem('user');
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
 
-        // Validate with server session
+        // Always validate with server session (source of truth)
         const response = await fetch('/api/session', {
           credentials: 'include',
         });
@@ -60,12 +64,15 @@ export default function Dashboard() {
   };
 
   const getInitials = (name) => {
-    if (!name) return '?';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
+    if (!name || name.trim() === '') return '?';
+    const parts = name.trim().split(' ').filter(p => p.length > 0);
+    if (parts.length >= 2 && parts[0].length > 0 && parts[1].length > 0) {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
-    return name.substring(0, 2).toUpperCase();
+    if (parts.length > 0 && parts[0].length > 0) {
+      return parts[0].substring(0, Math.min(2, parts[0].length)).toUpperCase();
+    }
+    return '?';
   };
 
   if (loading) {

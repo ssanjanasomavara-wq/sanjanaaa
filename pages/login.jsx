@@ -24,7 +24,9 @@ export default function Login() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save user to sessionStorage
+        // Save user to sessionStorage per requirements for client-side sync
+        // Note: Only non-sensitive display data (name, email) is stored
+        // Server session (iron-session) is the authoritative source
         sessionStorage.setItem('user', JSON.stringify(data.user));
         
         // Redirect to dashboard
@@ -51,7 +53,9 @@ export default function Login() {
       const data = await response.json();
 
       if (data.ok) {
-        // Save user to sessionStorage
+        // Save user to sessionStorage per requirements for client-side sync
+        // Note: Only non-sensitive display data (name, email) is stored
+        // Server session (iron-session) is the authoritative source
         sessionStorage.setItem('user', JSON.stringify(data.user));
         
         // Redirect to dashboard
