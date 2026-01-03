@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { getIronSession } from 'iron-session';
 
 // Session configuration for iron-session
 const sessionOptions = {
@@ -12,17 +12,17 @@ const sessionOptions = {
   },
 };
 
-async function sessionHandler(req, res) {
+export default async function sessionHandler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
+  const session = await getIronSession(req, res, sessionOptions);
+
   // Check if user session exists
-  if (req.session.user) {
-    return res.status(200).json({ ok: true, user: req.session.user });
+  if (session.user) {
+    return res.status(200).json({ ok: true, user: session.user });
   }
 
   return res.status(200).json({ ok: false, user: null });
 }
-
-export default withIronSessionApiRoute(sessionHandler, sessionOptions);

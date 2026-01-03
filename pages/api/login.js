@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { getIronSession } from 'iron-session';
 
 // Session configuration for iron-session
 const sessionOptions = {
@@ -12,7 +12,7 @@ const sessionOptions = {
   },
 };
 
-async function loginHandler(req, res) {
+export default async function loginHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
@@ -29,17 +29,19 @@ async function loginHandler(req, res) {
       return res.status(400).json({ ok: false, error: 'Email is required' });
     }
 
+    const session = await getIronSession(req, res, sessionOptions);
+
     // Set user session
-    req.session.user = {
+    session.user = {
       email: email,
       name: name || email.split('@')[0], // Use email prefix as name if not provided
     };
 
-    await req.session.save();
+    await session.save();
 
     return res.status(200).json({ 
       ok: true, 
-      user: req.session.user 
+      user: session.user 
     });
   } catch (error) {
     return res.status(500).json({ 
@@ -48,5 +50,3 @@ async function loginHandler(req, res) {
     });
   }
 }
-
-export default withIronSessionApiRoute(loginHandler, sessionOptions);

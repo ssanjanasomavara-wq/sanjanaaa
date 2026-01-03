@@ -1,4 +1,4 @@
-import { withIronSessionApiRoute } from 'iron-session/next';
+import { getIronSession } from 'iron-session';
 
 // Session configuration for iron-session
 const sessionOptions = {
@@ -12,14 +12,16 @@ const sessionOptions = {
   },
 };
 
-async function logoutHandler(req, res) {
+export default async function logoutHandler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
   }
 
   try {
+    const session = await getIronSession(req, res, sessionOptions);
+    
     // Destroy the session
-    req.session.destroy();
+    session.destroy();
     
     return res.status(200).json({ ok: true });
   } catch (error) {
@@ -29,5 +31,3 @@ async function logoutHandler(req, res) {
     });
   }
 }
-
-export default withIronSessionApiRoute(logoutHandler, sessionOptions);
