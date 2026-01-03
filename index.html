@@ -325,7 +325,7 @@
         await setDoc(doc(db, 'users', user.uid), {
           email: user.email,
           createdAt: serverTimestamp()
-        });
+        }, { merge: true });
 
         signupMessage.textContent = 'Account created — signing in...';
         // show home view
@@ -359,7 +359,8 @@
         await signOut(auth);
         showLoginView();
       } catch (err) {
-        alert('Sign out error: ' + (err.message || err));
+        console.error('Sign out error:', err);
+        showLoginView(); // Still show login view even if sign out fails
       }
     }
 
