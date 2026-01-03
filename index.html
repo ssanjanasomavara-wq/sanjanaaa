@@ -167,6 +167,40 @@
         const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } = authMod;
         const { ref, set, get, serverTimestamp } = dbMod;
 
+        // Friendly error messages for common Firebase auth failures
+        function friendlyAuthError(err) {
+          // Prefer err.code; some environments include code inside the message as "Firebase: Error (auth/...)"
+          const code = err && (err.code || (typeof err.message === 'string' && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
+          const normalized = (code || '').toString().replace(/^.*(auth\/)/, 'auth/').replace(/[()]/g, '').trim();
+
+          switch (normalized) {
+            case 'auth/wrong-password':
+            case 'auth/invalid-login-credentials':
+              return 'Incorrect email or password.';
+            case 'auth/user-not-found':
+              return 'No account found with that email.';
+            case 'auth/invalid-email':
+              return 'Please enter a valid email address.';
+            case 'auth/user-disabled':
+              return 'This account has been disabled.';
+            case 'auth/email-already-in-use':
+              return 'An account with that email already exists.';
+            case 'auth/weak-password':
+              return 'Password is too weak. Use at least 6 characters.';
+            case 'auth/network-request-failed':
+              return 'Network error — check your connection and try again.';
+            default:
+              // Fall back to the raw message, but strip the "Firebase: Error (...)." wrapper if present
+              if (err && err.message) {
+                // Example raw: "Firebase: Error (auth/invalid-login-credentials)."
+                const match = err.message.match(/Firebase:\s*Error\s*\((auth\/[^\)]+)\)\.?\s*(.*)/);
+                if (match) return (match[2] && match[2].trim()) ? match[2].trim() : ('Authentication error: ' + match[1]);
+                return err.message;
+              }
+              return 'Authentication failed. Please try again.';
+          }
+        }
+
         // Expose signUp, signIn, signOutUser to UI (they use auth/db from closure)
         window.signUp = async function signUp() {
           const email = document.getElementById('signup-email').value.trim();
@@ -189,7 +223,7 @@
             signupMessage.textContent = 'Account created — signing in...';
             // UI will be updated by onAuthStateChanged
           } catch (err) {
-            signupMessage.textContent = err.message || 'Sign up failed';
+            signupMessage.textContent = friendlyAuthError(err);
           }
         };
 
@@ -203,7 +237,7 @@
             authMessage.textContent = 'Signed in — redirecting...';
             // UI will be updated by onAuthStateChanged
           } catch (err) {
-            authMessage.textContent = err.message || 'Sign in failed';
+            authMessage.textContent = friendlyAuthError(err);
           }
         };
 
