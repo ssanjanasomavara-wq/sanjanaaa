@@ -15,6 +15,7 @@ export default function FocusSprint() {
   const gameAreaRef = useRef(null);
   const spawnRef = useRef(null);
   const timerRef = useRef(null);
+  const scoreRef = useRef(0);
 
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(30);
@@ -50,7 +51,8 @@ export default function FocusSprint() {
     target.style.left = left + "px";
 
     const onClick = () => {
-      setScore((s) => s + 1);
+      scoreRef.current += 1;
+      setScore(scoreRef.current);
       target.removeEventListener("click", onClick);
       if (gameArea.contains(target)) gameArea.removeChild(target);
     };
@@ -68,6 +70,7 @@ export default function FocusSprint() {
   }
 
   function startGame() {
+    scoreRef.current = 0;
     setScore(0);
     setTimeLeft(30);
     setRunning(true);
@@ -81,7 +84,7 @@ export default function FocusSprint() {
           clearInterval(spawnRef.current);
           setRunning(false);
           // using window.alert for parity with original; calling code can replace with custom UI
-          window.alert("Time's up! Your score: " + (score));
+          window.alert("Time's up! Your score: " + scoreRef.current);
           return 0;
         }
         return t - 1;

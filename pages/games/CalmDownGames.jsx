@@ -22,6 +22,7 @@ export default function CalmDownGames() {
   const drawingRef = useRef(false);
   const bubbleRAF = useRef(null);
   const flowRAF = useRef(null);
+  const drawSoundRef = useRef(null);
 
   useEffect(() => {
     // setup bubbles
@@ -77,6 +78,10 @@ export default function CalmDownGames() {
     const drawCtx = drawCanvas.getContext("2d");
     drawCtxRef.current = drawCtx;
 
+    // create audio once and reuse
+    drawSoundRef.current = new Audio("https://freesound.org/data/previews/66/66717_931655-lq.mp3");
+    drawSoundRef.current.volume = 0.2;
+
     const startDraw = () => (drawingRef.current = true);
     const stopDraw = () => (drawingRef.current = false);
 
@@ -90,10 +95,11 @@ export default function CalmDownGames() {
       drawCtx.arc(x, y, 10, 0, Math.PI * 2);
       drawCtx.fill();
 
-      // optional sound (kept remote link from original)
-      const drawSound = new Audio("https://freesound.org/data/previews/66/66717_931655-lq.mp3");
-      drawSound.volume = 0.2;
-      drawSound.play().catch(() => {});
+      // optional sound (reuse audio object)
+      if (drawSoundRef.current) {
+        drawSoundRef.current.currentTime = 0;
+        drawSoundRef.current.play().catch(() => {});
+      }
     }
 
     drawCanvas.addEventListener("mousedown", startDraw);
