@@ -208,7 +208,6 @@ export default function Diary() {
         }
 
         await loadRemoteEntries(userRef.current, cfg, authRef.current);
-        alert('Entry saved to your account.');
       } catch (err) {
         console.error('Failed saving remote diary', err);
         alert(`Failed to save to server (${err && err.message ? err.message : 'unknown error'}). Your entry will be stored locally instead.`);
@@ -217,7 +216,6 @@ export default function Diary() {
     } else {
       // Guest or firebase not available -> localStorage
       saveLocalEntry(payload);
-      alert('Saved locally in your browser.');
     }
   }
 
