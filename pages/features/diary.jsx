@@ -152,23 +152,42 @@ export default function Diary() {
       try {
         const authInstance = authRef.current;
         const uid = userRef.current.uid;
-        const token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
-          ? await authInstance.currentUser.getIdToken()
-          : null;
+
+        let token = null;
+        try {
+          token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
+            ? await authInstance.currentUser.getIdToken()
+            : null;
+        } catch (tErr) {
+          // token retrieval may fail; surface it
+          console.error('Error getting ID token', tErr);
+          throw new Error('Failed to get authentication token: ' + (tErr && tErr.message ? tErr.message : tErr));
+        }
+
         const base = cfg.databaseURL.replace(/\/$/, '');
         // Use PUT to set the entry for the specific date
         const url = `${base}/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(dateKey)}.json${token ? `?auth=${token}` : ''}`;
+
+        // Helpful debug logs so you can inspect Network/Console
+        console.debug('Saving diary entry', { url, hasToken: !!token, dateKey, uid, payload });
+
         const resp = await fetch(url, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (!resp.ok) throw new Error('Failed saving remote diary');
+
+        if (!resp.ok) {
+          // include server response body in the thrown error for easier debugging
+          const bodyText = await resp.text().catch(() => '');
+          throw new Error(`Failed saving remote diary (${resp.status}) ${bodyText}`);
+        }
+
         await loadRemoteEntries(userRef.current, cfg, authRef.current);
         alert('Entry saved to your account.');
       } catch (err) {
         console.error('Failed saving remote diary', err);
-        alert('Failed to save to server. Your entry will be stored locally instead.');
+        alert(`Failed to save to server (${err && err.message ? err.message : 'unknown error'}). Your entry will be stored locally instead.`);
         saveLocalEntry(payload);
       }
     } else {
