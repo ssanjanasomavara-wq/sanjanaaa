@@ -332,7 +332,9 @@ export default function IndexPage() {
       {view === 'login' && (
         <div className="container" id="login">
           <div className="subtitle">Not the end—just a moment to rest.</div>
-          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
+            <img src="/semi-colonic-logo.png" alt="Semi-colonic" /></a>colonic
+          </div>
 
           <div className="card" id="login-card" role="region" aria-labelledby="login-title">
             <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
@@ -368,9 +370,11 @@ export default function IndexPage() {
           <div className="profile-card">
             <div className="cover" aria-hidden />
             <div className="profile-body">
-              <div className="avatar" aria-hidden>;<span className="avatar-mark">;</span></div>
+              <div className="avatar"><img src="/semi-colonic-logo.png" alt="Semi-colonic avatar" /></div>
               <div className="profile-header">
-                <div className="logo">Semi-colonic</div>
+                <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
+  <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
+</a></div>
                 <div className="subtitle small">Not the end—just a moment to rest.</div>
               </div>
 
@@ -425,7 +429,9 @@ export default function IndexPage() {
       {/* SIGNUP / FORGOT / RESET views (kept) */}
       {view === 'signup' && (
         <div className="container" id="signup">
-          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
+  <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
+</a></div>
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
@@ -442,7 +448,9 @@ export default function IndexPage() {
 
       {view === 'forgot' && (
         <div className="container" id="forgot">
-          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
+  <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
+</a></div>
           <div className="card">
             <p className="small">Enter your account email and we'll send a link to reset your password.</p>
             <input value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} id="forgot-email" type="email" placeholder="Email" autoComplete="email" />
@@ -458,7 +466,9 @@ export default function IndexPage() {
 
       {view === 'reset' && (
         <div className="container" id="reset">
-          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
+  <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
+</a></div>
           <div className="card">
             <p className="small" id="reset-desc">{resetDescText}</p>
             <input value={resetPasswordInput} onChange={(e) => setResetPasswordInput(e.target.value)} id="reset-password" type="password" placeholder="New password (min 6 chars)" />
