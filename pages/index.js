@@ -53,7 +53,7 @@ export default function IndexPage() {
     }
   }
 
-  // Friendly error mapping (same as previous)
+  // Friendly error mapping
   function friendlyAuthError(err) {
     if (!err) return 'Authentication failed. Please try again.';
     const code = err && (err.code || (err.message && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
@@ -332,14 +332,17 @@ export default function IndexPage() {
       {view === 'login' && (
         <div className="container" id="login">
           <div className="subtitle">Not the end—just a moment to rest.</div>
-          <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
-            <img src="/semi-colonic-logo.png" alt="Semi-colonic" /></a>Semi-Colonic
+          <div className="logo">
+            <a href="/" className="brand-logo" aria-label="Semi-colonic home">
+              <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
+            </a>
+            Semi‑Colonic
           </div>
 
           <div className="card" id="login-card" role="region" aria-labelledby="login-title">
             <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
             <input value={password} onChange={(e) => setPassword(e.target.value)} id="password" type="password" placeholder="Password" autoComplete="current-password" />
-            <button id="sign-in-btn" onClick={handleSignIn}>Log in</button>
+            <button id="sign-in-btn" onClick={handleSignIn} className="btn-cta">Log in</button>
 
             <div className="row action-row">
               <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
@@ -352,9 +355,13 @@ export default function IndexPage() {
 
             <div className="row" style={{ marginTop: 12 }}>
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
-                {/* Google icon */}
-                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v9[...]
-                <span style={{ marginLeft: 8 }}>Continue with Google</span>
+                <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false" role="img">
+                  <path fill="#fbbc05" d="M43.6 20.1H42V20H24v8h11.2c-1.1 4-4 7.4-8.2 9.2l0 .1 6.2 4.8c3.6-3.3 6-8.2 6-13.9 0-1.1-.1-2.1-.6-3.2z"/>
+                  <path fill="#ea4335" d="M6.3 14.7l6.8 5c1.8-3.8 5.6-6.4 10-6.4 2.6 0 4.9.9 6.7 2.4l5-5.1C30.6 6.1 27 5 23 5 15.3 5 9 9.6 6.3 14.7z"/>
+                  <path fill="#34a853" d="M24 43c6 0 10.9-2 14.6-5.4l-7-5.4c-2.2 1.5-5 2.4-7.6 2.4-5 0-9.2-3.2-10.8-7.7L6.5 34.7C9.3 39.6 15 43 24 43z"/>
+                  <path fill="#4285f4" d="M43.6 20.1c0-1.2-.1-2.4-.4-3.5H24v6.8h11.2c-.5 2.5-1.9 4.6-3.9 6.1l.1.1 6.2 4.8c3.6-3.3 6-8.2 6-13.9z"/>
+                </svg>
+                <span style={{ marginLeft: 6 }}>Continue with Google</span>
               </button>
             </div>
 
@@ -379,8 +386,8 @@ export default function IndexPage() {
               </div>
 
               <div className="cta-row">
-                <button className="outline-btn">Invite</button>
-                <button className="primary-btn" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
+                <button className="btn btn-outline">Invite</button>
+                <button className="btn btn-primary" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
               </div>
 
               <nav className="tabs">
@@ -398,24 +405,24 @@ export default function IndexPage() {
                     <div className="muted-label">Get in Touch</div>
                     <div>Semi-colonic</div>
                   </div>
-                  <button className="outline-btn small">Message</button>
+                  <button className="btn btn-outline small">Message</button>
                 </div>
                 <div className="invite-code">
                   <div className="muted-label">TTASOK</div>
                   <div>Invite Code</div>
                 </div>
                 <div className="social-row">
-                  <button className="social">IG</button>
-                  <button className="social">FB</button>
-                  <button className="social">X</button>
-                  <button className="social">YT</button>
-                  <button className="social">TT</button>
+                  <button className="social-btn">IG</button>
+                  <button className="social-btn">FB</button>
+                  <button className="social-btn">X</button>
+                  <button className="social-btn">YT</button>
+                  <button className="social-btn">TT</button>
                 </div>
               </div>
 
               <div className="enter-row">
-                <button id="enter-app" className="enter-btn" onClick={handleEnterApp}>Enter app</button>
-                <button id="sign-out-btn" className="signout-btn" onClick={handleSignOut}>Sign out</button>
+                <button id="enter-app" className="btn btn-primary" onClick={handleEnterApp}>Enter app</button>
+                <button id="sign-out-btn" className="btn" onClick={handleSignOut}>Sign out</button>
               </div>
 
               <div className="message small" id="user-info">{userInfo}</div>
@@ -435,8 +442,8 @@ export default function IndexPage() {
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="ne[...]
-            <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
+            <button id="create-account-btn" onClick={handleSignUp} className="btn-cta">Create account</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
@@ -454,7 +461,7 @@ export default function IndexPage() {
           <div className="card">
             <p className="small">Enter your account email and we'll send a link to reset your password.</p>
             <input value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} id="forgot-email" type="email" placeholder="Email" autoComplete="email" />
-            <button onClick={handleSendResetEmail}>Send reset email</button>
+            <button onClick={handleSendResetEmail} className="btn-cta">Send reset email</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
@@ -473,7 +480,7 @@ export default function IndexPage() {
             <p className="small" id="reset-desc">{resetDescText}</p>
             <input value={resetPasswordInput} onChange={(e) => setResetPasswordInput(e.target.value)} id="reset-password" type="password" placeholder="New password (min 6 chars)" />
             <input value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} id="reset-password-confirm" type="password" placeholder="Confirm new password" />
-            <button id="reset-password-btn" onClick={handleResetPassword}>Reset password</button>
+            <button id="reset-password-btn" onClick={handleResetPassword} className="btn-cta">Reset password</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
@@ -484,59 +491,43 @@ export default function IndexPage() {
       )}
 
       <style jsx>{`
-        /* refined theme tokens */
+        /* component-level enhancements (uses CSS variables defined in globals.css) */
         :root {
-          --night-bg: #071025;
-          --night-card: rgba(11,20,40,0.7);
-          --muted-light: #9aa6d9;
-          --text-light: #eef1ff;
-          --primary-cta: #7aa2ff;
-          --secondary-cta: #6f89a8;
-          --card-radius: 20px;
-          --card-padding: 20px;
-          --soft-shadow: 0 10px 30px rgba(6,20,40,0.45);
-          --elev-shadow: 0 6px 18px rgba(6,20,40,0.18);
+          --card-radius-local: 20px;
+          --card-padding-local: 20px;
         }
 
-        /* base */
         .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:28px; font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; }
         .container { width:100%; max-width:420px; margin:0 auto; text-align:center; }
 
-        /* Card (layered gradient + soft elevation) */
+        /* Card base: layered + soft blur */
         .card {
-          border-radius: var(--card-radius);
-          padding: var(--card-padding);
+          border-radius: var(--card-radius-local);
+          padding: var(--card-padding-local);
           color: var(--text-light);
-          background:
-            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
-            linear-gradient(180deg, rgba(30,45,70,0.06), rgba(10,18,34,0.04));
-          box-shadow:
-            0 24px 60px rgba(6,20,40,0.45),
-            0 8px 18px rgba(6,20,40,0.12),
-            inset 0 1px 0 rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.04);
+          background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+          box-shadow: 0 24px 60px rgba(6,20,40,0.45), 0 8px 18px rgba(6,20,40,0.12);
+          border: 1px solid rgba(255,255,255,0.03);
           backdrop-filter: blur(6px);
+          transition: transform 260ms ease, box-shadow 260ms ease;
         }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 36px 90px rgba(6,20,40,0.5); }
 
-        /* Login-specific look: richer deep blue card */
+        /* Login-specific look (keeps a deep card while aligning with global palette) */
         body.login .card, #login-card {
           background:
-            linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95));
-          box-shadow:
-            0 28px 80px rgba(4,12,28,0.65),
-            0 6px 16px rgba(4,12,28,0.28);
-          border: 1px solid rgba(255,255,255,0.04);
+            linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95)),
+            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
           color: var(--text-light);
         }
 
-        /* Logo + subtitle */
         .logo { font-size:1.95rem; font-weight:700; margin-bottom:12px; color:var(--text-light); display:flex; align-items:center; justify-content:center; gap:10px; }
         .subtitle { font-size:0.95rem; color: var(--muted-light); text-align:center; margin-bottom:8px; }
 
         /* Inputs - constrained and centered */
         input {
           width:100%;
-          max-width:200px;          /* enforce your requirement */
+          max-width:200px; /* requirement */
           display:block;
           margin:10px auto;
           padding:12px 14px;
@@ -550,49 +541,27 @@ export default function IndexPage() {
         }
         input::placeholder { color: rgba(255,255,255,0.65); }
 
-        /* Buttons - consistent, centered */
-        button {
-          font-family: inherit;
-          font-weight:700;
-          border-radius:14px;
-          padding:10px 14px;
-          cursor:pointer;
-          border: none;
-          display:inline-flex;
-          align-items:center;
-          justify-content:center;
-        }
+        /* Buttons */
+        button { font-family: inherit; font-weight:700; border-radius:14px; padding:10px 14px; cursor:pointer; border: none; display:inline-flex; align-items:center; justify-content:center; }
 
-        #sign-in-btn, #create-account-btn, #reset-password-btn {
+        .btn-cta {
           width: 100%;
           max-width: 220px;
           margin: 12px auto 6px;
-          background: linear-gradient(90deg, var(--primary-cta), #a3c3ff);
-          color: #07233e;
+          background: linear-gradient(90deg, var(--cta-1, #e9cfa6), var(--cta-2, #b8e0d9));
+          color: var(--cta-text, #07233e);
           box-shadow: 0 10px 30px rgba(106,141,191,0.18);
+          transition: transform 220ms ease, box-shadow 220ms ease;
         }
+        .btn-cta:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(106,141,191,0.22); }
 
-        .muted {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.06);
-          color: rgba(255,255,255,0.92);
-          padding:10px;
-          width:48%;
-          box-sizing:border-box;
-        }
+        .muted { background: transparent; border: 1px solid rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); padding:10px; width:48%; box-sizing:border-box; }
 
-        /* Action row layout for inline buttons */
-        .row.action-row {
-          display:flex;
-          gap:12px;
-          justify-content:center;
-          align-items:center;
-          margin-top:8px;
-        }
+        .row.action-row { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:8px; }
 
         .centered-row { display:flex; justify-content:center; margin-top:8px; }
 
-        /* Google sign-in center + subtle white background pill */
+        /* Google sign-in center + white pill */
         .google-btn {
           margin: 12px auto 0;
           background: rgba(255,255,255,0.98);
@@ -607,49 +576,35 @@ export default function IndexPage() {
           justify-content:center;
           gap:10px;
         }
-        .google-btn svg { flex:0 0 auto; }
 
-        /* Home / profile card refinements (glass + layered gradient) */
-        .profile-card {
-          border-radius: 22px;
-          overflow:hidden;
-          box-shadow: 0 20px 60px rgba(6,20,40,0.08);
-        }
-        .cover { height:140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; }
-        .profile-body {
-          background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
-          border-top-left-radius: var(--card-radius);
-          border-top-right-radius: var(--card-radius);
-          transform: translateY(-28px);
-          padding: 12px 18px 22px 18px;
-          box-shadow: 0 6px 24px rgba(10,20,40,0.06);
-          color: #183547;
-        }
+        /* Home / profile refinements */
+        .profile-card { border-radius: 22px; overflow:hidden; box-shadow: 0 20px 60px rgba(6,20,40,0.08); }
+        .cover { height:140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; animation: floatSlow 6s ease-in-out infinite; }
+        .profile-body { background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92)); border-top-left-radius: var(--card-radius-local); border-top-right-radius: var(--card-radius-local); transform: translateY(-28px); padding: 12px 18px 22px 18px; box-shadow: 0 6px 24px rgba(10,20,40,0.06); color: #183547; }
 
         .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); overflow:hidden; }
 
-        /* content card (light) */
-        .content-card {
-          margin-top:14px;
-          padding:14px;
-          border-radius:12px;
-          background: linear-gradient(180deg, #ffffff, #fbfdff);
-          color:#222;
-          box-shadow: 0 8px 20px rgba(6,20,40,0.04);
+        .content-card { margin-top:14px; padding:14px; border-radius:12px; background: linear-gradient(180deg, #ffffff, #fbfdff); color:#222; box-shadow: 0 8px 20px rgba(6,20,40,0.04); }
+
+        .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
+
+        .footer { margin-top:18px; font-size:0.85rem; color: var(--muted-light); text-align:center; }
+
+        @keyframes floatSlow {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(-6px); }
+          100% { transform: translateY(0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cover, .card, .btn-cta { animation: none; transition: none; transform: none; }
         }
 
-        /* small helpers */
-        .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
-        .footer { margin-top:18px; font-size:0.85rem; color: #9aa6d9; text-align:center; }
-
-        /* responsive tweaks */
         @media (max-width: 420px) {
           .cover { height:120px; }
           .avatar { width:64px; height:64px; transform: translateY(-32px); margin-bottom:-22px; }
           .profile-body { padding: 0 14px 18px 14px; }
           input { max-width: 200px; }
         }
-
         @media (min-width: 768px) {
           .container { max-width:720px; }
           .cover { height:200px; }
