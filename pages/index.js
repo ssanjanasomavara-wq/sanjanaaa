@@ -49,7 +49,7 @@ export default function IndexPage() {
     }
   }
 
-  // Friendly error mapping (similar to original)
+  // Friendly error mapping
   function friendlyAuthError(err) {
     if (!err) return 'Authentication failed. Please try again.';
     const code = err && (err.code || (err.message && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
@@ -122,7 +122,7 @@ export default function IndexPage() {
               setUserInfo('Signed in — failed to load profile.');
             }
           } else {
-            // If no auth session but URL contains reset info, we'll preserve reset view.
+            // If no auth session but URL contains reset info, preserve reset view.
             if (view !== 'reset') {
               showLogin();
             }
@@ -295,28 +295,28 @@ export default function IndexPage() {
   }, []);
 
   return (
-    <div className="page-root">
+    <div className="page-root" role="main">
       {/* LOGIN */}
       {view === 'login' && (
-        <div className="container" id="login">
+        <div className="container" id="login" aria-labelledby="login-title">
           <div className="subtitle">Not the end—just a moment to rest.</div>
-          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="logo" id="login-title">semi<span>;</span>colonic</div>
 
-          <div className="card" id="login-card" role="region" aria-labelledby="login">
+          <div className="card" id="login-card" role="region" aria-labelledby="login-title">
             <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
             <input value={password} onChange={(e) => setPassword(e.target.value)} id="password" type="password" placeholder="Password" autoComplete="current-password" />
             <button id="sign-in-btn" onClick={handleSignIn}>Log in</button>
 
-            <div className="row" style={{ marginTop: 8 }}>
+            <div className="row action-row">
               <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
               <button onClick={() => { showHome(); setUserInfo('Guest — limited access.'); }} className="muted">Guest</button>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+            <div className="centered-row">
               <button onClick={showForgot} className="muted small-btn">Forgot Password?</button>
             </div>
 
-            <div className="row" style={{ marginTop: 10 }}>
+            <div className="row" style={{ marginTop: 12 }}>
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v96.4h147.4c-6.3 34-25.4 62.9-54 82.1v68h87.3c51-47 80.8-116.4 80.8-195.6z"/><path fill="#34a853" d="M272 544.3c73.6 0 135.4-24.4 180.5-66.3l-87.3-68c-24.3 16.3-55.6 25.9-93.2 25.9-71.6 0-132.4-48.2-154.1-113.1H28.7v70.9C73 488 164.8 544.3 272 544.3z"/><path fill="#fbbc05" d="M117.9 324.9c-10.6-31.4-10.6-65.3 0-96.7V157.3H28.7C-7.1 215.4-7.1 328.9 28.7 386.9l89.2-62z"/><path fill="#ea4335" d="M272 106.1c39.9-.6 78.1 14.2 107.3 40.6l80.4-80.4C405.6 24.8 344 0 272 0 164.8 0 73 56.3 28.7 143.8l89.2 62C139.6 154.3 200.4 106.7 272 106.1z"/></svg>
                 <span style={{ marginLeft: 8 }}>Continue with Google</span>
@@ -338,7 +338,7 @@ export default function IndexPage() {
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
             <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
             <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
-            <div className="row" style={{ marginTop: 8 }}>
+            <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
             <div className="message" aria-live="polite">{signupMessage}</div>
@@ -355,7 +355,7 @@ export default function IndexPage() {
             <p className="small">Enter your account email and we'll send a link to reset your password.</p>
             <input value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} id="forgot-email" type="email" placeholder="Email" autoComplete="email" />
             <button onClick={handleSendResetEmail}>Send reset email</button>
-            <div className="row" style={{ marginTop: 8 }}>
+            <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
             <div className="message" aria-live="polite">{forgotMessage}</div>
@@ -373,7 +373,7 @@ export default function IndexPage() {
             <input value={resetPasswordInput} onChange={(e) => setResetPasswordInput(e.target.value)} id="reset-password" type="password" placeholder="New password (min 6 chars)" />
             <input value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} id="reset-password-confirm" type="password" placeholder="Confirm new password" />
             <button id="reset-password-btn" onClick={handleResetPassword}>Reset password</button>
-            <div className="row" style={{ marginTop: 8 }}>
+            <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
             <div className="message" aria-live="polite">{resetMessage}</div>
@@ -397,9 +397,9 @@ export default function IndexPage() {
               This app is not about fixing yourself or being productive.
               It’s a place to rest, reflect, and continue gently.
             </p>
-            <div className="row">
+            <div className="row action-row">
               <button id="enter-app" onClick={() => alert('Entering the app — wire this up to your SPA / routing.')}>Enter app</button>
-              <button id="sign-out-btn" style={{ background: '#eee', color: '#222' }} onClick={handleSignOut}>Sign out</button>
+              <button id="sign-out-btn" onClick={handleSignOut}>Sign out</button>
             </div>
             <div className="message small" id="user-info">{userInfo}</div>
           </div>
@@ -408,7 +408,7 @@ export default function IndexPage() {
       )}
 
       <style jsx>{`
-        :root {
+        :root{
           --night-bg: #0b1324;
           --night-card: #121b34;
           --blue: #7aa2ff;
@@ -420,9 +420,11 @@ export default function IndexPage() {
           --sand: #e2b07a;
           --clay: #c87a3c;
           --earth-text: #2a2a2a;
+          --max-width: 420px;
+          --card-padding: 26px;
         }
 
-        /* Page root layout */
+        /* Page root layout and centering */
         .page-root {
           min-height: 100vh;
           display: flex;
@@ -430,18 +432,22 @@ export default function IndexPage() {
           justify-content: center;
           padding: 24px;
           font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          line-height: 1.45;
         }
 
         .container {
           width: 100%;
-          max-width: 420px;
-          padding: 26px;
+          max-width: var(--max-width);
+          padding: 0 18px;
           text-align: center;
           animation: fadeIn 1.2s ease;
+          margin: 12px auto;
         }
 
         .subtitle {
-          font-size: 0.85rem;
+          font-size: 0.86rem;
           letter-spacing: 0.6px;
           color: var(--muted-light);
           margin-bottom: 6px;
@@ -449,44 +455,50 @@ export default function IndexPage() {
 
         .logo {
           font-size: 2.6rem;
-          font-weight: 600;
+          font-weight: 700;
           margin-bottom: 10px;
+          line-height: 1;
         }
         .logo span { color: currentColor; }
 
         .card {
           border-radius: 22px;
-          padding: 26px 22px;
+          padding: var(--card-padding);
           box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+          display: block;
+          width: 100%;
         }
 
         /* Common form elements */
         input {
           width: 100%;
-          padding: 12px;
+          padding: 12px 14px;
           margin-bottom: 10px;
           border-radius: 12px;
           border: none;
           background: rgba(255,255,255,0.05);
           color: inherit;
+          font-size: 0.95rem;
+          outline: none;
         }
+        input::placeholder { color: rgba(255,255,255,0.66); }
 
         button {
           width: 100%;
-          padding: 14px;
-          border-radius: 16px;
+          padding: 12px 14px;
+          border-radius: 14px;
           border: none;
           font-size: 0.95rem;
           font-weight: 600;
           cursor: pointer;
           margin-top: 10px;
+          transition: transform .05s ease, box-shadow .08s ease;
         }
+        button:active { transform: translateY(1px); }
 
-        .row {
-          display: flex;
-          gap: 8px;
-        }
-        .row button { flex: 1; }
+        .row { display: flex; gap: 10px; margin-top: 8px; }
+        .action-row { justify-content: space-between; }
+        .row button { flex: 1; min-width: 0; }
 
         .muted {
           background: transparent;
@@ -497,15 +509,17 @@ export default function IndexPage() {
           width: 48%;
         }
 
+        .centered-row { display:flex; align-items:center; justify-content:center; margin-top:8px; }
+
         .small { font-size: 0.85rem; }
 
         .footer {
           margin-top: 16px;
           font-size: 0.75rem;
-          opacity: 0.8;
+          opacity: 0.88;
         }
 
-        .message { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+        .message { margin-top: 12px; font-size: 0.92rem; min-height: 1.2em; }
 
         .google-btn {
           background: #fff;
@@ -517,6 +531,7 @@ export default function IndexPage() {
           justify-content: center;
           gap: 8px;
         }
+        .google-btn svg { display:block; }
 
         /* Theme: login (night) */
         :global(body.login) {
@@ -531,10 +546,7 @@ export default function IndexPage() {
           background: #0f1733;
           color: var(--text-light);
         }
-        :global(body.login) button { color: #fff; }
         :global(body.login) .muted { border-color: rgba(255,255,255,0.06); }
-
-        :global(body.login) button.google-btn { background: #fff; color: #222; }
 
         /* Theme: home (light / sea) */
         :global(body.home) {
@@ -549,15 +561,24 @@ export default function IndexPage() {
         }
         :global(body.home) .logo { color: #1f3f57; font-size: 2.2rem; }
         :global(body.home) strong { color: var(--clay); }
-        :global(body.home) button { color: #fff; }
-        :global(body.home) #enter-app { background: linear-gradient(90deg,var(--sand),var(--clay)); }
+        :global(body.home) #enter-app { background: linear-gradient(90deg,var(--sand),var(--clay)); color: #fff; }
         :global(body.home) #sign-out-btn { background: #eee; color: #222; }
 
-        /* Accessibility / smaller screens */
-        @media (max-width: 480px) {
-          .container { padding: 20px; }
-          .logo { font-size: 2rem; }
-          .card { padding: 20px; }
+        /* Responsive behavior */
+        @media (max-width: 520px) {
+          :root { --max-width: 460px; --card-padding: 20px; }
+          .logo { font-size: 2.2rem; }
+          .container { padding: 0 12px; }
+          .row { flex-direction: column; }
+          .muted { width: 100%; }
+          .google-btn { padding: 10px 12px; font-size: 0.95rem; }
+        }
+
+        @media (max-width: 360px) {
+          .logo { font-size: 1.9rem; }
+          .subtitle { font-size: 0.78rem; }
+          input { padding: 10px 12px; }
+          button { padding: 10px 12px; font-size: 0.92rem; }
         }
 
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
