@@ -75,7 +75,7 @@ export default function Games() {
             }}
             role="list"
           >
-            <Link href="/games/midful-puzzle" legacyBehavior>
+            <Link href="/games/mindful-puzzle" legacyBehavior>
               <a
                 className="game-tile"
                 role="listitem"
