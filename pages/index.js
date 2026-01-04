@@ -333,7 +333,7 @@ export default function IndexPage() {
         <div className="container" id="login">
           <div className="subtitle">Not the end—just a moment to rest.</div>
           <div className="logo"><a href="/" className="brand-logo" aria-label="Semi-colonic home">
-            <img src="/semi-colonic-logo.png" alt="Semi-colonic" /></a>colonic
+            <img src="/semi-colonic-logo.png" alt="Semi-colonic" /></a>Semi-Colonic
           </div>
 
           <div className="card" id="login-card" role="region" aria-labelledby="login-title">
