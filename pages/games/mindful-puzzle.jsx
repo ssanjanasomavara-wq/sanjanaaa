@@ -205,10 +205,6 @@ export default function MindfulPuzzle() {
                     Restart Puzzle
                   </button>
                 </div>
-
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
