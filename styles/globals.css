@@ -20,6 +20,63 @@
   --primary-cta: #6f89a8;
   --primary-cta-strong: #5b7895;
 }
+/* Ensure Helvetica / sans family consistently */
+.page-root {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* Ensure login view text and inputs are white (explicit) */
+.login .card,
+.login .logo,
+.login .subtitle,
+.login .footer,
+.login .message,
+.login button,
+.login .muted,
+.login .google-btn {
+  color: #ffffff !important;
+}
+
+/* Constrain inputs to not exceed 200px and center them */
+.card input[type="email"],
+.card input[type="password"],
+.card input {
+  width: 100%;
+  max-width: 200px;
+  display: block;
+  margin: 8px auto;
+}
+
+/* Make action-row buttons inline and centered */
+.row.action-row {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+/* Keep "muted" style buttons at ~half width so they appear side-by-side */
+.row.action-row .muted {
+  width: 48%;
+  box-sizing: border-box;
+}
+
+/* Center the Google sign-in button */
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+/* Small tweak: ensure messages remain readable on dark background */
+.login .message { color: rgba(255,255,255,0.95); }
+
+/* optional: ensure .container keeps content centered textually */
+.container { text-align: center; }
 
 /* ---------- Global layout ---------- */
 * { box-sizing: border-box; }
