@@ -206,14 +206,6 @@ export default function MindfulPuzzle() {
                   </button>
                 </div>
 
-                <div style={{ width: '100%', marginTop: 6 }}>
-                  <MindfulForm onSave={saveCheckIn} />
-                  <div style={{ marginTop: 16, fontSize: 13 }}>
-                    {entries.map((item, idx) => (
-                      <div key={idx} style={{ background: '#eef5f2', padding: 10, borderRadius: 10, marginBottom: 8, color: '#3e5f60', borderLeft: '4px solid #8fbfa8' }}>
-                        <div style={{ fontSize: 11, color: '#6a8f8d', fontWeight: 700 }}>{item.time}</div>
-                        <div style={{ marginTop: 6 }}>{item.text}</div>
-                      </div>
                     ))}
                   </div>
                 </div>
