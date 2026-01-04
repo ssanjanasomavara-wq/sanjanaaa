@@ -144,41 +144,65 @@ export default function Diary() {
     }
   }
 
+  // Helper: perform a Realtime DB REST request with idToken, retrying once on 401 by forcing token refresh
+  async function fetchWithAuth(path, options = {}) {
+    if (!cfg || !cfg.databaseURL) throw new Error('No databaseURL configured');
+    const authInstance = authRef.current;
+    const base = cfg.databaseURL.replace(/\/$/, '');
+    let token = null;
+
+    // safe token retrieval (may throw if currentUser is null)
+    try {
+      token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
+        ? await authInstance.currentUser.getIdToken()
+        : null;
+    } catch (tErr) {
+      console.error('Error getting ID token', tErr);
+      // let the caller handle fallback
+      token = null;
+    }
+
+    const makeUrl = (tok) => `${base}${path}${tok ? `?auth=${tok}` : ''}`;
+
+    // try request
+    let resp = await fetch(makeUrl(token), options);
+
+    // If unauthorized, try to refresh token once and retry
+    if (resp.status === 401 && authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function') {
+      console.debug('fetchWithAuth: 401 received, refreshing idToken and retrying');
+      try {
+        token = await authInstance.currentUser.getIdToken(true); // force refresh
+        resp = await fetch(makeUrl(token), options);
+      } catch (refreshErr) {
+        console.error('fetchWithAuth: token refresh failed', refreshErr);
+        // return the original 401 response for diagnostics if available
+      }
+    }
+
+    return resp;
+  }
+
   async function handleSave() {
     if (!dateKey) return;
     const payload = { text: text || '', time: new Date().toLocaleString() };
 
     if (firebaseAvailable && userRef.current && cfg && cfg.databaseURL) {
       try {
-        const authInstance = authRef.current;
         const uid = userRef.current.uid;
+        const path = `/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(dateKey)}.json`;
 
-        let token = null;
-        try {
-          token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
-            ? await authInstance.currentUser.getIdToken()
-            : null;
-        } catch (tErr) {
-          // token retrieval may fail; surface it
-          console.error('Error getting ID token', tErr);
-          throw new Error('Failed to get authentication token: ' + (tErr && tErr.message ? tErr.message : tErr));
-        }
-
-        const base = cfg.databaseURL.replace(/\/$/, '');
-        // Use PUT to set the entry for the specific date
-        const url = `${base}/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(dateKey)}.json${token ? `?auth=${token}` : ''}`;
-
-        // Helpful debug logs so you can inspect Network/Console
-        console.debug('Saving diary entry', { url, hasToken: !!token, dateKey, uid, payload });
-
-        const resp = await fetch(url, {
+        const options = {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
-        });
+        };
+
+        console.debug('Attempting remote save', { path, uid, dateKey });
+
+        const resp = await fetchWithAuth(path, options);
 
         if (!resp.ok) {
-          // include server response body in the thrown error for easier debugging
+          // surface body for easier debugging
           const bodyText = await resp.text().catch(() => '');
           throw new Error(`Failed saving remote diary (${resp.status}) ${bodyText}`);
         }
@@ -214,16 +238,13 @@ export default function Diary() {
 
     if (firebaseAvailable && userRef.current && cfg && cfg.databaseURL) {
       try {
-        const authInstance = authRef.current;
         const uid = userRef.current.uid;
-        const token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
-          ? await authInstance.currentUser.getIdToken()
-          : null;
-        const base = cfg.databaseURL.replace(/\/$/, '');
-        const url = `${base}/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(dateKey)}.json${token ? `?auth=${token}` : ''}`;
-        // Delete the entry for this date
-        const resp = await fetch(url, { method: 'DELETE' });
-        if (!resp.ok) throw new Error('Failed to delete remote entry');
+        const path = `/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(dateKey)}.json`;
+        const resp = await fetchWithAuth(path, { method: 'DELETE' });
+        if (!resp.ok) {
+          const bodyText = await resp.text().catch(() => '');
+          throw new Error(`Failed to delete remote entry (${resp.status}) ${bodyText}`);
+        }
         await loadRemoteEntries(userRef.current, cfg, authRef.current);
         setText('');
       } catch (err) {
@@ -252,14 +273,9 @@ export default function Diary() {
     if (firebaseAvailable && userRef.current && cfg && cfg.databaseURL) {
       // try to fetch the day's entry from remote
       try {
-        const authInstance = authRef.current;
         const uid = userRef.current.uid;
-        const token = authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function'
-          ? await authInstance.currentUser.getIdToken()
-          : null;
-        const base = cfg.databaseURL.replace(/\/$/, '');
-        const url = `${base}/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(newKey)}.json${token ? `?auth=${token}` : ''}`;
-        const resp = await fetch(url);
+        const path = `/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(newKey)}.json`;
+        const resp = await fetchWithAuth(path);
         if (!resp.ok) { setText(''); return; }
         const body = await resp.json();
         setText(body ? body.text || '' : '');
