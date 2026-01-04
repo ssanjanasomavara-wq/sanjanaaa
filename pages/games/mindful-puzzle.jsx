@@ -198,7 +198,7 @@ export default function MindfulPuzzle() {
             </div>
           </div>
         </main>
-
+);
         <footer className="site-footer">
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
