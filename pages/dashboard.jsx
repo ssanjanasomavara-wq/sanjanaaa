@@ -33,12 +33,12 @@ export default function Dashboard() {
         } else {
           // No valid session, redirect to login
           sessionStorage.removeItem('user');
-          router.push('/login');
+          router.push('/');
           return;
         }
       } catch (error) {
         console.error('Session check failed:', error);
-        router.push('/login');
+        router.push('/');
         return;
       }
       setLoading(false);
@@ -54,7 +54,7 @@ export default function Dashboard() {
         credentials: 'include',
       });
       sessionStorage.removeItem('user');
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
