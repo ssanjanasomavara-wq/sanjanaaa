@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 
 export default function IndexPage() {
+  const router = useRouter();
+
   // UI state (login | signup | forgot | reset | home)
   const [view, setView] = useState('login');
 
@@ -27,6 +30,7 @@ export default function IndexPage() {
   const firebaseRef = useRef(null); // { app, auth, db, authMod, dbMod }
   const currentOobCodeRef = useRef(null);
   const resetEmailRef = useRef(null);
+  const currentUserRef = useRef(null); // track current user for Enter app behavior
 
   // UI helpers to switch views
   const showLogin = () => { setView('login'); clearMessages(); setBodyClass('login'); };
@@ -49,7 +53,7 @@ export default function IndexPage() {
     }
   }
 
-  // Friendly error mapping
+  // Friendly error mapping (same as previous)
   function friendlyAuthError(err) {
     if (!err) return 'Authentication failed. Please try again.';
     const code = err && (err.code || (err.message && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
@@ -106,8 +110,11 @@ export default function IndexPage() {
 
         // keep auth state in sync
         onAuthStateChanged(auth, async (user) => {
+          // track current user
+          currentUserRef.current = user || null;
+
           if (user) {
-            showHome();
+            // Load profile then redirect to dashboard
             try {
               const snapshot = await get(ref(db, `users/${user.uid}`));
               if (snapshot && snapshot.exists()) {
@@ -121,8 +128,15 @@ export default function IndexPage() {
               console.error('Failed to load profile:', err);
               setUserInfo('Signed in — failed to load profile.');
             }
+
+            // Show home briefly then navigate to dashboard (replace history)
+            showHome();
+            try {
+              router.replace('/dashboard');
+            } catch (e) {
+              console.warn('Router replace failed', e);
+            }
           } else {
-            // If no auth session but URL contains reset info, preserve reset view.
             if (view !== 'reset') {
               showLogin();
             }
@@ -130,11 +144,12 @@ export default function IndexPage() {
         });
 
         // Handle incoming URL for in-app reset flow: ?mode=resetPassword&oobCode=...
-        const params = new URLSearchParams(window.location.search);
+        const params = new URLSearchParams(location.search);
         const mode = params.get('mode');
         const oobCode = params.get('oobCode');
 
         if (mode === 'resetPassword' && oobCode) {
+          // Store the code so resetPassword() can use it
           currentOobCodeRef.current = oobCode;
           try {
             const email = await verifyPasswordResetCode(auth, oobCode);
@@ -174,7 +189,7 @@ export default function IndexPage() {
       const createdAt = typeof serverTimestamp === 'function' ? serverTimestamp() : Date.now();
       await set(ref(db, `users/${user.uid}`), { email: user.email, createdAt });
       setSignupMessage('Account created — signing in...');
-      // onAuthStateChanged will update UI
+      // onAuthStateChanged will update UI and redirect
     } catch (err) {
       setSignupMessage(friendlyAuthError(err));
     }
@@ -188,7 +203,7 @@ export default function IndexPage() {
       const { signInWithEmailAndPassword } = authMod;
       await signInWithEmailAndPassword(auth, email, password);
       setAuthMessage('Signed in — redirecting...');
-      // onAuthStateChanged will update UI
+      // onAuthStateChanged will redirect to /dashboard
     } catch (err) {
       setAuthMessage(friendlyAuthError(err));
     }
@@ -199,7 +214,9 @@ export default function IndexPage() {
       const { authMod, auth } = firebaseRef.current;
       const { signOut } = authMod;
       await signOut(auth);
+      currentUserRef.current = null;
       showLogin();
+      router.push('/');
     } catch (err) {
       alert('Sign out error: ' + (err.message || err));
     }
@@ -213,7 +230,7 @@ export default function IndexPage() {
       const { sendPasswordResetEmail } = authMod;
       // actionCodeSettings to bring user back to the site with mode=resetPassword
       const actionCodeSettings = {
-        url: `${window.location.origin}${window.location.pathname}?mode=resetPassword`,
+        url: `${location.origin}${location.pathname}?mode=resetPassword`,
       };
       await sendPasswordResetEmail(auth, forgotEmail, actionCodeSettings);
       setForgotMessage('Reset email sent. Check your inbox.');
@@ -224,22 +241,26 @@ export default function IndexPage() {
 
   async function handleResetPassword() {
     setResetMessage('');
+    const newPass = resetPasswordInput;
+    const confirm = resetPasswordConfirm;
     const oobCode = currentOobCodeRef.current;
     if (!oobCode) { setResetMessage('Reset code missing or invalid.'); return; }
-    if (!resetPasswordInput) { setResetMessage('Enter a new password.'); return; }
-    if (resetPasswordInput.length < 6) { setResetMessage('Password must be at least 6 characters.'); return; }
-    if (resetPasswordInput !== resetPasswordConfirm) { setResetMessage('Passwords do not match.'); return; }
+    if (!newPass) { setResetMessage('Enter a new password.'); return; }
+    if (newPass.length < 6) { setResetMessage('Password must be at least 6 characters.'); return; }
+    if (newPass !== confirm) { setResetMessage('Passwords do not match.'); return; }
 
     try {
       const { authMod, auth } = firebaseRef.current;
       const { confirmPasswordReset, signInWithEmailAndPassword } = authMod;
-      await confirmPasswordReset(auth, oobCode, resetPasswordInput);
+      await confirmPasswordReset(auth, oobCode, newPass);
       setResetMessage('Password updated. Signing you in...');
+      // If we have the email from verifyPasswordResetCode, attempt to sign in automatically.
       const emailToSignIn = resetEmailRef.current;
       if (emailToSignIn) {
         try {
-          await signInWithEmailAndPassword(auth, emailToSignIn, resetPasswordInput);
+          await signInWithEmailAndPassword(auth, emailToSignIn, newPass);
           setResetMessage('Password updated and signed in.');
+          // onAuthStateChanged will redirect
         } catch (err) {
           setResetMessage('Password updated. Please sign in.');
         }
@@ -276,12 +297,23 @@ export default function IndexPage() {
       }
 
       setAuthMessage('Signed in with Google.');
+      // onAuthStateChanged will redirect to /dashboard
     } catch (err) {
       setAuthMessage(friendlyAuthError(err));
     }
   }
 
-  // Parse URL params for reset link when the component mounts (client-only)
+  // Enter app -> navigate to dashboard. Ensure user is signed in (otherwise go to login).
+  function handleEnterApp() {
+    if (currentUserRef.current) {
+      router.push('/dashboard');
+    } else {
+      setAuthMessage('Please sign in to enter the app.');
+      showLogin();
+    }
+  }
+
+  // handle reset link if present before Firebase init
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
@@ -289,18 +321,18 @@ export default function IndexPage() {
     const oobCode = params.get('oobCode');
     if (mode === 'resetPassword' && oobCode) {
       currentOobCodeRef.current = oobCode;
-      showReset(); // verification happens after firebase init if available
+      showReset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="page-root" role="main">
-      {/* LOGIN */}
+      {/* LOGIN view */}
       {view === 'login' && (
-        <div className="container" id="login" aria-labelledby="login-title">
+        <div className="container" id="login">
           <div className="subtitle">Not the end—just a moment to rest.</div>
-          <div className="logo" id="login-title">semi<span>;</span>colonic</div>
+          <div className="logo">semi<span>;</span>colonic</div>
 
           <div className="card" id="login-card" role="region" aria-labelledby="login-title">
             <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
@@ -318,6 +350,7 @@ export default function IndexPage() {
 
             <div className="row" style={{ marginTop: 12 }}>
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
+                {/* Google icon */}
                 <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v96.4h147.4c-6.3 34-25.4 62.9-54 82.1v68h87.3c51-47 80.8-116.4 80.8-195.6z"/><path fill="#34a853" d="M272 544.3c73.6 0 135.4-24.4 180.5-66.3l-87.3-68c-24.3 16.3-55.6 25.9-93.2 25.9-71.6 0-132.4-48.2-154.1-113.1H28.7v70.9C73 488 164.8 544.3 272 544.3z"/><path fill="#fbbc05" d="M117.9 324.9c-10.6-31.4-10.6-65.3 0-96.7V157.3H28.7C-7.1 215.4-7.1 328.9 28.7 386.9l89.2-62z"/><path fill="#ea4335" d="M272 106.1c39.9-.6 78.1 14.2 107.3 40.6l80.4-80.4C405.6 24.8 344 0 272 0 164.8 0 73 56.3 28.7 143.8l89.2 62C139.6 154.3 200.4 106.7 272 106.1z"/></svg>
                 <span style={{ marginLeft: 8 }}>Continue with Google</span>
               </button>
@@ -329,7 +362,67 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* SIGNUP */}
+      {/* HOME view (profile-like mobile card) */}
+      {view === 'home' && (
+        <div className="container" id="home">
+          <div className="profile-card">
+            <div className="cover" aria-hidden />
+            <div className="profile-body">
+              <div className="avatar" aria-hidden>;<span className="avatar-mark">;</span></div>
+              <div className="profile-header">
+                <div className="logo">Semi-colonic</div>
+                <div className="subtitle small">Not the end—just a moment to rest.</div>
+              </div>
+
+              <div className="cta-row">
+                <button className="outline-btn">Invite</button>
+                <button className="primary-btn" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
+              </div>
+
+              <nav className="tabs">
+                <button className="tab active">Home</button>
+                <button className="tab">Features</button>
+                <button className="tab">Games</button>
+                <button className="tab">Login</button>
+              </nav>
+
+              <div className="card content-card">
+                <p>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
+                <hr/>
+                <div className="get-in-touch">
+                  <div>
+                    <div className="muted-label">Get in Touch</div>
+                    <div>Semi-colonic</div>
+                  </div>
+                  <button className="outline-btn small">Message</button>
+                </div>
+                <div className="invite-code">
+                  <div className="muted-label">TTASOK</div>
+                  <div>Invite Code</div>
+                </div>
+                <div className="social-row">
+                  <button className="social">IG</button>
+                  <button className="social">FB</button>
+                  <button className="social">X</button>
+                  <button className="social">YT</button>
+                  <button className="social">TT</button>
+                </div>
+              </div>
+
+              <div className="enter-row">
+                <button id="enter-app" className="enter-btn" onClick={handleEnterApp}>Enter app</button>
+                <button id="sign-out-btn" className="signout-btn" onClick={handleSignOut}>Sign out</button>
+              </div>
+
+              <div className="message small" id="user-info">{userInfo}</div>
+            </div>
+          </div>
+
+          <div className="footer">The tide goes out. The tide comes back.</div>
+        </div>
+      )}
+
+      {/* SIGNUP / FORGOT / RESET views (kept) */}
       {view === 'signup' && (
         <div className="container" id="signup">
           <div className="logo">semi<span>;</span>colonic</div>
@@ -347,7 +440,6 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* FORGOT */}
       {view === 'forgot' && (
         <div className="container" id="forgot">
           <div className="logo">semi<span>;</span>colonic</div>
@@ -364,7 +456,6 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* RESET */}
       {view === 'reset' && (
         <div className="container" id="reset">
           <div className="logo">semi<span>;</span>colonic</div>
@@ -382,206 +473,74 @@ export default function IndexPage() {
         </div>
       )}
 
-      {/* HOME */}
-      {view === 'home' && (
-        <div className="container" id="home">
-          <div className="logo">semi<span>;</span>colonic</div>
-          <div className="card">
-            <p>
-              <strong>What does a semicolon mean?</strong><br /><br />
-              A semicolon is used when a sentence could end — but doesn’t.
-              It represents choosing to continue, even when stopping feels easier.
-              <br /><br />
-              <strong>What is semi‑colonic?</strong><br /><br />
-              Semi‑colonic lives in the pause before that choice.
-              This app is not about fixing yourself or being productive.
-              It’s a place to rest, reflect, and continue gently.
-            </p>
-            <div className="row action-row">
-              <button id="enter-app" onClick={() => alert('Entering the app — wire this up to your SPA / routing.')}>Enter app</button>
-              <button id="sign-out-btn" onClick={handleSignOut}>Sign out</button>
-            </div>
-            <div className="message small" id="user-info">{userInfo}</div>
-          </div>
-          <div className="footer">The tide goes out. The tide comes back.</div>
-        </div>
-      )}
-
       <style jsx>{`
-        :root{
+        /* keep the same CSS you had previously (mobile-first, iPad-friendly) */
+        :root {
           --night-bg: #0b1324;
           --night-card: #121b34;
-          --blue: #7aa2ff;
-          --blue-soft: #a9c0ff;
-          --text-light: #eef1ff;
-          --muted-light: #9aa6d9;
-          --sea: #6fa9c9;
-          --foam: #d6ecf6;
-          --sand: #e2b07a;
-          --clay: #c87a3c;
-          --earth-text: #2a2a2a;
-          --max-width: 420px;
-          --card-padding: 26px;
+          --muted-light: #8f9dc6;
+          --primary-cta: #6f89a8;
+          --primary-cta-strong: #5b7895;
+          --card-radius: 18px;
         }
 
-        /* Page root layout and centering */
-        .page-root {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 24px;
-          font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-          line-height: 1.45;
+        .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:18px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        .container { width:100%; max-width:420px; margin:0 auto; }
+
+        /* profile card */
+        .profile-card { border-radius: 20px; overflow:hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        .cover { height:140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; }
+        .profile-body { background:white; border-top-left-radius: var(--card-radius); border-top-right-radius: var(--card-radius); transform: translateY(-28px); padding: 0 18px 20px 18px; box-shadow: 0 6px 20px rgba(15,30,50,0.06); }
+
+        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 6px 12px rgba(0,0,0,0.12); transform: translateY(-36px); margin-bottom:-26px; border:3px solid #fff; position:relative; }
+        .profile-header { text-align:left; padding-left:2px; margin-top:6px; }
+        .profile-header .logo { font-size:1.6rem; font-weight:700; color:#183547; }
+        .profile-header .subtitle { margin-top:6px; color:#617489; }
+
+        .cta-row { display:flex; gap:12px; margin-top:12px; }
+        .outline-btn { flex:1; background:transparent; border:1px solid rgba(88,109,139,0.14); padding:12px 16px; border-radius:28px; color:#274a66; font-weight:600; }
+        .primary-btn { flex:1; background: linear-gradient(90deg, var(--primary-cta), var(--primary-cta-strong)); color:#fff; padding:12px 16px; border-radius:28px; border:none; font-weight:700; }
+
+        .tabs { display:flex; gap:12px; margin-top:16px; overflow:auto; }
+        .tab { background:transparent; border:none; padding:8px 6px; color:#2e4a62; font-weight:600; }
+        .tab.active { border-bottom:3px solid var(--primary-cta); color: var(--primary-cta-strong); }
+
+        .content-card { margin-top:14px; padding:14px; border-radius:12px; background:#fafafa; color:#222; }
+        .get-in-touch { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+        .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
+
+        .social-row { display:flex; gap:8px; margin-top:14px; }
+        .social { flex:1; border-radius:999px; background:#fff; border:1px solid rgba(0,0,0,0.05); padding:10px; }
+
+        .enter-row { display:flex; gap:10px; margin-top:16px; }
+        .enter-btn { flex:1; background: linear-gradient(90deg,var(--sand, #d8b37b),var(--clay, #c87a3c)); color:#fff; padding:12px; border-radius:14px; border:none; font-weight:700; }
+        .signout-btn { flex:1; background:#f1f1f1; color:#222; padding:12px; border-radius:14px; border:none; }
+
+        /* Login card styles */
+        .card { border-radius:16px; padding:18px; background: linear-gradient(180deg,#16204a,var(--night-card)); color: var(--text-light); box-shadow: 0 18px 45px rgba(0,0,0,0.3); }
+        .logo { font-size:2.4rem; font-weight:700; margin-bottom:8px; color:#fff; text-align:center; }
+        .subtitle { font-size:0.9rem; color: var(--muted-light); text-align:center; margin-bottom:6px; }
+
+        input { width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:#0f1733; color:var(--text-light); }
+        .muted { background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px;border-radius:12px; width:48%; }
+
+        .footer { margin-top:18px; font-size:0.8rem; color:#7b8899; text-align:center; }
+
+        @media (max-width: 420px) {
+          .cover { height:120px; }
+          .avatar { width:64px; height:64px; transform: translateY(-32px); margin-bottom:-22px; }
+          .profile-body { padding: 0 14px 18px 14px; }
         }
 
-        .container {
-          width: 100%;
-          max-width: var(--max-width);
-          padding: 0 18px;
-          text-align: center;
-          animation: fadeIn 1.2s ease;
-          margin: 12px auto;
+        @media (min-width: 768px) {
+          .container { max-width:720px; }
+          .cover { height:200px; }
+          .avatar { width:88px; height:88px; border-radius:18px; transform: translateY(-44px); margin-bottom:-34px; }
+          .profile-body { padding: 0 28px 28px 28px; transform: translateY(-40px); }
+          .profile-header .logo { font-size:2rem; }
+          .cta-row { gap:18px; }
+          .enter-row { gap:16px; }
         }
-
-        .subtitle {
-          font-size: 0.86rem;
-          letter-spacing: 0.6px;
-          color: var(--muted-light);
-          margin-bottom: 6px;
-        }
-
-        .logo {
-          font-size: 2.6rem;
-          font-weight: 700;
-          margin-bottom: 10px;
-          line-height: 1;
-        }
-        .logo span { color: currentColor; }
-
-        .card {
-          border-radius: 22px;
-          padding: var(--card-padding);
-          box-shadow: 0 18px 45px rgba(0,0,0,0.45);
-          display: block;
-          width: 100%;
-        }
-
-        /* Common form elements */
-        input {
-          width: 100%;
-          padding: 12px 14px;
-          margin-bottom: 10px;
-          border-radius: 12px;
-          border: none;
-          background: rgba(255,255,255,0.05);
-          color: inherit;
-          font-size: 0.95rem;
-          outline: none;
-        }
-        input::placeholder { color: rgba(255,255,255,0.66); }
-
-        button {
-          width: 100%;
-          padding: 12px 14px;
-          border-radius: 14px;
-          border: none;
-          font-size: 0.95rem;
-          font-weight: 600;
-          cursor: pointer;
-          margin-top: 10px;
-          transition: transform .05s ease, box-shadow .08s ease;
-        }
-        button:active { transform: translateY(1px); }
-
-        .row { display: flex; gap: 10px; margin-top: 8px; }
-        .action-row { justify-content: space-between; }
-        .row button { flex: 1; min-width: 0; }
-
-        .muted {
-          background: transparent;
-          border: 1px solid rgba(255,255,255,0.06);
-          color: inherit;
-          padding: 10px;
-          border-radius: 12px;
-          width: 48%;
-        }
-
-        .centered-row { display:flex; align-items:center; justify-content:center; margin-top:8px; }
-
-        .small { font-size: 0.85rem; }
-
-        .footer {
-          margin-top: 16px;
-          font-size: 0.75rem;
-          opacity: 0.88;
-        }
-
-        .message { margin-top: 12px; font-size: 0.92rem; min-height: 1.2em; }
-
-        .google-btn {
-          background: #fff;
-          color: #222;
-          border-radius: 12px;
-          padding: 10px;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-        .google-btn svg { display:block; }
-
-        /* Theme: login (night) */
-        :global(body.login) {
-          background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), var(--night-bg);
-          color: var(--text-light);
-        }
-        :global(body.login) .card {
-          background: linear-gradient(180deg,#16204a,var(--night-card));
-          color: var(--text-light);
-        }
-        :global(body.login) input {
-          background: #0f1733;
-          color: var(--text-light);
-        }
-        :global(body.login) .muted { border-color: rgba(255,255,255,0.06); }
-
-        /* Theme: home (light / sea) */
-        :global(body.home) {
-          background: radial-gradient(800px 500px at 50% -10%, var(--foam), transparent), linear-gradient(180deg,var(--sea),#4e8fae);
-          color: var(--earth-text);
-        }
-        :global(body.home) .card {
-          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
-          backdrop-filter: blur(6px);
-          box-shadow: 0 18px 45px rgba(15, 45, 70, 0.12);
-          color: var(--earth-text);
-        }
-        :global(body.home) .logo { color: #1f3f57; font-size: 2.2rem; }
-        :global(body.home) strong { color: var(--clay); }
-        :global(body.home) #enter-app { background: linear-gradient(90deg,var(--sand),var(--clay)); color: #fff; }
-        :global(body.home) #sign-out-btn { background: #eee; color: #222; }
-
-        /* Responsive behavior */
-        @media (max-width: 520px) {
-          :root { --max-width: 460px; --card-padding: 20px; }
-          .logo { font-size: 2.2rem; }
-          .container { padding: 0 12px; }
-          .row { flex-direction: column; }
-          .muted { width: 100%; }
-          .google-btn { padding: 10px 12px; font-size: 0.95rem; }
-        }
-
-        @media (max-width: 360px) {
-          .logo { font-size: 1.9rem; }
-          .subtitle { font-size: 0.78rem; }
-          input { padding: 10px 12px; }
-          button { padding: 10px 12px; font-size: 0.92rem; }
-        }
-
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
       `}</style>
     </div>
   );
