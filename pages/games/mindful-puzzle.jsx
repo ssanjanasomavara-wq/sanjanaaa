@@ -206,7 +206,6 @@ export default function MindfulPuzzle() {
                   </button>
                 </div>
 
-                {/* Check-in form and saved entries (same pattern as checkin page) */}
                 <div style={{ width: '100%', marginTop: 6 }}>
                   <MindfulForm onSave={saveCheckIn} />
                   <div style={{ marginTop: 16, fontSize: 13 }}>
@@ -228,6 +227,6 @@ export default function MindfulPuzzle() {
         </footer>
       </div>
     </div>
-}
+});
 
 }
