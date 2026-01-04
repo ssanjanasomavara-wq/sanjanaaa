@@ -11,8 +11,9 @@ import { useEffect, useRef, useState } from 'react';
   - Affirmations list + speak
   Notes:
     - Audio files expected at: /assets/audio/rain.mp3, /assets/audio/wind.mp3, /assets/audio/piano.mp3
-    - Prototype CSS is referenced (prototype/find-the-calm.css) — ensure that file is available in public/
 */
+
+/* IMPORTANT: ensure these files exist in your app at public/assets/audio/ */
 
 const TRACK_CONFIG = {
   rain: { file: '/assets/audio/rain.mp3', label: 'Rain' },
@@ -69,56 +70,43 @@ export default function Breathe() {
   // Audio context + nodes (refs because we don't want re-renders)
   const audioCtxRef = useRef(null);
   const masterGainRef = useRef(null);
-  const tracksRef = useRef({}); // { rain: {audio, outGain, muted, volume, usingFallback}, ... }
+  const tracksRef = useRef({});
   const startedRef = useRef(false);
 
-  // UI state
   const [status, setStatus] = useState('Audio is not started.');
   const [solo, setSoloState] = useState(null);
   const [masterVolume, setMasterVolumeState] = useState(1.0);
   const [currentAffIndex, setCurrentAffIndex] = useState(0);
   const [autoSpeak, setAutoSpeak] = useState(false);
-  const [activeExercise, setActiveExercise] = useState(null); // 'box' | '478' | 'diaphragm' | null
-  const breathingTimersRef = useRef({}); // store timers by exercise key
+  const [activeExercise, setActiveExercise] = useState(null);
+  const breathingTimersRef = useRef({});
   const [ftcDebugVisible, setFtcDebugVisible] = useState(false);
 
-  // Ensure DOM-driven elements found after render
   useEffect(() => {
-    // On mount, try to load preset
     loadPreset();
-    // Load voices (for TTS) - browsers fill voices asynchronously
     if ('speechSynthesis' in window) {
       speechSynthesis.onvoiceschanged = () => {};
     }
-    // Cleanup on unmount: stop audio
     return () => {
       try {
-        if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-          // do not close automatically (user gesture may be needed) — but stop media elements
-          Object.values(tracksRef.current).forEach(t => {
-            try { t.audio && t.audio.pause(); } catch(e){}
-          });
-        }
+        Object.values(tracksRef.current).forEach(t => {
+          try { t.audio && t.audio.pause(); } catch(e){}
+        });
       } catch(e){}
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Helpers for time
   const now = () => (audioCtxRef.current ? audioCtxRef.current.currentTime : 0);
-
   function linearRampTo(node, value, time = 0.15) {
     try {
       if (node && node.gain) {
         node.gain.cancelScheduledValues(now());
         node.gain.linearRampToValueAtTime(value, now() + time);
       }
-    } catch (e) {
-      // ignore
-    }
+    } catch (e) {}
   }
 
-  // Create a track: attempt MediaElementSource, fallback to synthetic noise/osc
   function makeTrack(name, file) {
     const audio = new Audio(file);
     audio.loop = true;
@@ -144,7 +132,6 @@ export default function Breathe() {
       if (!audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
       try {
-        // try media element route
         source = ctx.createMediaElementSource(audio);
         outGain = ctx.createGain();
         outGain.gain.value = DEFAULT_VOL;
@@ -153,7 +140,6 @@ export default function Breathe() {
         usingFallback = false;
         sourceCreated = true;
       } catch (e) {
-        // fallback synthetic
         usingFallback = true;
         outGain = ctx.createGain();
         outGain.gain.value = DEFAULT_VOL;
@@ -180,7 +166,7 @@ export default function Breathe() {
           src.connect(hp);
           hp.connect(outGain);
           fallbackNodes.push(src, hp);
-        } else { // piano-ish pad
+        } else {
           const g = ctx.createGain();
           g.gain.value = 0.4;
           const freqs = [220, 262, 330];
@@ -196,7 +182,6 @@ export default function Breathe() {
           fallbackNodes.push(...oscs, g);
         }
         sourceCreated = true;
-        // start fallback buffer sources
         try {
           fallbackNodes.forEach(n => { if (n.start) try { n.start(0); } catch(e){} });
         } catch (e) {}
@@ -204,10 +189,7 @@ export default function Breathe() {
     }
 
     audio.addEventListener('error', () => {
-      // fallback creation on error
-      setTimeout(() => {
-        if (audioCtxRef.current) ensureNodes();
-      }, 50);
+      setTimeout(() => { if (audioCtxRef.current) ensureNodes(); }, 50);
     });
 
     audio.addEventListener('canplaythrough', () => {
@@ -217,13 +199,9 @@ export default function Breathe() {
     function start() {
       ensureNodes();
       if (!usingFallback) {
-        audio.play().catch(e => {
-          // could not autoplay — user gesture required; keep status
-          console.debug('audio play error', e);
-        });
+        audio.play().catch(e => { console.debug('audio play error', e); });
       }
     }
-
     function stop() {
       try { audio.pause(); audio.currentTime = 0; } catch(e){}
       fallbackNodes.forEach(n => { try { if (n.stop) n.stop(0); } catch(e){} });
@@ -254,31 +232,23 @@ export default function Breathe() {
     masterGainRef.current.gain.value = masterVolume;
     masterGainRef.current.connect(ctx.destination);
 
-    // create tracks
     const rain = makeTrack('rain', TRACK_CONFIG.rain.file);
     const wind = makeTrack('wind', TRACK_CONFIG.wind.file);
     const piano = makeTrack('piano', TRACK_CONFIG.piano.file);
-
-    // start them (will attempt audio.play and/or fallback)
     rain.start(); wind.start(); piano.start();
 
     tracksRef.current = { rain, wind, piano };
     startedRef.current = true;
     setStatus('Audio active — use controls to adjust layers.');
-
-    // apply loaded preset if any
     applyTrackGains();
     updateUIFromTracks();
   }
 
-  // Master volume
   function setMasterVolume(value) {
     setMasterVolumeState(value);
     if (masterGainRef.current) linearRampTo(masterGainRef.current, value);
-    // persist?
   }
 
-  // Apply per-track target volumes considering solo/mute
   function applyTrackGains() {
     const tracks = tracksRef.current;
     Object.entries(tracks).forEach(([name, t]) => {
@@ -291,7 +261,6 @@ export default function Breathe() {
     });
   }
 
-  // Update UI elements (set aria-pressed, slider values) — performed directly on DOM for simplicity
   function updateUIFromTracks() {
     if (typeof document === 'undefined') return;
     Object.entries(tracksRef.current).forEach(([name, t]) => {
@@ -317,12 +286,10 @@ export default function Breathe() {
     });
   }
 
-  // Solo toggle
   function toggleSolo(name) {
     const prev = solo;
     if (!audioCtxRef.current) return;
     if (prev === name) {
-      // unsolo
       setSoloState(null);
       Object.entries(tracksRef.current).forEach(([n, t]) => {
         const target = t.muted ? 0 : t.volume;
@@ -339,11 +306,9 @@ export default function Breathe() {
         }
       });
     }
-    // update UI after small delay
     setTimeout(updateUIFromTracks, 160);
   }
 
-  // Set per-track volume
   function setTrackVolume(name, value) {
     const t = tracksRef.current[name];
     if (!t) return;
@@ -354,7 +319,6 @@ export default function Breathe() {
     else linearRampTo(t.out, value);
   }
 
-  // Mute per-track
   function setTrackMute(name, muted) {
     const t = tracksRef.current[name];
     if (!t) return;
@@ -365,7 +329,6 @@ export default function Breathe() {
     updateUIFromTracks();
   }
 
-  // Haptics helper
   function doHaptic(short = false) {
     const disabledEl = document.getElementById('disable-haptics');
     const disabled = disabledEl ? disabledEl.checked : false;
@@ -373,7 +336,6 @@ export default function Breathe() {
     if (navigator.vibrate) navigator.vibrate(short ? 30 : 60);
   }
 
-  // Presets
   function savePreset() {
     const preset = { tracks: {}, master: masterVolume, solo };
     Object.entries(tracksRef.current).forEach(([name, t]) => {
@@ -413,7 +375,6 @@ export default function Breathe() {
         });
       }
       if (preset.solo) setSoloState(preset.solo);
-      // apply
       applyTrackGains();
       updateUIFromTracks();
     } catch (e) {
@@ -421,13 +382,10 @@ export default function Breathe() {
     }
   }
 
-  // Affirmations
   function showAffirmation(idx = 0) {
     setCurrentAffIndex(((idx % affirmations.length) + affirmations.length) % affirmations.length);
   }
-  function nextAffirmation() {
-    showAffirmation(currentAffIndex + 1);
-  }
+  function nextAffirmation() { showAffirmation(currentAffIndex + 1); }
   function speakText(text, opts = {}) {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
@@ -443,16 +401,13 @@ export default function Breathe() {
     speakText(affirmations[currentAffIndex], { rate: 0.9, pitch: 0.95, volume: 0.85 });
   }
 
-  // Breathing exercise control
   function startBreathingExercise(key) {
     if (!breathingExercises[key]) return;
-    // if another is active, stop it
     if (activeExercise && activeExercise !== key) stopBreathingExercise(activeExercise);
     const btn = document.querySelector(`.breathing-btn[data-exercise="${key}"]`);
     const visualClass = (key === 'box') ? 'box-breathing' : `breathing-${key}`;
     const visual = document.querySelector(`.${visualClass}`);
     if (!btn || !visual) return;
-
     const isStarting = !btn.classList.contains('active');
     if (isStarting) {
       setActiveExercise(key);
@@ -460,9 +415,7 @@ export default function Breathe() {
       btn.textContent = 'Stop Exercise';
       visual.style.display = 'flex';
       visual.classList.add('active');
-      // start label cycle
       startLabelCycle(key);
-      // auto speak affirmation
       if (autoSpeak) speakAffirmation();
     } else {
       stopBreathingExercise(key);
@@ -473,21 +426,9 @@ export default function Breathe() {
     const btn = document.querySelector(`.breathing-btn[data-exercise="${key}"]`);
     const visualClass = (key === 'box') ? 'box-breathing' : `breathing-${key}`;
     const visual = document.querySelector(`.${visualClass}`);
-    if (btn) {
-      btn.classList.remove('active');
-      btn.textContent = 'Start Exercise';
-    }
-    if (visual) {
-      visual.style.display = 'none';
-      visual.classList.remove('active');
-      const label = visual.querySelector('.breath-label');
-      if (label) label.textContent = (key === 'diaphragm') ? 'Breathe In' : 'Inhale';
-    }
-    // clear timers
-    if (breathingTimersRef.current[key]) {
-      clearTimeout(breathingTimersRef.current[key]);
-      delete breathingTimersRef.current[key];
-    }
+    if (btn) { btn.classList.remove('active'); btn.textContent = 'Start Exercise'; }
+    if (visual) { visual.style.display = 'none'; visual.classList.remove('active'); const label = visual.querySelector('.breath-label'); if (label) label.textContent = (key === 'diaphragm') ? 'Breathe In' : 'Inhale'; }
+    if (breathingTimersRef.current[key]) { clearTimeout(breathingTimersRef.current[key]); delete breathingTimersRef.current[key]; }
     if (activeExercise === key) setActiveExercise(null);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
   }
@@ -511,31 +452,23 @@ export default function Breathe() {
         step();
       }, s.seconds * 1000);
     }
-    // clear existing then start
     if (breathingTimersRef.current[key]) clearTimeout(breathingTimersRef.current[key]);
     step();
   }
 
-  // Wire up DOM event handlers after mount for card interactions & controls
   useEffect(() => {
-    // Start button
     const startBtn = document.getElementById('start');
     if (startBtn) {
       startBtn.addEventListener('click', async () => {
         await initAudio();
-        try {
-          if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') {
-            await audioCtxRef.current.resume();
-          }
-        } catch(e){}
+        try { if (audioCtxRef.current && audioCtxRef.current.state === 'suspended') await audioCtxRef.current.resume(); } catch(e){}
       });
     }
 
-    // Card tap/longpress for solo (pointer events)
     document.querySelectorAll('.card').forEach(btn => {
       let longpress = false;
       let timer;
-      btn.addEventListener('pointerdown', (ev) => {
+      btn.addEventListener('pointerdown', () => {
         timer = setTimeout(() => {
           longpress = true;
           btn.classList.add('pulse');
@@ -543,7 +476,7 @@ export default function Breathe() {
           toggleSolo(btn.dataset.track);
         }, 550);
       });
-      btn.addEventListener('pointerup', (ev) => {
+      btn.addEventListener('pointerup', () => {
         clearTimeout(timer);
         if (!longpress) {
           btn.classList.add('pulse');
@@ -556,7 +489,6 @@ export default function Breathe() {
       btn.addEventListener('pointerleave', () => { clearTimeout(timer); longpress = false; });
     });
 
-    // Volume sliders
     document.querySelectorAll('.volume-slider').forEach(slider => {
       const trackName = slider.dataset.track;
       slider.addEventListener('input', (e) => {
@@ -566,7 +498,6 @@ export default function Breathe() {
       });
     });
 
-    // Mute buttons
     document.querySelectorAll('.mute-btn').forEach(btn => {
       const trackName = btn.dataset.track;
       btn.addEventListener('click', () => {
@@ -578,52 +509,33 @@ export default function Breathe() {
       });
     });
 
-    // Solo small buttons
     document.querySelectorAll('.solo-btn').forEach(btn => {
       const trackName = btn.dataset.track;
       btn.addEventListener('click', () => { toggleSolo(trackName); doHaptic(true); });
     });
 
-    // Master volume
     const masterSlider = document.getElementById('master-volume');
-    if (masterSlider) {
-      masterSlider.addEventListener('input', (e) => {
-        const v = parseFloat(e.target.value);
-        setMasterVolume(v);
-      });
-    }
+    if (masterSlider) masterSlider.addEventListener('input', (e) => setMasterVolume(parseFloat(e.target.value)));
 
-    // Preset buttons
     const saveBtn = document.getElementById('save-preset');
     if (saveBtn) saveBtn.addEventListener('click', () => { savePreset(); doHaptic(true); });
     const loadBtn = document.getElementById('load-preset');
     if (loadBtn) loadBtn.addEventListener('click', () => { loadPreset(); doHaptic(true); });
 
-    // Aff controls
     const speakBtn = document.getElementById('speak-affirmation');
     const nextBtn = document.getElementById('next-affirmation');
     if (speakBtn) speakBtn.addEventListener('click', speakAffirmation);
     if (nextBtn) nextBtn.addEventListener('click', nextAffirmation);
 
-    // Breathing buttons
     document.querySelectorAll('.breathing-btn').forEach(btn => {
       btn.addEventListener('click', () => startBreathingExercise(btn.dataset.exercise));
     });
 
-    return () => {
-      // remove listeners (best-effort)
-    };
+    return () => {};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoSpeak, solo, activeExercise]);
 
-  // Keep UI in sync when solo changes
-  useEffect(() => {
-    applyTrackGains();
-    updateUIFromTracks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [solo]);
-
-  // Initialize first affirmation
+  useEffect(() => { applyTrackGains(); updateUIFromTracks(); /* eslint-disable-next-line */ }, [solo]);
   useEffect(() => { showAffirmation(0); }, []);
 
   return (
@@ -631,8 +543,6 @@ export default function Breathe() {
       <Head>
         <title>Breathe — Semi;colonic</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        {/* Prototype CSS — ensure prototype/find-the-calm.css is present in public/ */}
-        <link rel="stylesheet" href="/prototype/find-the-calm.css" />
       </Head>
 
       <main className="page" style={{ maxWidth: 980 }}>
@@ -655,7 +565,6 @@ export default function Breathe() {
         </header>
 
         <section className="grid" aria-label="Sound layers">
-          {/* Rain */}
           <div className="card" data-track="rain" role="group" aria-label="Rain sound" tabIndex="0">
             <svg className="icon" viewBox="0 0 64 64" aria-hidden>
               <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
@@ -678,7 +587,6 @@ export default function Breathe() {
             </div>
           </div>
 
-          {/* Wind */}
           <div className="card" data-track="wind" role="group" aria-label="Wind sound" tabIndex="0">
             <svg className="icon" viewBox="0 0 64 64" aria-hidden>
               <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
@@ -701,7 +609,6 @@ export default function Breathe() {
             </div>
           </div>
 
-          {/* Piano */}
           <div className="card" data-track="piano" role="group" aria-label="Piano sound" tabIndex="0">
             <svg className="icon" viewBox="0 0 64 64" aria-hidden>
               <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
@@ -794,7 +701,6 @@ export default function Breathe() {
         </footer>
       </main>
 
-      {/* simple debug panel */}
       {ftcDebugVisible && (
         <div className="ftc-debug" role="log" style={{ display: 'block' }}>
           <div className="hdr">
