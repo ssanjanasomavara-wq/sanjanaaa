@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 
 /*
@@ -67,6 +68,8 @@ const breathingExercises = {
 };
 
 export default function Breathe() {
+  const router = useRouter();
+
   // Audio context + nodes (refs because we don't want re-renders)
   const audioCtxRef = useRef(null);
   const masterGainRef = useRef(null);
@@ -427,7 +430,12 @@ export default function Breathe() {
     const visualClass = (key === 'box') ? 'box-breathing' : `breathing-${key}`;
     const visual = document.querySelector(`.${visualClass}`);
     if (btn) { btn.classList.remove('active'); btn.textContent = 'Start Exercise'; }
-    if (visual) { visual.style.display = 'none'; visual.classList.remove('active'); const label = visual.querySelector('.breath-label'); if (label) label.textContent = (key === 'diaphragm') ? 'Breathe In' : 'Inhale'; }
+    if (visual) {
+      visual.style.display = 'none';
+      visual.classList.remove('active');
+      const label = visual.querySelector('.breath-label');
+      if (label) label.textContent = (key === 'diaphragm') ? 'Breathe In' : 'Inhale';
+    }
     if (breathingTimersRef.current[key]) { clearTimeout(breathingTimersRef.current[key]); delete breathingTimersRef.current[key]; }
     if (activeExercise === key) setActiveExercise(null);
     if ('speechSynthesis' in window) speechSynthesis.cancel();
@@ -538,6 +546,10 @@ export default function Breathe() {
   useEffect(() => { applyTrackGains(); updateUIFromTracks(); /* eslint-disable-next-line */ }, [solo]);
   useEffect(() => { showAffirmation(0); }, []);
 
+  function handleSignOut() {
+    router.replace('/');
+  }
+
   return (
     <>
       <Head>
@@ -545,178 +557,232 @@ export default function Breathe() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <main className="page" style={{ maxWidth: 980 }}>
-        <header className="hero">
-          <div className="hero-inner">
-            <h1 className="title">Find the Calm</h1>
-            <p className="subtitle">Tap a card to isolate a sound. Gentle haptic feedback on interaction.</p>
-            <div className="controls">
-              <button id="start" className="btn">Start audio</button>
-              <button id="debug-toggle" className="btn btn-ghost" aria-pressed="false" title="Toggle debug panel (Ctrl/Cmd+D)"
-                onClick={() => setFtcDebugVisible(v => !v)}>
-                Debug
-              </button>
-              <label className="toggle">
-                <input type="checkbox" id="disable-haptics" />
-                <span>Disable Haptics</span>
-              </label>
-            </div>
-          </div>
-        </header>
+      <div className="site-root">
+        <div className="site">
+          {/* Top navigation (matches dashboard layout & sizing) */}
+          <header className="topbar" role="banner">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
+              <Link href="/" legacyBehavior>
+                <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div
+                    className="brand-avatar"
+                    aria-hidden
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 8,
+                      overflow: 'hidden',
+                      flex: '0 0 40px',
+                    }}
+                  >
+                    <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
+                </a>
+              </Link>
 
-        <section className="grid" aria-label="Sound layers">
-          <div className="card" data-track="rain" role="group" aria-label="Rain sound" tabIndex="0">
-            <svg className="icon" viewBox="0 0 64 64" aria-hidden>
-              <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
-                <path d="M21 32a9 9 0 0118 0" />
-                <path d="M24 28c-6 0-7-7-1-10A10 10 0 0138 18c6 0 9 6 6 11"/>
-                <path d="M22 44l3 6M30 44l3 6M38 44l3 6" strokeWidth="1.8"/>
-              </g>
-            </svg>
-            <div className="label">Rain</div>
-            <div className="meta">Calm, steady • ambient</div>
-            <div className="card-controls">
-              <label className="volume-control">
-                <span className="sr-only">Adjust rain volume level</span>
-                <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="rain" />
-              </label>
-              <div className="btn-group">
-                <button className="mute-btn btn-small" data-track="rain" aria-pressed="false" aria-label="Mute rain">M</button>
-                <button className="solo-btn btn-small" data-track="rain" aria-pressed="false" aria-label="Solo rain">S</button>
+              <nav className="desktop-nav" aria-label="Primary">
+                <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
+                <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
+                <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
+                <Link href="/games" legacyBehavior><a>Games</a></Link>
+              </nav>
+            </div>
+
+            <div className="topbar-actions" role="navigation" aria-label="Top actions">
+              <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
+              <button aria-label="Messages" className="btn" title="Messages">💬</button>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ color: '#556', fontSize: 14 }}>guest</div>
+                <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
               </div>
             </div>
-          </div>
+          </header>
 
-          <div className="card" data-track="wind" role="group" aria-label="Wind sound" tabIndex="0">
-            <svg className="icon" viewBox="0 0 64 64" aria-hidden>
-              <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
-                <path d="M8 28c6-3 14-3 20 0s14 3 20 0" />
-                <path d="M10 38c6-3 18-3 24 0s14 3 18 0" opacity="0.7"/>
-                <path d="M12 18c6-3 10-3 16 0s10 3 16 0" opacity="0.4"/>
-              </g>
-            </svg>
-            <div className="label">Wind</div>
-            <div className="meta">Gentle whoosh • airy</div>
-            <div className="card-controls">
-              <label className="volume-control">
-                <span className="sr-only">Adjust wind volume level</span>
-                <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="wind" />
-              </label>
-              <div className="btn-group">
-                <button className="mute-btn btn-small" data-track="wind" aria-pressed="false" aria-label="Mute wind">M</button>
-                <button className="solo-btn btn-small" data-track="wind" aria-pressed="false" aria-label="Solo wind">S</button>
+          <main className="page" style={{ maxWidth: 980 }}>
+            <header className="hero">
+              <div className="hero-inner">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <Link href="/features" legacyBehavior>
+                      <a className="btn btn-ghost" aria-label="Back to features" style={{ marginRight: 8 }}>← Back</a>
+                    </Link>
+                    <h1 className="title" style={{ margin: 0 }}>Find the Calm</h1>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button id="start" className="btn">Start audio</button>
+                    <button id="debug-toggle" className="btn btn-ghost" aria-pressed="false" title="Toggle debug panel (Ctrl/Cmd+D)"
+                      onClick={() => setFtcDebugVisible(v => !v)}>
+                      Debug
+                    </button>
+                    <label className="toggle" style={{ marginLeft: 6 }}>
+                      <input type="checkbox" id="disable-haptics" />
+                      <span>Disable Haptics</span>
+                    </label>
+                  </div>
+                </div>
+
+                <p className="subtitle" style={{ marginTop: 8 }}>Tap a card to isolate a sound. Gentle haptic feedback on interaction.</p>
+              </div>
+            </header>
+
+            <section className="grid" aria-label="Sound layers">
+              <div className="card" data-track="rain" role="group" aria-label="Rain sound" tabIndex="0">
+                <svg className="icon" viewBox="0 0 64 64" aria-hidden>
+                  <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
+                    <path d="M21 32a9 9 0 0118 0" />
+                    <path d="M24 28c-6 0-7-7-1-10A10 10 0 0138 18c6 0 9 6 6 11"/>
+                    <path d="M22 44l3 6M30 44l3 6M38 44l3 6" strokeWidth="1.8"/>
+                  </g>
+                </svg>
+                <div className="label">Rain</div>
+                <div className="meta">Calm, steady • ambient</div>
+                <div className="card-controls">
+                  <label className="volume-control">
+                    <span className="sr-only">Adjust rain volume level</span>
+                    <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="rain" />
+                  </label>
+                  <div className="btn-group">
+                    <button className="mute-btn btn-small" data-track="rain" aria-pressed="false" aria-label="Mute rain">M</button>
+                    <button className="solo-btn btn-small" data-track="rain" aria-pressed="false" aria-label="Solo rain">S</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card" data-track="wind" role="group" aria-label="Wind sound" tabIndex="0">
+                <svg className="icon" viewBox="0 0 64 64" aria-hidden>
+                  <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
+                    <path d="M8 28c6-3 14-3 20 0s14 3 20 0" />
+                    <path d="M10 38c6-3 18-3 24 0s14 3 18 0" opacity="0.7"/>
+                    <path d="M12 18c6-3 10-3 16 0s10 3 16 0" opacity="0.4"/>
+                  </g>
+                </svg>
+                <div className="label">Wind</div>
+                <div className="meta">Gentle whoosh • airy</div>
+                <div className="card-controls">
+                  <label className="volume-control">
+                    <span className="sr-only">Adjust wind volume level</span>
+                    <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="wind" />
+                  </label>
+                  <div className="btn-group">
+                    <button className="mute-btn btn-small" data-track="wind" aria-pressed="false" aria-label="Mute wind">M</button>
+                    <button className="solo-btn btn-small" data-track="wind" aria-pressed="false" aria-label="Solo wind">S</button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="card" data-track="piano" role="group" aria-label="Piano sound" tabIndex="0">
+                <svg className="icon" viewBox="0 0 64 64" aria-hidden>
+                  <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
+                    <rect x="6" y="16" width="52" height="20" rx="2"/>
+                    <path d="M14 20v12M22 20v12M30 20v12M38 20v12" strokeWidth="1.6"/>
+                    <path d="M12 40h40" strokeWidth="1" opacity="0.6"/>
+                  </g>
+                </svg>
+                <div className="label">Piano</div>
+                <div className="meta">Soft keys • sparse notes</div>
+                <div className="card-controls">
+                  <label className="volume-control">
+                    <span className="sr-only">Adjust piano volume level</span>
+                    <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="piano" />
+                  </label>
+                  <div className="btn-group">
+                    <button className="mute-btn btn-small" data-track="piano" aria-pressed="false" aria-label="Mute piano">M</button>
+                    <button className="solo-btn btn-small" data-track="piano" aria-pressed="false" aria-label="Solo piano">S</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="master-controls">
+              <h2>Master Mix</h2>
+              <div className="master-grid">
+                <div className="master-volume-control">
+                  <label htmlFor="master-volume">Master Volume</label>
+                  <input id="master-volume" type="range" min="0" max="1" step="0.01" defaultValue={masterVolume} />
+                </div>
+                <div className="preset-controls">
+                  <button id="save-preset" className="btn btn-ghost">Save Preset</button>
+                  <button id="load-preset" className="btn btn-ghost">Load Preset</button>
+                </div>
+              </div>
+            </section>
+
+            <section className="breathing-section">
+              <h2>Breathing Exercises</h2>
+              <div className="breathing-grid">
+                <div className="breathing-card">
+                  <h3>Box Breathing</h3>
+                  <p className="breathing-desc">Equal breathing pattern • 4 counts each</p>
+                  <button className="breathing-btn" data-exercise="box">Start Exercise</button>
+                  <div className="breathing-visual box-breathing" style={{display:'none'}}>
+                    <div className="breath-circle"></div>
+                    <div className="breath-label">Inhale</div>
+                  </div>
+                </div>
+
+                <div className="breathing-card">
+                  <h3>4-7-8 Breathing</h3>
+                  <p className="breathing-desc">Calming pattern • for deep relaxation</p>
+                  <button className="breathing-btn" data-exercise="478">Start Exercise</button>
+                  <div className="breathing-visual breathing-478" style={{display:'none'}}>
+                    <div className="breath-circle"></div>
+                    <div className="breath-label">Inhale</div>
+                  </div>
+                </div>
+
+                <div className="breathing-card">
+                  <h3>Diaphragmatic Breathing</h3>
+                  <p className="breathing-desc">Deep belly breathing • ground yourself</p>
+                  <button className="breathing-btn" data-exercise="diaphragm">Start Exercise</button>
+                  <div className="breathing-visual breathing-diaphragm" style={{display:'none'}}>
+                    <div className="breath-circle"></div>
+                    <div className="breath-label">Breathe In</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className="affirmations-section">
+              <h2>Motivational Affirmations</h2>
+              <div className="affirmations-controls">
+                <button id="speak-affirmation" className="btn" onClick={speakAffirmation}>🔊 Speak Affirmation</button>
+                <button id="next-affirmation" className="btn btn-ghost" onClick={nextAffirmation}>Next Message</button>
+                <label className="toggle">
+                  <input id="auto-speak" type="checkbox" checked={autoSpeak} onChange={(e) => setAutoSpeak(e.target.checked)} />
+                  <span>Auto-speak during breathing</span>
+                </label>
+              </div>
+              <div className="affirmation-display">
+                <p id="current-affirmation" className="affirmation-text">{affirmations[currentAffIndex]}</p>
+              </div>
+            </section>
+
+            <footer className="foot">
+              <p className="status">{status}</p>
+            </footer>
+          </main>
+
+          {ftcDebugVisible && (
+            <div className="ftc-debug" role="log" style={{ display: 'block' }}>
+              <div className="hdr">
+                <div className="title">Find the Calm — debug</div>
+                <div className="controls">
+                  <button onClick={() => { localStorage.removeItem('ftc_preset'); alert('ftc_preset removed'); }}>Clear Preset</button>
+                  <button onClick={() => setFtcDebugVisible(false)}>Close</button>
+                </div>
+              </div>
+              <div className="lines">
+                <div className="line">Audio started: {String(!!audioCtxRef.current)}</div>
+                <div className="line">Tracks: {Object.keys(tracksRef.current).join(', ')}</div>
+                <div className="line">Solo: {String(solo)}</div>
               </div>
             </div>
-          </div>
-
-          <div className="card" data-track="piano" role="group" aria-label="Piano sound" tabIndex="0">
-            <svg className="icon" viewBox="0 0 64 64" aria-hidden>
-              <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
-                <rect x="6" y="16" width="52" height="20" rx="2"/>
-                <path d="M14 20v12M22 20v12M30 20v12M38 20v12" strokeWidth="1.6"/>
-                <path d="M12 40h40" strokeWidth="1" opacity="0.6"/>
-              </g>
-            </svg>
-            <div className="label">Piano</div>
-            <div className="meta">Soft keys • sparse notes</div>
-            <div className="card-controls">
-              <label className="volume-control">
-                <span className="sr-only">Adjust piano volume level</span>
-                <input type="range" min="0" max="1" step="0.01" defaultValue={DEFAULT_VOL} className="volume-slider" data-track="piano" />
-              </label>
-              <div className="btn-group">
-                <button className="mute-btn btn-small" data-track="piano" aria-pressed="false" aria-label="Mute piano">M</button>
-                <button className="solo-btn btn-small" data-track="piano" aria-pressed="false" aria-label="Solo piano">S</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="master-controls">
-          <h2>Master Mix</h2>
-          <div className="master-grid">
-            <div className="master-volume-control">
-              <label htmlFor="master-volume">Master Volume</label>
-              <input id="master-volume" type="range" min="0" max="1" step="0.01" defaultValue={masterVolume} />
-            </div>
-            <div className="preset-controls">
-              <button id="save-preset" className="btn btn-ghost">Save Preset</button>
-              <button id="load-preset" className="btn btn-ghost">Load Preset</button>
-            </div>
-          </div>
-        </section>
-
-        <section className="breathing-section">
-          <h2>Breathing Exercises</h2>
-          <div className="breathing-grid">
-            <div className="breathing-card">
-              <h3>Box Breathing</h3>
-              <p className="breathing-desc">Equal breathing pattern • 4 counts each</p>
-              <button className="breathing-btn" data-exercise="box">Start Exercise</button>
-              <div className="breathing-visual box-breathing" style={{display:'none'}}>
-                <div className="breath-circle"></div>
-                <div className="breath-label">Inhale</div>
-              </div>
-            </div>
-
-            <div className="breathing-card">
-              <h3>4-7-8 Breathing</h3>
-              <p className="breathing-desc">Calming pattern • for deep relaxation</p>
-              <button className="breathing-btn" data-exercise="478">Start Exercise</button>
-              <div className="breathing-visual breathing-478" style={{display:'none'}}>
-                <div className="breath-circle"></div>
-                <div className="breath-label">Inhale</div>
-              </div>
-            </div>
-
-            <div className="breathing-card">
-              <h3>Diaphragmatic Breathing</h3>
-              <p className="breathing-desc">Deep belly breathing • ground yourself</p>
-              <button className="breathing-btn" data-exercise="diaphragm">Start Exercise</button>
-              <div className="breathing-visual breathing-diaphragm" style={{display:'none'}}>
-                <div className="breath-circle"></div>
-                <div className="breath-label">Breathe In</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="affirmations-section">
-          <h2>Motivational Affirmations</h2>
-          <div className="affirmations-controls">
-            <button id="speak-affirmation" className="btn" onClick={speakAffirmation}>🔊 Speak Affirmation</button>
-            <button id="next-affirmation" className="btn btn-ghost" onClick={nextAffirmation}>Next Message</button>
-            <label className="toggle">
-              <input id="auto-speak" type="checkbox" checked={autoSpeak} onChange={(e) => setAutoSpeak(e.target.checked)} />
-              <span>Auto-speak during breathing</span>
-            </label>
-          </div>
-          <div className="affirmation-display">
-            <p id="current-affirmation" className="affirmation-text">{affirmations[currentAffIndex]}</p>
-          </div>
-        </section>
-
-        <footer className="foot">
-          <p className="status">{status}</p>
-        </footer>
-      </main>
-
-      {ftcDebugVisible && (
-        <div className="ftc-debug" role="log" style={{ display: 'block' }}>
-          <div className="hdr">
-            <div className="title">Find the Calm — debug</div>
-            <div className="controls">
-              <button onClick={() => { localStorage.removeItem('ftc_preset'); alert('ftc_preset removed'); }}>Clear Preset</button>
-              <button onClick={() => setFtcDebugVisible(false)}>Close</button>
-            </div>
-          </div>
-          <div className="lines">
-            <div className="line">Audio started: {String(!!audioCtxRef.current)}</div>
-            <div className="line">Tracks: {Object.keys(tracksRef.current).join(', ')}</div>
-            <div className="line">Solo: {String(solo)}</div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </>
   );
 }
