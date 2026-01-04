@@ -353,12 +353,17 @@ export default function IndexPage() {
             <div className="row" style={{ marginTop: 12 }}>
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 {/* Google icon */}
-                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v9[...]
+                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg">
+                  <path fill="#4285f4" d="M533.5 278.4c0-18.4-1.5-33.6-4.7-48.3H272.1v91.3h147.9c-6.1 33.8-25.7 63.7-54.4 82.7v68h87.7c51.5-47.4 81.1-117.4 81.1-193.7z"/>
+                  <path fill="#34a853" d="M272.1 544.3c73.4 0 135.3-24.1 180.4-65.7l-87.7-68c-24.4 16.6-55.9 26-92.6 26-71 0-131.2-47.9-152.8-112.3H28.9v70.1c46.2 91.9 141.3 149.9 243.2 149.9z"/>
+                  <path fill="#fbbc04" d="M119.3 324.3c-11.4-33.8-11.4-70.4 0-104.2V150H28.9c-38.6 77.2-38.6 167.8 0 245z"/>
+                  <path fill="#ea4335" d="M272.1 107.7c38.8-.6 76.3 14 104.4 40.8l77.7-77.7C405 24.6 339.7-.8 272.1 0 169.2 0 74.9 58.1 28.9 150l90.4 70.1c21.5-64.5 81.8-112.4 152.8-112.4z"/>
+                </svg>
                 <span style={{ marginLeft: 8 }}>Continue with Google</span>
               </button>
             </div>
 
-            <div className="message" aria-live="polite">{authMessage}</div>
+            <div className="message" role="status" aria-live="polite">{authMessage}</div>
           </div>
           <div className="footer">You’re safe to pause here.</div>
         </div>
@@ -435,12 +440,12 @@ export default function IndexPage() {
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="ne[...]
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
             <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
-            <div className="message" aria-live="polite">{signupMessage}</div>
+            <div className="message" role="status" aria-live="polite">{signupMessage}</div>
           </div>
           <div className="footer">You can come back anytime.</div>
         </div>
@@ -458,7 +463,7 @@ export default function IndexPage() {
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
-            <div className="message" aria-live="polite">{forgotMessage}</div>
+            <div className="message" role="status" aria-live="polite">{forgotMessage}</div>
           </div>
           <div className="footer">Check your inbox — and your spam folder just in case.</div>
         </div>
@@ -477,78 +482,117 @@ export default function IndexPage() {
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
             </div>
-            <div className="message" aria-live="polite">{resetMessage}</div>
+            <div className="message" role="status" aria-live="polite">{resetMessage}</div>
           </div>
           <div className="footer">If the link is expired, request a new reset email from the login view.</div>
         </div>
       )}
 
       <style jsx>{`
-        /* refined theme tokens */
+        /* Palette A: soft blue-green theme tokens */
         :root {
           --night-bg: #071025;
           --night-card: rgba(11,20,40,0.7);
           --muted-light: #9aa6d9;
           --text-light: #eef1ff;
-          --primary-cta: #7aa2ff;
-          --secondary-cta: #6f89a8;
+          --primary-cta: #b8e0d9;
+          --secondary-cta: #e9cfa6;
           --card-radius: 20px;
           --card-padding: 20px;
           --soft-shadow: 0 10px 30px rgba(6,20,40,0.45);
           --elev-shadow: 0 6px 18px rgba(6,20,40,0.18);
+          --bg-start: #eaf7fb;
+          --bg-end: #d8f1ee;
+          --panel-glass: rgba(255,255,255,0.92);
+          --cta-1: #e9cfa6;
+          --cta-2: #b8e0d9;
+          --muted-text: #4b6b73;
         }
 
         /* base */
-        .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:28px; font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; }
+        .page-root { 
+          min-height: 100vh; 
+          display:flex; 
+          align-items:center; 
+          justify-content:center; 
+          padding:28px; 
+          font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; 
+        }
         .container { width:100%; max-width:420px; margin:0 auto; text-align:center; }
 
-        /* Card (layered gradient + soft elevation) */
+        /* Card (layered gradient + soft elevation + hover) */
         .card {
           border-radius: var(--card-radius);
           padding: var(--card-padding);
           color: var(--text-light);
           background:
-            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
-            linear-gradient(180deg, rgba(30,45,70,0.06), rgba(10,18,34,0.04));
+            linear-gradient(180deg, rgba(22,34,64,0.96), rgba(8,15,30,0.95)),
+            linear-gradient(135deg, rgba(184,224,217,0.08), rgba(233,207,166,0.06));
           box-shadow:
             0 24px 60px rgba(6,20,40,0.45),
             0 8px 18px rgba(6,20,40,0.12),
-            inset 0 1px 0 rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.04);
-          backdrop-filter: blur(6px);
+            inset 0 1px 0 rgba(184,224,217,0.08);
+          border: 1px solid rgba(184,224,217,0.12);
+          backdrop-filter: blur(8px);
+          transition: all 0.3s ease;
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .card:hover {
+            transform: translateY(-3px);
+            box-shadow:
+              0 28px 70px rgba(6,20,40,0.5),
+              0 10px 24px rgba(6,20,40,0.15),
+              inset 0 1px 0 rgba(184,224,217,0.12);
+          }
         }
 
         /* Login-specific look: richer deep blue card */
         body.login .card, #login-card {
           background:
-            linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95));
+            linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95)),
+            linear-gradient(135deg, rgba(184,224,217,0.08), rgba(233,207,166,0.06));
           box-shadow:
             0 28px 80px rgba(4,12,28,0.65),
             0 6px 16px rgba(4,12,28,0.28);
-          border: 1px solid rgba(255,255,255,0.04);
+          border: 1px solid rgba(184,224,217,0.12);
           color: var(--text-light);
         }
 
         /* Logo + subtitle */
-        .logo { font-size:1.95rem; font-weight:700; margin-bottom:12px; color:var(--text-light); display:flex; align-items:center; justify-content:center; gap:10px; }
-        .subtitle { font-size:0.95rem; color: var(--muted-light); text-align:center; margin-bottom:8px; }
+        .logo { 
+          font-size:1.95rem; 
+          font-weight:700; 
+          margin-bottom:12px; 
+          color:var(--text-light); 
+          display:flex; 
+          align-items:center; 
+          justify-content:center; 
+          gap:10px; 
+        }
+        .subtitle { 
+          font-size:0.95rem; 
+          color: var(--muted-light); 
+          text-align:center; 
+          margin-bottom:8px; 
+        }
 
         /* Inputs - constrained and centered */
         input {
           width:100%;
-          max-width:200px;          /* enforce your requirement */
+          max-width:200px;
           display:block;
           margin:10px auto;
           padding:12px 14px;
           border-radius:12px;
-          border:1px solid rgba(255,255,255,0.06);
-          background: rgba(255,255,255,0.03);
+          border:1px solid rgba(184,224,217,0.15);
+          background: rgba(15,23,51,0.6);
           color: #ffffff;
           font-size:1rem;
           outline: none;
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+          box-shadow: inset 0 1px 0 rgba(184,224,217,0.08);
         }
-        input::placeholder { color: rgba(255,255,255,0.65); }
+        input::placeholder { color: rgba(255,255,255,0.7); }
 
         /* Buttons - consistent, centered */
         button {
@@ -561,20 +605,29 @@ export default function IndexPage() {
           display:inline-flex;
           align-items:center;
           justify-content:center;
+          transition: all 0.3s ease;
         }
 
         #sign-in-btn, #create-account-btn, #reset-password-btn {
           width: 100%;
           max-width: 220px;
           margin: 12px auto 6px;
-          background: linear-gradient(90deg, var(--primary-cta), #a3c3ff);
+          background: linear-gradient(90deg, var(--cta-2), #a0d8cf);
           color: #07233e;
-          box-shadow: 0 10px 30px rgba(106,141,191,0.18);
+          box-shadow: 0 10px 30px rgba(184,224,217,0.25);
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          #sign-in-btn:hover, #create-account-btn:hover, #reset-password-btn:hover,
+          button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(184,224,217,0.35);
+          }
         }
 
         .muted {
           background: transparent;
-          border: 1px solid rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
           color: rgba(255,255,255,0.92);
           padding:10px;
           width:48%;
@@ -591,6 +644,7 @@ export default function IndexPage() {
         }
 
         .centered-row { display:flex; justify-content:center; margin-top:8px; }
+        .small-btn { padding: 6px 10px; font-size: 0.85rem; }
 
         /* Google sign-in center + subtle white background pill */
         .google-btn {
@@ -609,15 +663,33 @@ export default function IndexPage() {
         }
         .google-btn svg { flex:0 0 auto; }
 
-        /* Home / profile card refinements (glass + layered gradient) */
+        /* Home / profile card refinements (glass + layered gradient + floating) */
         .profile-card {
           border-radius: 22px;
           overflow:hidden;
           box-shadow: 0 20px 60px rgba(6,20,40,0.08);
         }
-        .cover { height:140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; }
+        .cover { 
+          height:140px; 
+          background: linear-gradient(90deg, #6fa9c9, #b8e0d9); 
+          background-size: cover; 
+        }
+
+        @media (prefers-reduced-motion: no-preference) {
+          .cover {
+            animation: float 6s ease-in-out infinite;
+          }
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-8px); }
+        }
+
         .profile-body {
-          background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
+          background: 
+            linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92)),
+            linear-gradient(135deg, rgba(184,224,217,0.18), rgba(233,207,166,0.12));
           border-top-left-radius: var(--card-radius);
           border-top-right-radius: var(--card-radius);
           transform: translateY(-28px);
@@ -626,21 +698,44 @@ export default function IndexPage() {
           color: #183547;
         }
 
-        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); overflow:hidden; }
+        .avatar { 
+          width:72px; 
+          height:72px; 
+          border-radius:14px; 
+          background:#fff; 
+          display:flex; 
+          align-items:center; 
+          justify-content:center; 
+          color:#1f3f57; 
+          box-shadow: 0 8px 20px rgba(6,20,40,0.08); 
+          overflow:hidden; 
+        }
 
         /* content card (light) */
         .content-card {
           margin-top:14px;
           padding:14px;
           border-radius:12px;
-          background: linear-gradient(180deg, #ffffff, #fbfdff);
+          background: 
+            linear-gradient(180deg, #ffffff, #fbfdff),
+            linear-gradient(135deg, rgba(184,224,217,0.08), rgba(233,207,166,0.05));
           color:#222;
           box-shadow: 0 8px 20px rgba(6,20,40,0.04);
         }
 
         /* small helpers */
         .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
-        .footer { margin-top:18px; font-size:0.85rem; color: #9aa6d9; text-align:center; }
+        .footer { 
+          margin-top:18px; 
+          font-size:0.85rem; 
+          color: var(--muted-text); 
+          text-align:center; 
+        }
+        .message { 
+          margin-top: 12px; 
+          font-size: 0.9rem; 
+          color: rgba(255,255,255,0.95); 
+        }
 
         /* responsive tweaks */
         @media (max-width: 420px) {
