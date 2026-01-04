@@ -87,12 +87,27 @@ export default function Features() {
               </a>
             </Link>
 
-            {/* If you add more pages inside pages/features/, add matching tiles here.
-                Example:
-                <Link href="/features/other-feature" legacyBehavior>
-                  <a className="feature-tile">...</a>
-                </Link>
-            */}
+            <Link href="/features/diary" legacyBehavior>
+              <a
+                className="feature-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>📔</div>
+                <div style={{ fontWeight: 700 }}>Diary</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Daily journal (local or saved to your account)</div>
+              </a>
+            </Link>
+
+            {/* Add more tiles for other pages under pages/features/ */}
           </div>
         </main>
 
