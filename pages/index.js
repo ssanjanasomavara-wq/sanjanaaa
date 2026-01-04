@@ -49,7 +49,7 @@ export default function IndexPage() {
   function friendlyAuthError(err) {
     if (!err) return 'Authentication failed. Please try again.';
     const code = err && (err.code || '');
-    const normalized = (code || '').toString().replace(/^.*(auth\/)\, 'auth/').replace(/[()]/g, '').trim();
+    const normalized = (code || '').toString().replace(/^.*(auth\/)/, 'auth/').replace(/[()]/g, '').trim();
     switch (normalized) {
       case 'auth/wrong-password':
       case 'auth/invalid-login-credentials':
