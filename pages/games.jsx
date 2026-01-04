@@ -108,7 +108,137 @@ export default function Games() {
               </a>
             </Link>
 
-            {/* Add more game tiles below following the same structure */}
+            <Link href="/games/FocusSprint" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🎯
+                </div>
+                <div style={{ fontWeight: 700 }}>Focus Sprint Challenge</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Click targets quickly
+                </div>
+              </a>
+            </Link>
+
+            <Link href="/games/PatternSequence" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🔴
+                </div>
+                <div style={{ fontWeight: 700 }}>Pattern & Sequence Game</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Memory sequence game
+                </div>
+              </a>
+            </Link>
+
+            <Link href="/games/CalmDownGames" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🫧
+                </div>
+                <div style={{ fontWeight: 700 }}>Calm-Down Games</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Relaxing activities
+                </div>
+              </a>
+            </Link>
+
+            <Link href="/games/PressureSlice" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  ✂️
+                </div>
+                <div style={{ fontWeight: 700 }}>Pressure Slice</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Draw and release tension
+                </div>
+              </a>
+            </Link>
           </div>
         </main>
 
