@@ -107,6 +107,26 @@ export default function Features() {
               </a>
             </Link>
 
+            <Link href="/features/find-the-calm" legacyBehavior>
+              <a
+                className="feature-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>🧘‍♀️</div>
+                <div style={{ fontWeight: 700 }}>Find the Calm</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Ambient layers, breathing exercises & affirmations</div>
+              </a>
+            </Link>
+
             <Link href="/features/safe-space" legacyBehavior>
               <a
                 className="feature-tile"
