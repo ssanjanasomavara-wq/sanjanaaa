@@ -14,7 +14,11 @@ export default function Games() {
         <header className="topbar" role="banner">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
             <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <a
+                className="brand"
+                aria-label="Semi-colonic home"
+                style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+              >
                 <div
                   className="brand-avatar"
                   aria-hidden
@@ -37,34 +41,20 @@ export default function Games() {
             </Link>
 
             <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior>
-                <a style={{ marginRight: 12 }}>Posts</a>
-              </Link>
-              <Link href="/chat" legacyBehavior>
-                <a style={{ marginRight: 12 }}>Chat</a>
-              </Link>
-              <Link href="/features" legacyBehavior>
-                <a style={{ marginRight: 12 }}>Features</a>
-              </Link>
-              <Link href="/games" legacyBehavior>
-                <a>Games</a>
-              </Link>
+              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
+              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
+              <Link href="/games" legacyBehavior><a>Games</a></Link>
             </nav>
           </div>
 
           <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">
-              🔔
-            </button>
-            <button aria-label="Messages" className="btn" title="Messages">
-              💬
-            </button>
+            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
+            <button aria-label="Messages" className="btn" title="Messages">💬</button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ color: '#556', fontSize: 14 }}>guest</div>
-              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">
-                Sign out
-              </button>
+              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
             </div>
           </div>
         </header>
@@ -85,7 +75,7 @@ export default function Games() {
             }}
             role="list"
           >
-            <Link href="/games/mindful-puzzle" legacyBehavior>
+            <Link href="/games/midful-puzzle" legacyBehavior>
               <a
                 className="game-tile"
                 role="listitem"
@@ -113,18 +103,17 @@ export default function Games() {
                 </div>
                 <div style={{ fontWeight: 700 }}>Mindful Puzzle</div>
                 <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
-                  Quick mindful check-ins and puzzles
+                  Quick mindful puzzles
                 </div>
               </a>
             </Link>
 
-            {/* Future game tiles should follow the same structure */}
+            {/* Add more game tiles below following the same structure */}
           </div>
         </main>
 
         <footer className="site-footer">
-          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site
-          constitutes acceptance of our Terms and Privacy Policy.
+          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
     </div>
