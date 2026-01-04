@@ -107,7 +107,7 @@ export default function Dashboard() {
               >
                 <div
                   className="brand-avatar"
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   <img
                     src="/semi-colonic-logo.png"
@@ -142,7 +142,7 @@ export default function Dashboard() {
             <div className="cover" />
             <div className="profile-body">
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div className="avatar" aria-hidden>
+                <div className="avatar" aria-hidden="true">
                   <img src="/semi-colonic-logo.png" alt="avatar" />
                 </div>
                 <div style={{ flex: 1 }}>
@@ -202,36 +202,66 @@ export default function Dashboard() {
 
                 <div className="social-row" role="navigation" aria-label="Social links" style={{ marginTop: 14 }}>
                   {/* Instagram */}
-                  <a className="social-btn" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zm6.4-2.6a1.1 1.1 0 1 0 1.1 1[...]
+                  <a
+                    className="social-btn"
+                    href="https://instagram.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Instagram"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zM18 7.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
                     </svg>
                   </a>
 
                   {/* Facebook */}
-                  <a className="social-btn" href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2.2v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.[...]
+                  <a
+                    className="social-btn"
+                    href="https://facebook.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="Facebook"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7H8.3v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.98v7A10 10 0 0 0 22 12z"/>
                     </svg>
                   </a>
 
                   {/* X (Twitter) */}
-                  <a className="social-btn" href="https://x.com" target="_blank" rel="noreferrer" aria-label="X">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M21.3 7.2c.01.17.01.35.01.52 0 5.3-4 11.5-11.5 11.5A11.2 11.2 0 0 1 3 18.7a8.2 8.2 0 0 0 .96.05c2.2 0 4.23-.75 5.84-2.02a4 4 0 0 1-3.73-2.78c.64.1 1.[...]
+                  <a
+                    className="social-btn"
+                    href="https://x.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="X"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M21 6.5c-.6.3-1.2.5-1.8.6.7-.4 1.2-1 1.4-1.7-.7.4-1.5.7-2.3.9C17 5 16 5 15.2 4.5c-1-.6-2.2-1-3.5-1 0 .1 0 .2 0 .3C9.6 4 8 5 7.3 6.3c-.6 1.2-.3 2.6.7 3.3-.5 0-1-.1-1.5-.4 0 1.6 1.1 3 2.8 3.3-.5.1-1 .2-1.5.1.4 1.4 1.7 2.4 3.2 2.4C9.9 19 7.8 19.6 5.6 19.6 4.9 19.6 4.2 19.5 3.5 19.3c1.6 1 3.5 1.6 5.6 1.6 6.7 0 10.4-5.6 10.4-10.4v-.5c.7-.5 1.2-1.2 1.6-2z"/>
                     </svg>
                   </a>
 
                   {/* YouTube */}
-                  <a className="social-btn" href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M23 7a3 3 0 0 0-2.12-2.12C18.5 4 12 4 12 4s-6.5 0-8.88.88A3 3 0 0 0 .99 7 31 31 0 0 0 0 12a31 31 0 0 0 .99 5c.35.9 1.22 1.66 2.13 1.88C5.5 20 12 20 1[...]
+                  <a
+                    className="social-btn"
+                    href="https://youtube.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="YouTube"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                      <path fill="currentColor" d="M23 7s-.2-1.6-.8-2.3C21 3 19.7 3 19 3H5C4.3 3 3 3 1.8 4.7 1.2 5.4 1 7 1 7S1 8.9 1 10.8v2.4C1 16.1 1.2 17.6 1.8 18.3 3 20 4.3 20 5 20h14c.7 0 2 0 3.2-1.7.6-.7.8-2.2.8-2.2V7zM10 14V8l5 3-5 3z"/>
                     </svg>
                   </a>
 
                   {/* TikTok */}
-                  <a className="social-btn" href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                  <a
+                    className="social-btn"
+                    href="https://tiktok.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label="TikTok"
+                  >
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
                       <path fill="currentColor" d="M16 3h2.5v4a4.5 4.5 0 1 1-4.5-4.5V6a1 1 0 0 0-1 1 6.5 6.5 0 1 0 6.5 6.5V7H16V3z"/>
                     </svg>
                   </a>
