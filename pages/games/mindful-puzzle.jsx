@@ -228,7 +228,6 @@ export default function MindfulPuzzle() {
         </footer>
       </div>
     </div>
-  );
 }
 
 }
