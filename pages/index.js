@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 
 export default function IndexPage() {
-  const router = useRouter();
-
   // UI state (login | signup | forgot | reset | home)
   const [view, setView] = useState('login');
 
@@ -14,6 +11,7 @@ export default function IndexPage() {
   const [forgotMessage, setForgotMessage] = useState('');
   const [resetMessage, setResetMessage] = useState('');
   const [userInfo, setUserInfo] = useState('');
+  const [resetDescText, setResetDescText] = useState('Choose a new password for your account.');
 
   // inputs
   const [email, setEmail] = useState('');
@@ -31,11 +29,11 @@ export default function IndexPage() {
   const resetEmailRef = useRef(null);
 
   // UI helpers to switch views
-  const showLogin = () => { setView('login'); clearMessages(); document.body.className = 'login'; };
-  const showSignUp = () => { setView('signup'); clearMessages(); document.body.className = 'login'; };
-  const showForgot = () => { setView('forgot'); clearMessages(); document.body.className = 'login'; };
-  const showReset = () => { setView('reset'); clearMessages(); document.body.className = 'login'; };
-  const showHome = () => { setView('home'); clearMessages(); document.body.className = 'home'; };
+  const showLogin = () => { setView('login'); clearMessages(); setBodyClass('login'); };
+  const showSignUp = () => { setView('signup'); clearMessages(); setBodyClass('login'); };
+  const showForgot = () => { setView('forgot'); clearMessages(); setBodyClass('login'); };
+  const showReset = () => { setView('reset'); clearMessages(); setBodyClass('login'); };
+  const showHome = () => { setView('home'); clearMessages(); setBodyClass('home'); };
 
   function clearMessages() {
     setAuthMessage('');
@@ -45,11 +43,18 @@ export default function IndexPage() {
     setUserInfo('');
   }
 
+  function setBodyClass(cls) {
+    if (typeof document !== 'undefined') {
+      document.body.className = cls;
+    }
+  }
+
   // Friendly error mapping (similar to original)
   function friendlyAuthError(err) {
     if (!err) return 'Authentication failed. Please try again.';
-    const code = err && (err.code || '');
+    const code = err && (err.code || (err.message && (err.message.match(/\(auth\/[^\)]+\)/) || [])[0]) || '');
     const normalized = (code || '').toString().replace(/^.*(auth\/)/, 'auth/').replace(/[()]/g, '').trim();
+
     switch (normalized) {
       case 'auth/wrong-password':
       case 'auth/invalid-login-credentials':
@@ -71,7 +76,7 @@ export default function IndexPage() {
         return 'The password reset link is invalid or has expired. Request a new link.';
       default:
         if (err && err.message) {
-          const match = err.message.match(/Firebase:\s*Error\s*\((auth\/[^)]+)\)\.\?\s*(.*)/);
+          const match = err.message.match(/Firebase:\s*Error\s*\((auth\/[^\)]+)\)\.?\s*(.*)/);
           if (match) return (match[2] && match[2].trim()) ? match[2].trim() : ('Authentication error: ' + match[1]);
           return err.message;
         }
@@ -96,10 +101,8 @@ export default function IndexPage() {
         firebaseRef.current = result;
 
         const { auth, db, authMod, dbMod } = result;
-        const { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
-                sendPasswordResetEmail, verifyPasswordResetCode, confirmPasswordReset, GoogleAuthProvider,
-                signInWithPopup } = authMod;
-        const { ref, set, get, serverTimestamp } = dbMod;
+        const { onAuthStateChanged, verifyPasswordResetCode } = authMod;
+        const { ref, get } = dbMod;
 
         // keep auth state in sync
         onAuthStateChanged(auth, async (user) => {
@@ -119,23 +122,24 @@ export default function IndexPage() {
               setUserInfo('Signed in — failed to load profile.');
             }
           } else {
-            // check URL reset params — handled separately in handleUrlActions
-            // default to login
+            // If no auth session but URL contains reset info, we'll preserve reset view.
             if (view !== 'reset') {
               showLogin();
             }
           }
         });
 
-        // handle incoming URL for reset flow
+        // Handle incoming URL for in-app reset flow: ?mode=resetPassword&oobCode=...
         const params = new URLSearchParams(window.location.search);
         const mode = params.get('mode');
         const oobCode = params.get('oobCode');
+
         if (mode === 'resetPassword' && oobCode) {
           currentOobCodeRef.current = oobCode;
           try {
-            const emailForReset = await verifyPasswordResetCode(auth, oobCode);
-            resetEmailRef.current = emailForReset || null;
+            const email = await verifyPasswordResetCode(auth, oobCode);
+            resetEmailRef.current = email || null;
+            setResetDescText(email ? `Resetting password for ${email}. Choose a new password.` : 'Choose a new password for your account.');
             setResetMessage('');
             showReset();
           } catch (err) {
@@ -155,7 +159,6 @@ export default function IndexPage() {
   }, []);
 
   // Auth action implementations
-
   async function handleSignUp() {
     setSignupMessage('');
     if (!signupEmail || !signupPassword) { setSignupMessage('Enter email and password.'); return; }
@@ -226,6 +229,7 @@ export default function IndexPage() {
     if (!resetPasswordInput) { setResetMessage('Enter a new password.'); return; }
     if (resetPasswordInput.length < 6) { setResetMessage('Password must be at least 6 characters.'); return; }
     if (resetPasswordInput !== resetPasswordConfirm) { setResetMessage('Passwords do not match.'); return; }
+
     try {
       const { authMod, auth } = firebaseRef.current;
       const { confirmPasswordReset, signInWithEmailAndPassword } = authMod;
@@ -284,127 +288,124 @@ export default function IndexPage() {
     const mode = params.get('mode');
     const oobCode = params.get('oobCode');
     if (mode === 'resetPassword' && oobCode) {
-      // We set currentOobCodeRef earlier during init (if firebase initialized).
-      // But if firebase isn't ready yet, handle it after init via initial effect.
       currentOobCodeRef.current = oobCode;
-      // show reset view; verify will happen in init effect once SDK is initialized.
-      showReset();
+      showReset(); // verification happens after firebase init if available
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // UI render — I preserved the original layout and styling via styled-jsx.
   return (
-    <div>
-      <div className="page-root">
-        {/* LOGIN */}
-        {view === 'login' && (
-          <div className="container" id="login">
-            <div className="subtitle">Not the end—just a moment to rest.</div>
-            <div className="logo">semi<span>; </span>colonic</div>
+    <div className="page-root">
+      {/* LOGIN */}
+      {view === 'login' && (
+        <div className="container" id="login">
+          <div className="subtitle">Not the end—just a moment to rest.</div>
+          <div className="logo">semi<span>;</span>colonic</div>
 
-            <div className="card" id="login-card">
-              <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
-              <input value={password} onChange={(e) => setPassword(e.target.value)} id="password" type="password" placeholder="Password" autoComplete="current-password" />
-              <button id="sign-in-btn" onClick={handleSignIn}>Log in</button>
+          <div className="card" id="login-card" role="region" aria-labelledby="login">
+            <input value={email} onChange={(e) => setEmail(e.target.value)} id="email" type="email" placeholder="Email" autoComplete="username" />
+            <input value={password} onChange={(e) => setPassword(e.target.value)} id="password" type="password" placeholder="Password" autoComplete="current-password" />
+            <button id="sign-in-btn" onClick={handleSignIn}>Log in</button>
 
-              <div className="row" style={{ marginTop: 8 }}>
-                <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
-                <button onClick={() => { showHome(); setUserInfo('Guest — limited access.'); }} className="muted">Guest</button>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
-                <button onClick={showForgot} className="muted small-btn">Forgot Password?</button>
-              </div>
-
-              <div className="row" style={{ marginTop: 10 }}>
-                <button onClick={handleGoogleSignIn} className="google-btn">Continue with Google</button>
-              </div>
-
-              <div className="message" aria-live="polite">{authMessage}</div>
+            <div className="row" style={{ marginTop: 8 }}>
+              <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
+              <button onClick={() => { showHome(); setUserInfo('Guest — limited access.'); }} className="muted">Guest</button>
             </div>
-            <div className="footer">You're safe to pause here.</div>
-          </div>
-        )}
 
-        {/* SIGNUP */}
-        {view === 'signup' && (
-          <div className="container" id="signup">
-            <div className="logo">semi<span>; </span>colonic</div>
-            <div className="card">
-              <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
-              <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-              <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
-              <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
-              <div className="row" style={{ marginTop: 8 }}>
-                <button onClick={showLogin} className="muted">Back</button>
-              </div>
-              <div className="message" aria-live="polite">{signupMessage}</div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+              <button onClick={showForgot} className="muted small-btn">Forgot Password?</button>
             </div>
-            <div className="footer">You can come back anytime.</div>
-          </div>
-        )}
 
-        {/* FORGOT */}
-        {view === 'forgot' && (
-          <div className="container" id="forgot">
-            <div className="logo">semi<span>; </span>colonic</div>
-            <div className="card">
-              <p className="small">Enter your account email and we'll send a link to reset your password.</p>
-              <input value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} id="forgot-email" type="email" placeholder="Email" autoComplete="email" />
-              <button onClick={handleSendResetEmail}>Send reset email</button>
-              <div className="row" style={{ marginTop: 8 }}>
-                <button onClick={showLogin} className="muted">Back</button>
-              </div>
-              <div className="message" aria-live="polite">{forgotMessage}</div>
+            <div className="row" style={{ marginTop: 10 }}>
+              <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
+                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v96.4h147.4c-6.3 34-25.4 62.9-54 82.1v68h87.3c51-47 80.8-116.4 80.8-195.6z"/><path fill="#34a853" d="M272 544.3c73.6 0 135.4-24.4 180.5-66.3l-87.3-68c-24.3 16.3-55.6 25.9-93.2 25.9-71.6 0-132.4-48.2-154.1-113.1H28.7v70.9C73 488 164.8 544.3 272 544.3z"/><path fill="#fbbc05" d="M117.9 324.9c-10.6-31.4-10.6-65.3 0-96.7V157.3H28.7C-7.1 215.4-7.1 328.9 28.7 386.9l89.2-62z"/><path fill="#ea4335" d="M272 106.1c39.9-.6 78.1 14.2 107.3 40.6l80.4-80.4C405.6 24.8 344 0 272 0 164.8 0 73 56.3 28.7 143.8l89.2 62C139.6 154.3 200.4 106.7 272 106.1z"/></svg>
+                <span style={{ marginLeft: 8 }}>Continue with Google</span>
+              </button>
             </div>
-            <div className="footer">Check your inbox — and your spam folder just in case.</div>
-          </div>
-        )}
 
-        {/* RESET */}
-        {view === 'reset' && (
-          <div className="container" id="reset">
-            <div className="logo">semi<span>; </span>colonic</div>
-            <div className="card">
-              <p className="small" id="reset-desc">Choose a new password for your account.</p>
-              <input value={resetPasswordInput} onChange={(e) => setResetPasswordInput(e.target.value)} id="reset-password" type="password" placeholder="New password (min 6 chars)" />
-              <input value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} id="reset-password-confirm" type="password" placeholder="Confirm new password" />
-              <button id="reset-password-btn" onClick={handleResetPassword}>Reset password</button>
-              <div className="row" style={{ marginTop: 8 }}>
-                <button onClick={showLogin} className="muted">Back</button>
-              </div>
-              <div className="message" aria-live="polite">{resetMessage}</div>
-            </div>
-            <div className="footer">If the link is expired, request a new reset email from the login view.</div>
+            <div className="message" aria-live="polite">{authMessage}</div>
           </div>
-        )}
+          <div className="footer">You’re safe to pause here.</div>
+        </div>
+      )}
 
-        {/* HOME */}
-        {view === 'home' && (
-          <div className="container" id="home">
-            <div className="logo">semi<span>; </span>colonic</div>
-            <div className="card">
-              <p>
-                <strong>What does a semicolon mean?</strong><br /><br />
-                A semicolon is used when a sentence could end — but doesn't.
-                It represents choosing to continue, even when stopping feels easier.
-                <br /><br />
-                <strong>What is semi‑colonic?</strong><br /><br />
-                Semi‑colonic lives in the pause before that choice.
-                This app is not about fixing yourself or being productive.
-                It's a place to rest, reflect, and continue gently.
-              </p>
-              <div className="row">
-                <button id="enter-app" onClick={() => alert('Entering the app — wire this up to your SPA / routing.')}>Enter app</button>
-                <button id="sign-out-btn" style={{ background: '#eee', color: '#222' }} onClick={handleSignOut}>Sign out</button>
-              </div>
-              <div className="message small" id="user-info">{userInfo}</div>
+      {/* SIGNUP */}
+      {view === 'signup' && (
+        <div className="container" id="signup">
+          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="card">
+            <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
+            <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
+            <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
+            <div className="row" style={{ marginTop: 8 }}>
+              <button onClick={showLogin} className="muted">Back</button>
             </div>
-            <div className="footer">The tide goes out. The tide comes back.</div>
+            <div className="message" aria-live="polite">{signupMessage}</div>
           </div>
-        )}
-      </div>
+          <div className="footer">You can come back anytime.</div>
+        </div>
+      )}
+
+      {/* FORGOT */}
+      {view === 'forgot' && (
+        <div className="container" id="forgot">
+          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="card">
+            <p className="small">Enter your account email and we'll send a link to reset your password.</p>
+            <input value={forgotEmail} onChange={(e) => setForgotEmail(e.target.value)} id="forgot-email" type="email" placeholder="Email" autoComplete="email" />
+            <button onClick={handleSendResetEmail}>Send reset email</button>
+            <div className="row" style={{ marginTop: 8 }}>
+              <button onClick={showLogin} className="muted">Back</button>
+            </div>
+            <div className="message" aria-live="polite">{forgotMessage}</div>
+          </div>
+          <div className="footer">Check your inbox — and your spam folder just in case.</div>
+        </div>
+      )}
+
+      {/* RESET */}
+      {view === 'reset' && (
+        <div className="container" id="reset">
+          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="card">
+            <p className="small" id="reset-desc">{resetDescText}</p>
+            <input value={resetPasswordInput} onChange={(e) => setResetPasswordInput(e.target.value)} id="reset-password" type="password" placeholder="New password (min 6 chars)" />
+            <input value={resetPasswordConfirm} onChange={(e) => setResetPasswordConfirm(e.target.value)} id="reset-password-confirm" type="password" placeholder="Confirm new password" />
+            <button id="reset-password-btn" onClick={handleResetPassword}>Reset password</button>
+            <div className="row" style={{ marginTop: 8 }}>
+              <button onClick={showLogin} className="muted">Back</button>
+            </div>
+            <div className="message" aria-live="polite">{resetMessage}</div>
+          </div>
+          <div className="footer">If the link is expired, request a new reset email from the login view.</div>
+        </div>
+      )}
+
+      {/* HOME */}
+      {view === 'home' && (
+        <div className="container" id="home">
+          <div className="logo">semi<span>;</span>colonic</div>
+          <div className="card">
+            <p>
+              <strong>What does a semicolon mean?</strong><br /><br />
+              A semicolon is used when a sentence could end — but doesn’t.
+              It represents choosing to continue, even when stopping feels easier.
+              <br /><br />
+              <strong>What is semi‑colonic?</strong><br /><br />
+              Semi‑colonic lives in the pause before that choice.
+              This app is not about fixing yourself or being productive.
+              It’s a place to rest, reflect, and continue gently.
+            </p>
+            <div className="row">
+              <button id="enter-app" onClick={() => alert('Entering the app — wire this up to your SPA / routing.')}>Enter app</button>
+              <button id="sign-out-btn" style={{ background: '#eee', color: '#222' }} onClick={handleSignOut}>Sign out</button>
+            </div>
+            <div className="message small" id="user-info">{userInfo}</div>
+          </div>
+          <div className="footer">The tide goes out. The tide comes back.</div>
+        </div>
+      )}
 
       <style jsx>{`
         :root {
@@ -420,28 +421,146 @@ export default function IndexPage() {
           --clay: #c87a3c;
           --earth-text: #2a2a2a;
         }
-        .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:24px; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .container { width:100%; max-width:420px; padding:26px; text-align:center; animation:fadeIn 1.2s ease; }
-        .logo { font-size:2.6rem; font-weight:600; margin-bottom:10px; }
+
+        /* Page root layout */
+        .page-root {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .container {
+          width: 100%;
+          max-width: 420px;
+          padding: 26px;
+          text-align: center;
+          animation: fadeIn 1.2s ease;
+        }
+
+        .subtitle {
+          font-size: 0.85rem;
+          letter-spacing: 0.6px;
+          color: var(--muted-light);
+          margin-bottom: 6px;
+        }
+
+        .logo {
+          font-size: 2.6rem;
+          font-weight: 600;
+          margin-bottom: 10px;
+        }
         .logo span { color: currentColor; }
-        button { width:100%; padding:14px; border-radius:16px; border:none; font-size:0.95rem; font-weight:600; cursor:pointer; margin-top:10px; }
-        .link { margin-top:14px; font-size:0.85rem; cursor:pointer; text-decoration:underline; }
-        .message { margin-top:10px; font-size:0.9rem; }
-        input { width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:rgba(255,255,255,0.05); }
-        body.login .subtitle {}
-        .subtitle { font-size:0.85rem; letter-spacing:0.6px; color:var(--muted-light); margin-bottom:6px; }
-        .card { background: linear-gradient(180deg,#16204a,var(--night-card)); border-radius:22px; padding:26px 22px; box-shadow:0 18px 45px rgba(0,0,0,0.45); color: var(--text-light); }
-        .muted { background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px;border-radius:12px; width:48%; }
-        .row { display:flex; gap:8px; }
-        .row button { flex:1; }
-        .small { font-size:0.85rem; }
-        .footer { margin-top:16px; font-size:0.75rem; opacity:0.8; }
-        .hidden { display:none !important; }
-        .google-btn { background: #fff; color: #222; border-radius:12px; padding:10px; display:inline-flex; align-items:center; justify-content:center; gap:8px; }
+
+        .card {
+          border-radius: 22px;
+          padding: 26px 22px;
+          box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+        }
+
+        /* Common form elements */
+        input {
+          width: 100%;
+          padding: 12px;
+          margin-bottom: 10px;
+          border-radius: 12px;
+          border: none;
+          background: rgba(255,255,255,0.05);
+          color: inherit;
+        }
+
+        button {
+          width: 100%;
+          padding: 14px;
+          border-radius: 16px;
+          border: none;
+          font-size: 0.95rem;
+          font-weight: 600;
+          cursor: pointer;
+          margin-top: 10px;
+        }
+
+        .row {
+          display: flex;
+          gap: 8px;
+        }
+        .row button { flex: 1; }
+
+        .muted {
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.06);
+          color: inherit;
+          padding: 10px;
+          border-radius: 12px;
+          width: 48%;
+        }
+
+        .small { font-size: 0.85rem; }
+
+        .footer {
+          margin-top: 16px;
+          font-size: 0.75rem;
+          opacity: 0.8;
+        }
+
+        .message { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+
+        .google-btn {
+          background: #fff;
+          color: #222;
+          border-radius: 12px;
+          padding: 10px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        /* Theme: login (night) */
+        :global(body.login) {
+          background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), var(--night-bg);
+          color: var(--text-light);
+        }
+        :global(body.login) .card {
+          background: linear-gradient(180deg,#16204a,var(--night-card));
+          color: var(--text-light);
+        }
+        :global(body.login) input {
+          background: #0f1733;
+          color: var(--text-light);
+        }
+        :global(body.login) button { color: #fff; }
+        :global(body.login) .muted { border-color: rgba(255,255,255,0.06); }
+
+        :global(body.login) button.google-btn { background: #fff; color: #222; }
+
+        /* Theme: home (light / sea) */
+        :global(body.home) {
+          background: radial-gradient(800px 500px at 50% -10%, var(--foam), transparent), linear-gradient(180deg,var(--sea),#4e8fae);
+          color: var(--earth-text);
+        }
+        :global(body.home) .card {
+          background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
+          backdrop-filter: blur(6px);
+          box-shadow: 0 18px 45px rgba(15, 45, 70, 0.12);
+          color: var(--earth-text);
+        }
+        :global(body.home) .logo { color: #1f3f57; font-size: 2.2rem; }
+        :global(body.home) strong { color: var(--clay); }
+        :global(body.home) button { color: #fff; }
+        :global(body.home) #enter-app { background: linear-gradient(90deg,var(--sand),var(--clay)); }
+        :global(body.home) #sign-out-btn { background: #eee; color: #222; }
+
+        /* Accessibility / smaller screens */
+        @media (max-width: 480px) {
+          .container { padding: 20px; }
+          .logo { font-size: 2rem; }
+          .card { padding: 20px; }
+        }
+
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        /* Simple theme switching */
-        :global(body.home) { background: radial-gradient(800px 500px at 50% -10%, var(--foam), transparent), linear-gradient(180deg,var(--sea),#4e8fae); color:var(--earth-text); }
-        :global(body.login) { background: radial-gradient(900px 500px at 50% -20%, #1b2550, transparent), var(--night-bg); color: var(--text-light); }
       `}</style>
     </div>
   );
