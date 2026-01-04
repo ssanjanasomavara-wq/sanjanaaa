@@ -96,14 +96,16 @@ export default function Dashboard() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
             <Link href="/" legacyBehavior>
               <a className="brand">
-                <div className="brand-avatar">SC</div>
+                <div className="brand-avatar">
+                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
                 <span style={{ fontWeight: 700 }}>Semi-colonic</span>
               </a>
             </Link>
 
             <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a>Chat</a></Link>
+              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
               <Link href="/features" legacyBehavior><a>Features</a></Link>
             </nav>
           </div>
@@ -124,21 +126,23 @@ export default function Dashboard() {
             <div className="cover" />
             <div className="profile-body">
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div className="avatar">SC</div>
+                <div className="avatar">
+                  <img src="/semi-colonic-logo.png" alt="avatar" />
+                </div>
                 <div style={{ flex: 1 }}>
                   <h1 id="profile-title" style={{ margin: 0, fontSize: 20, color: '#183547' }}>Semi-colonic</h1>
                   <p style={{ margin: '6px 0 0', color: '#617489' }}>Not the end—just a moment to rest.</p>
                 </div>
               </div>
 
-              <div className="cta-row">
+              <div className="cta-row" style={{ marginTop: 12 }}>
                 <Link href="/invite" legacyBehavior>
                   <a className="btn btn-outline" style={{ display: 'inline-flex', justifyContent: 'center' }}>Invite</a>
                 </Link>
                 <button className="btn btn-strong" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
               </div>
 
-              <nav className="tabs" role="navigation" aria-label="Profile tabs">
+              <nav className="tabs" role="navigation" aria-label="Profile tabs" style={{ marginTop: 16 }}>
                 <Link href="/dashboard" legacyBehavior><a className="tab">Home</a></Link>
                 <Link href="/features" legacyBehavior><a className="tab">Features</a></Link>
                 <Link href="/games" legacyBehavior><a className="tab">Games</a></Link>
@@ -194,8 +198,8 @@ export default function Dashboard() {
           </section>
 
           <div className="footer-actions" style={{ marginTop: 18 }}>
-            <Link href="/settings" legacyBehavior><a className="footer-actions" style={{ background: '#f1f1f1', padding: 12, borderRadius: 14, textDecoration: 'none', color: '#222', textAlign: 'center' }}>Settings</a></Link>
-            <Link href="/profile" legacyBehavior><a className="footer-actions" style={{ background: 'linear-gradient(90deg,#d8b37b,#c87a3c)', padding: 12, borderRadius: 14, textDecoration: 'none', color: '#fff', textAlign: 'center' }}>Profile</a></Link>
+            <Link href="/settings" legacyBehavior><a style={{ background: '#f1f1f1', padding: 12, borderRadius: 14, textDecoration: 'none', color: '#222', textAlign: 'center' }}>Settings</a></Link>
+            <Link href="/profile" legacyBehavior><a style={{ background: 'linear-gradient(90deg,#d8b37b,#c87a3c)', padding: 12, borderRadius: 14, color: '#fff', textAlign: 'center', textDecoration: 'none' }}>Profile</a></Link>
           </div>
 
           <div style={{ marginTop: 18, color: '#7b8899', textAlign: 'center' }}>
@@ -203,7 +207,9 @@ export default function Dashboard() {
           </div>
         </main>
 
-        <footer className="site-footer">© {new Date().getFullYear()} Semi-colonic — Pause. Reflect. Continue.</footer>
+        <footer className="site-footer">
+          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
+        </footer>
       </div>
     </div>
   );
