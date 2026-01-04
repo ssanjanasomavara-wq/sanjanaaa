@@ -353,7 +353,7 @@ export default function IndexPage() {
             <div className="row" style={{ marginTop: 12 }}>
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 {/* Google icon */}
-                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v96.4h147.4c-6.3 34-25.4 62.9-54 82.1v68h87.3c51-47 80.8-116.4 80.8-195.6z"/><path fill="#34a853" d="M272 544.3c73.6 0 135.4-24.4 180.5-66.3l-87.3-68c-24.3 16.3-55.6 25.9-93.2 25.9-71.6 0-132.4-48.2-154.1-113.1H28.7v70.9C73 488 164.8 544.3 272 544.3z"/><path fill="#fbbc05" d="M117.9 324.9c-10.6-31.4-10.6-65.3 0-96.7V157.3H28.7C-7.1 215.4-7.1 328.9 28.7 386.9l89.2-62z"/><path fill="#ea4335" d="M272 106.1c39.9-.6 78.1 14.2 107.3 40.6l80.4-80.4C405.6 24.8 344 0 272 0 164.8 0 73 56.3 28.7 143.8l89.2 62C139.6 154.3 200.4 106.7 272 106.1z"/></svg>
+                <svg width="18" height="18" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false"><path fill="#4285f4" d="M533.5 278.4c0-17.4-1.4-34.4-4-50.9H272v9[...]
                 <span style={{ marginLeft: 8 }}>Continue with Google</span>
               </button>
             </div>
@@ -435,7 +435,7 @@ export default function IndexPage() {
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="ne[...]
             <button id="create-account-btn" onClick={handleSignUp}>Create account</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
@@ -484,62 +484,170 @@ export default function IndexPage() {
       )}
 
       <style jsx>{`
-        /* keep the same CSS you had previously (mobile-first, iPad-friendly) */
+        /* refined theme tokens */
         :root {
-          --night-bg: #0b1324;
-          --night-card: #121b34;
-          --muted-light: #8f9dc6;
-          --primary-cta: #6f89a8;
-          --primary-cta-strong: #5b7895;
-          --card-radius: 18px;
+          --night-bg: #071025;
+          --night-card: rgba(11,20,40,0.7);
+          --muted-light: #9aa6d9;
+          --text-light: #eef1ff;
+          --primary-cta: #7aa2ff;
+          --secondary-cta: #6f89a8;
+          --card-radius: 20px;
+          --card-padding: 20px;
+          --soft-shadow: 0 10px 30px rgba(6,20,40,0.45);
+          --elev-shadow: 0 6px 18px rgba(6,20,40,0.18);
         }
 
-        .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:18px; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
-        .container { width:100%; max-width:420px; margin:0 auto; }
+        /* base */
+        .page-root { min-height: 100vh; display:flex; align-items:center; justify-content:center; padding:28px; font-family:"Helvetica Neue", Helvetica, Arial, sans-serif; }
+        .container { width:100%; max-width:420px; margin:0 auto; text-align:center; }
 
-        /* profile card */
-        .profile-card { border-radius: 20px; overflow:hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+        /* Card (layered gradient + soft elevation) */
+        .card {
+          border-radius: var(--card-radius);
+          padding: var(--card-padding);
+          color: var(--text-light);
+          background:
+            linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+            linear-gradient(180deg, rgba(30,45,70,0.06), rgba(10,18,34,0.04));
+          box-shadow:
+            0 24px 60px rgba(6,20,40,0.45),
+            0 8px 18px rgba(6,20,40,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.04);
+          backdrop-filter: blur(6px);
+        }
+
+        /* Login-specific look: richer deep blue card */
+        body.login .card, #login-card {
+          background:
+            linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95));
+          box-shadow:
+            0 28px 80px rgba(4,12,28,0.65),
+            0 6px 16px rgba(4,12,28,0.28);
+          border: 1px solid rgba(255,255,255,0.04);
+          color: var(--text-light);
+        }
+
+        /* Logo + subtitle */
+        .logo { font-size:1.95rem; font-weight:700; margin-bottom:12px; color:var(--text-light); display:flex; align-items:center; justify-content:center; gap:10px; }
+        .subtitle { font-size:0.95rem; color: var(--muted-light); text-align:center; margin-bottom:8px; }
+
+        /* Inputs - constrained and centered */
+        input {
+          width:100%;
+          max-width:200px;          /* enforce your requirement */
+          display:block;
+          margin:10px auto;
+          padding:12px 14px;
+          border-radius:12px;
+          border:1px solid rgba(255,255,255,0.06);
+          background: rgba(255,255,255,0.03);
+          color: #ffffff;
+          font-size:1rem;
+          outline: none;
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+        input::placeholder { color: rgba(255,255,255,0.65); }
+
+        /* Buttons - consistent, centered */
+        button {
+          font-family: inherit;
+          font-weight:700;
+          border-radius:14px;
+          padding:10px 14px;
+          cursor:pointer;
+          border: none;
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+        }
+
+        #sign-in-btn, #create-account-btn, #reset-password-btn {
+          width: 100%;
+          max-width: 220px;
+          margin: 12px auto 6px;
+          background: linear-gradient(90deg, var(--primary-cta), #a3c3ff);
+          color: #07233e;
+          box-shadow: 0 10px 30px rgba(106,141,191,0.18);
+        }
+
+        .muted {
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.06);
+          color: rgba(255,255,255,0.92);
+          padding:10px;
+          width:48%;
+          box-sizing:border-box;
+        }
+
+        /* Action row layout for inline buttons */
+        .row.action-row {
+          display:flex;
+          gap:12px;
+          justify-content:center;
+          align-items:center;
+          margin-top:8px;
+        }
+
+        .centered-row { display:flex; justify-content:center; margin-top:8px; }
+
+        /* Google sign-in center + subtle white background pill */
+        .google-btn {
+          margin: 12px auto 0;
+          background: rgba(255,255,255,0.98);
+          color: #0b1b2b;
+          border-radius: 999px;
+          padding:10px 14px;
+          max-width:280px;
+          width:100%;
+          box-shadow: 0 8px 22px rgba(8,20,40,0.14);
+          display:inline-flex;
+          align-items:center;
+          justify-content:center;
+          gap:10px;
+        }
+        .google-btn svg { flex:0 0 auto; }
+
+        /* Home / profile card refinements (glass + layered gradient) */
+        .profile-card {
+          border-radius: 22px;
+          overflow:hidden;
+          box-shadow: 0 20px 60px rgba(6,20,40,0.08);
+        }
         .cover { height:140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; }
-        .profile-body { background:white; border-top-left-radius: var(--card-radius); border-top-right-radius: var(--card-radius); transform: translateY(-28px); padding: 0 18px 20px 18px; box-shadow: 0 6px 20px rgba(15,30,50,0.06); }
+        .profile-body {
+          background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
+          border-top-left-radius: var(--card-radius);
+          border-top-right-radius: var(--card-radius);
+          transform: translateY(-28px);
+          padding: 12px 18px 22px 18px;
+          box-shadow: 0 6px 24px rgba(10,20,40,0.06);
+          color: #183547;
+        }
 
-        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 6px 12px rgba(0,0,0,0.12); transform: translateY(-36px); margin-bottom:-26px; border:3px solid #fff; position:relative; }
-        .profile-header { text-align:left; padding-left:2px; margin-top:6px; }
-        .profile-header .logo { font-size:1.6rem; font-weight:700; color:#183547; }
-        .profile-header .subtitle { margin-top:6px; color:#617489; }
+        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); overflow:hidden; }
 
-        .cta-row { display:flex; gap:12px; margin-top:12px; }
-        .outline-btn { flex:1; background:transparent; border:1px solid rgba(88,109,139,0.14); padding:12px 16px; border-radius:28px; color:#274a66; font-weight:600; }
-        .primary-btn { flex:1; background: linear-gradient(90deg, var(--primary-cta), var(--primary-cta-strong)); color:#fff; padding:12px 16px; border-radius:28px; border:none; font-weight:700; }
+        /* content card (light) */
+        .content-card {
+          margin-top:14px;
+          padding:14px;
+          border-radius:12px;
+          background: linear-gradient(180deg, #ffffff, #fbfdff);
+          color:#222;
+          box-shadow: 0 8px 20px rgba(6,20,40,0.04);
+        }
 
-        .tabs { display:flex; gap:12px; margin-top:16px; overflow:auto; }
-        .tab { background:transparent; border:none; padding:8px 6px; color:#2e4a62; font-weight:600; }
-        .tab.active { border-bottom:3px solid var(--primary-cta); color: var(--primary-cta-strong); }
-
-        .content-card { margin-top:14px; padding:14px; border-radius:12px; background:#fafafa; color:#222; }
-        .get-in-touch { display:flex; justify-content:space-between; align-items:center; margin-top:12px; }
+        /* small helpers */
         .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
+        .footer { margin-top:18px; font-size:0.85rem; color: #9aa6d9; text-align:center; }
 
-        .social-row { display:flex; gap:8px; margin-top:14px; }
-        .social { flex:1; border-radius:999px; background:#fff; border:1px solid rgba(0,0,0,0.05); padding:10px; }
-
-        .enter-row { display:flex; gap:10px; margin-top:16px; }
-        .enter-btn { flex:1; background: linear-gradient(90deg,var(--sand, #d8b37b),var(--clay, #c87a3c)); color:#fff; padding:12px; border-radius:14px; border:none; font-weight:700; }
-        .signout-btn { flex:1; background:#f1f1f1; color:#222; padding:12px; border-radius:14px; border:none; }
-
-        /* Login card styles */
-        .card { border-radius:16px; padding:18px; background: linear-gradient(180deg,#16204a,var(--night-card)); color: var(--text-light); box-shadow: 0 18px 45px rgba(0,0,0,0.3); }
-        .logo { font-size:2.4rem; font-weight:700; margin-bottom:8px; color:#fff; text-align:center; }
-        .subtitle { font-size:0.9rem; color: var(--muted-light); text-align:center; margin-bottom:6px; }
-
-        input { width:70%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:#0f1733; color:var(--text-light); }
-        .muted { background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px;border-radius:12px; width:48%; }
-
-        .footer { margin-top:18px; font-size:0.8rem; color:#7b8899; text-align:center; }
-
+        /* responsive tweaks */
         @media (max-width: 420px) {
           .cover { height:120px; }
           .avatar { width:64px; height:64px; transform: translateY(-32px); margin-bottom:-22px; }
           .profile-body { padding: 0 14px 18px 14px; }
+          input { max-width: 200px; }
         }
 
         @media (min-width: 768px) {
@@ -547,9 +655,6 @@ export default function IndexPage() {
           .cover { height:200px; }
           .avatar { width:88px; height:88px; border-radius:18px; transform: translateY(-44px); margin-bottom:-34px; }
           .profile-body { padding: 0 28px 28px 28px; transform: translateY(-40px); }
-          .profile-header .logo { font-size:2rem; }
-          .cta-row { gap:18px; }
-          .enter-row { gap:16px; }
         }
       `}</style>
     </div>
