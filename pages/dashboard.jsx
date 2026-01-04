@@ -95,8 +95,8 @@ export default function Dashboard() {
         <header className="topbar" role="banner">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
             <Link href="/" legacyBehavior>
-              <a className="brand">
-                <div className="brand-avatar">
+              <a className="brand" aria-label="Semi-colonic home">
+                <div className="brand-avatar" aria-hidden>
                   <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <span style={{ fontWeight: 700 }}>Semi-colonic</span>
@@ -110,13 +110,13 @@ export default function Dashboard() {
             </nav>
           </div>
 
-          <div className="topbar-actions">
-            <button aria-label="Notifications" className="btn">🔔</button>
-            <button aria-label="Messages" className="btn">💬</button>
+          <div className="topbar-actions" role="navigation" aria-label="Top actions">
+            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
+            <button aria-label="Messages" className="btn" title="Messages">💬</button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ color: '#556', fontSize: 14 }}>{userEmail}</div>
-              <button onClick={handleSignOut} className="btn btn-outline">Sign out</button>
+              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
             </div>
           </div>
         </header>
@@ -126,7 +126,7 @@ export default function Dashboard() {
             <div className="cover" />
             <div className="profile-body">
               <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-                <div className="avatar">
+                <div className="avatar" aria-hidden>
                   <img src="/semi-colonic-logo.png" alt="avatar" />
                 </div>
                 <div style={{ flex: 1 }}>
@@ -153,27 +153,27 @@ export default function Dashboard() {
               <div className="content-card">
                 <p style={{ marginTop: 0 }}>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
 
-                <div className="quick-grid">
+                <div className="quick-grid" role="list">
                   <Link href="/posts" legacyBehavior>
-                    <a className="quick-tile">Posts<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Browse community posts</div></a>
+                    <a className="quick-tile" role="listitem">Posts<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Browse community posts</div></a>
                   </Link>
 
                   <Link href="/chat" legacyBehavior>
-                    <a className="quick-tile">Chat<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Join community conversations</div></a>
+                    <a className="quick-tile" role="listitem">Chat<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Join community conversations</div></a>
                   </Link>
 
                   <Link href="/features" legacyBehavior>
-                    <a className="quick-tile">Features<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Explore app features</div></a>
+                    <a className="quick-tile" role="listitem">Features<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Explore app features</div></a>
                   </Link>
 
                   <Link href="/games" legacyBehavior>
-                    <a className="quick-tile">Games<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Relaxing mini-games</div></a>
+                    <a className="quick-tile" role="listitem">Games<div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Relaxing mini-games</div></a>
                   </Link>
                 </div>
 
                 <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #eee' }} />
 
-                <div className="get-in-touch">
+                <div className="get-in-touch" style={{ alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 14, color: '#7b8899', fontWeight: 700 }}>Get in Touch</div>
                     <div style={{ color: '#222' }}>Semi-colonic</div>
@@ -186,12 +186,41 @@ export default function Dashboard() {
                   <div style={{ color: '#222' }}>TTASOK</div>
                 </div>
 
-                <div className="social-row">
-                  <Link href="https://instagram.com" legacyBehavior><a className="social-btn">IG</a></Link>
-                  <Link href="https://facebook.com" legacyBehavior><a className="social-btn">FB</a></Link>
-                  <Link href="https://x.com" legacyBehavior><a className="social-btn">X</a></Link>
-                  <Link href="https://youtube.com" legacyBehavior><a className="social-btn">YT</a></Link>
-                  <Link href="https://tiktok.com" legacyBehavior><a className="social-btn">TT</a></Link>
+                <div className="social-row" role="navigation" aria-label="Social links" style={{ marginTop: 14 }}>
+                  {/* Instagram */}
+                  <a className="social-btn" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zm6.4-2.6a1.1 1.1 0 1 0 1.1 1.1 1.1 1.1 0 0 0-1.1-1.1z"/>
+                    </svg>
+                  </a>
+
+                  {/* Facebook */}
+                  <a className="social-btn" href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2.2v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.98v7A10 10 0 0 0 22 12z"/>
+                    </svg>
+                  </a>
+
+                  {/* X (Twitter) */}
+                  <a className="social-btn" href="https://x.com" target="_blank" rel="noreferrer" aria-label="X">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                      <path fill="currentColor" d="M21.3 7.2c.01.17.01.35.01.52 0 5.3-4 11.5-11.5 11.5A11.2 11.2 0 0 1 3 18.7a8.2 8.2 0 0 0 .96.05c2.2 0 4.23-.75 5.84-2.02a4 4 0 0 1-3.73-2.78c.64.1 1.3.06 1.9-.11a3.99 3.99 0 0 1-3.2-3.92v-.05c.54.3 1.16.48 1.82.5a3.98 3.98 0 0 1-1.24-5.3 11.34 11.34 0 0 0 8.24 4.18 4.5 4.5 0 0 1 7.62-4.1 8.05 8.05 0 0 0 2.52-.96 4.05 4.05 0 0 1-1.76 2.22 8.04 8.04 0 0 0 2.3-.63 7.96 7.96 0 0 1-2 2.07z"/>
+                    </svg>
+                  </a>
+
+                  {/* YouTube */}
+                  <a className="social-btn" href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                      <path fill="currentColor" d="M23 7a3 3 0 0 0-2.12-2.12C18.5 4 12 4 12 4s-6.5 0-8.88.88A3 3 0 0 0 .99 7 31 31 0 0 0 0 12a31 31 0 0 0 .99 5c.35.9 1.22 1.66 2.13 1.88C5.5 20 12 20 12 20s6.5 0 8.88-.88A3 3 0 0 0 23 17a31 31 0 0 0 1-5 31 31 0 0 0-1-5zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
+                    </svg>
+                  </a>
+
+                  {/* TikTok */}
+                  <a className="social-btn" href="https://tiktok.com" target="_blank" rel="noreferrer" aria-label="TikTok">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
+                      <path fill="currentColor" d="M16 3h2.5v4a4.5 4.5 0 1 1-4.5-4.5V6a1 1 0 0 0-1 1 6.5 6.5 0 1 0 6.5 6.5V7H16V3z"/>
+                    </svg>
+                  </a>
                 </div>
               </div>
             </div>
