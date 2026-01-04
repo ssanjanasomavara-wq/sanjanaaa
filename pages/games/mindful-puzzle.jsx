@@ -8,22 +8,6 @@ export default function MindfulPuzzle() {
     router.replace('/');
   }
 
-  // Check-in entries (same pattern as pages/features/checkin.jsx)
-  const [entries, setEntries] = useState([]);
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = JSON.parse(localStorage.getItem('checkIns') || '[]');
-    setEntries(stored.slice().reverse());
-  }, []);
-
-  function saveCheckIn(text) {
-    if (!text || !text.trim()) return;
-    const checkIns = JSON.parse(localStorage.getItem('checkIns') || '[]');
-    checkIns.push({ text: text.trim(), time: new Date().toLocaleString() });
-    localStorage.setItem('checkIns', JSON.stringify(checkIns));
-    setEntries(checkIns.slice().reverse());
-  }
-
   // Puzzle state
   const [numbers, setNumbers] = useState([]);
   const [nextNumber, setNextNumber] = useState(1);
@@ -207,16 +191,7 @@ export default function MindfulPuzzle() {
                   </button>
                 </div>
 
-                {/* Check-in form and saved entries (same pattern as checkin page) */}
-                <div style={{ width: '100%', marginTop: 6 }}>
-                  <MindfulForm onSave={saveCheckIn} />
-                  <div style={{ marginTop: 16, fontSize: 13 }}>
-                    {entries.map((item, idx) => (
-                      <div key={idx} style={{ background: '#eef5f2', padding: 10, borderRadius: 10, marginBottom: 8, color: '#3e5f60', borderLeft: '4px solid #8fbfa8' }}>
-                        <div style={{ fontSize: 11, color: '#6a8f8d', fontWeight: 700 }}>{item.time}</div>
-                        <div style={{ marginTop: 6 }}>{item.text}</div>
-                      </div>
-                    ))}
+
                   </div>
                 </div>
               </div>
@@ -232,48 +207,4 @@ export default function MindfulPuzzle() {
   );
 }
 
-function MindfulForm({ onSave }) {
-  const [text, setText] = useState('');
-  function submit() {
-    if (!text.trim()) return;
-    onSave(text);
-    setText('');
-  }
-  return (
-    <div>
-      <textarea
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder="How are you feeling right now?"
-        style={{
-          width: '100%',
-          height: 90,
-          borderRadius: 12,
-          border: '1.5px solid #b7d3cf',
-          padding: 12,
-          resize: 'none',
-          fontSize: 14,
-          background: '#f6fbfa',
-          color: '#355b5e',
-          outline: 'none',
-        }}
-      />
-      <button
-        onClick={submit}
-        style={{
-          marginTop: 12,
-          width: '100%',
-          padding: 11,
-          border: 'none',
-          borderRadius: 14,
-          background: 'linear-gradient(135deg,#6faab6,#8fbfa8)',
-          color: '#fff',
-          fontSize: 14,
-          cursor: 'pointer',
-        }}
-      >
-        Save check-in
-      </button>
-    </div>
-  );
-}
+
