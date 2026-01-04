@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import InviteWidget from '../components/InviteWidget';
+import ChatPopup from '../components/ChatPopup';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -10,6 +12,9 @@ export default function Dashboard() {
 
   const authRef = useRef(null);
   const authModRef = useRef(null);
+
+  const [showInvite, setShowInvite] = useState(false);
+  const [showChat, setShowChat] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -147,10 +152,8 @@ export default function Dashboard() {
               </div>
 
               <div className="cta-row" style={{ marginTop: 12 }}>
-                <Link href="/invite" legacyBehavior>
-                  <a className="btn btn-outline">Invite</a>
-                </Link>
-                <button className="btn btn-strong" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
+                <button className="btn btn-outline" onClick={() => setShowInvite(true)}>Invite</button>
+                <button className="btn btn-strong" onClick={() => setShowChat(true)}>Chat with Us</button>
               </div>
 
               <nav className="tabs" role="navigation" aria-label="Profile tabs" style={{ marginTop: 16 }}>
@@ -201,28 +204,28 @@ export default function Dashboard() {
                   {/* Instagram */}
                   <a className="social-btn" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zm6.4-2.6a1.1 1.1 0 1 0 1.1 1[...]"/>
+                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zm6.4-2.6a1.1 1.1 0 1 0 1.1 1[...]
                     </svg>
                   </a>
 
                   {/* Facebook */}
                   <a className="social-btn" href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2.2v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.[...]"/>
+                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7h-2.2v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.[...]
                     </svg>
                   </a>
 
                   {/* X (Twitter) */}
                   <a className="social-btn" href="https://x.com" target="_blank" rel="noreferrer" aria-label="X">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M21.3 7.2c.01.17.01.35.01.52 0 5.3-4 11.5-11.5 11.5A11.2 11.2 0 0 1 3 18.7a8.2 8.2 0 0 0 .96.05c2.2 0 4.23-.75 5.84-2.02a4 4 0 0 1-3.73-2.78c.64.1 1.[...]"/>
+                      <path fill="currentColor" d="M21.3 7.2c.01.17.01.35.01.52 0 5.3-4 11.5-11.5 11.5A11.2 11.2 0 0 1 3 18.7a8.2 8.2 0 0 0 .96.05c2.2 0 4.23-.75 5.84-2.02a4 4 0 0 1-3.73-2.78c.64.1 1.[...]
                     </svg>
                   </a>
 
                   {/* YouTube */}
                   <a className="social-btn" href="https://youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden focusable="false">
-                      <path fill="currentColor" d="M23 7a3 3 0 0 0-2.12-2.12C18.5 4 12 4 12 4s-6.5 0-8.88.88A3 3 0 0 0 .99 7 31 31 0 0 0 0 12a31 31 0 0 0 .99 5c.35.9 1.22 1.66 2.13 1.88C5.5 20 12 20 1[...]"/>
+                      <path fill="currentColor" d="M23 7a3 3 0 0 0-2.12-2.12C18.5 4 12 4 12 4s-6.5 0-8.88.88A3 3 0 0 0 .99 7 31 31 0 0 0 0 12a31 31 0 0 0 .99 5c.35.9 1.22 1.66 2.13 1.88C5.5 20 12 20 1[...]
                     </svg>
                   </a>
 
@@ -251,6 +254,16 @@ export default function Dashboard() {
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
+
+      {/* Invite & Chat popups */}
+      <InviteWidget
+        visible={showInvite}
+        onClose={() => setShowInvite(false)}
+        inviteCode="TTASOK"
+        inviteLink={`${typeof window !== 'undefined' ? window.location.origin : ''}/join?code=TTASOK`}
+      />
+
+      <ChatPopup visible={showChat} onClose={() => setShowChat(false)} />
 
       <style jsx>{`
         /* Shared, index-like theme for dashboard to match index/features/games */
@@ -319,7 +332,7 @@ export default function Dashboard() {
         .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
 
         .social-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:transparent; border: 1px solid rgba(6,20,40,0.04); color: #183547; text-decoration:none; }
+        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:transparent; border: 1px solid rgba(6,20,40,0.04); color:inherit; text-decoration:none; }
 
         .footer-actions { display:flex; gap:12px; justify-content:center; }
         .pill-link { background: #f1f1f1; padding: 12px 18px; border-radius: 14px; text-decoration: none; color: #222; }
