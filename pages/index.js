@@ -531,7 +531,7 @@ export default function IndexPage() {
         .logo { font-size:2.4rem; font-weight:700; margin-bottom:8px; color:#fff; text-align:center; }
         .subtitle { font-size:0.9rem; color: var(--muted-light); text-align:center; margin-bottom:6px; }
 
-        input { width:100%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:#0f1733; color:var(--text-light); }
+        input { width:70%; padding:12px; margin-bottom:10px; border-radius:12px; border:none; background:#0f1733; color:var(--text-light); }
         .muted { background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:10px;border-radius:12px; width:48%; }
 
         .footer { margin-top:18px; font-size:0.8rem; color:#7b8899; text-align:center; }
