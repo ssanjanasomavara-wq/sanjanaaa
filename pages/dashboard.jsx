@@ -143,7 +143,7 @@ export default function Dashboard() {
             <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
             <button aria-label="Messages" className="btn" title="Messages">💬</button>
               <div className="user-email" title={userEmail}>{userEmail}</div>
-              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
+              <button onClick={handleSignOut} className="btn btn-strong" aria-label="Sign out">Sign out</button>
 
             <button
               ref={mobileMenuButtonRef}
