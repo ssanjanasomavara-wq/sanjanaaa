@@ -126,14 +126,11 @@ export default function Dashboard() {
             </nav>
           </div>
 
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
+          <div className="topbar-actions" role="navigation" aria-label="Top actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
             <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div className="user-email">{userEmail}</div>
               <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
-            </div>
           </div>
         </header>
 
