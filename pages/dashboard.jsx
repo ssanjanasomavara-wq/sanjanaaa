@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 import InviteWidget from '../components/InviteWidget';
 import ChatPopup from '../components/ChatPopup';
+import QuoteBanner from '../components/QuoteBanner';
+import ImageGrid from '../components/ImageGrid';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -268,6 +270,21 @@ export default function Dashboard() {
             </div>
           </section>
 
+          <QuoteBanner 
+            text="Not the end—just a moment to rest. The tide goes out. The tide comes back."
+            author="Semi-colonic"
+            className="dashboard-quote"
+          />
+
+          <ImageGrid 
+            images={[
+              { src: '/images/placeholder-1.svg', alt: 'Peaceful seaside moment 1' },
+              { src: '/images/placeholder-2.svg', alt: 'Peaceful seaside moment 2' },
+              { src: '/images/placeholder-3.svg', alt: 'Peaceful seaside moment 3' },
+              { src: '/images/placeholder-4.svg', alt: 'Peaceful seaside moment 4' },
+            ]}
+          />
+
           <div className="footer-actions" style={{ marginTop: 18 }}>
             <Link href="/settings" legacyBehavior><a className="pill-link">Settings</a></Link>
             <Link href="/profile" legacyBehavior><a className="pill-link primary">Profile</a></Link>
@@ -294,83 +311,199 @@ export default function Dashboard() {
       <ChatPopup visible={showChat} onClose={() => setShowChat(false)} />
 
       <style jsx>{`
-        /* Shared, index-like theme for dashboard to match index/features/games */
-        :root {
-          --card-radius-local: 20px;
-          --card-padding-local: 18px;
+        /* Minimal dashboard-specific styles - most styling from theme.css */
+        .site-root {
+          min-height: 100vh;
+          padding: 0;
+        }
+        
+        .site {
+          max-width: var(--max-width);
+          margin: 0 auto;
         }
 
-        .topbar {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 18px;
-          background: linear-gradient(90deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
-          border-bottom: 1px solid rgba(6,20,40,0.04);
-        }
-
-        .brand-avatar {
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
-          overflow: hidden;
-          flex: 0 0 40px;
-          background: #fff;
-          box-shadow: 0 6px 18px rgba(6,20,40,0.06);
-        }
         .brand-text {
           font-weight: 700;
-          color: #183547;
+          color: var(--text-primary);
         }
 
-        .desktop-nav { margin-left: 8px; display:flex; gap:8px; align-items:center; }
-        .nav-link { margin-right: 12px; color: #183547; text-decoration:none; font-weight:600; }
-        .topbar-actions { margin-left: auto; display:flex; gap:10px; align-items:center; }
-        .btn { background: transparent; border: none; font-weight:700; padding:8px 10px; border-radius:10px; cursor:pointer; }
-        .btn-outline { border: 1px solid rgba(20,40,60,0.06); padding: 8px 12px; background: transparent; }
-        .btn-strong { background: linear-gradient(90deg,#d8b37b,#c87a3c); color: #fff; padding: 8px 12px; border-radius: 12px; }
+        .desktop-nav { 
+          margin-left: 8px; 
+          display: flex; 
+          gap: 8px; 
+          align-items: center; 
+        }
+        
+        .nav-link { 
+          margin-right: 12px; 
+          color: var(--text-primary); 
+          text-decoration: none; 
+          font-weight: 600; 
+        }
+        
+        .topbar-actions { 
+          margin-left: auto; 
+          display: flex; 
+          gap: 10px; 
+          align-items: center; 
+        }
 
-        .user-email { color: #556; font-size: 14px; }
+        .user-email { 
+          color: var(--text-secondary); 
+          font-size: 14px; 
+        }
 
-        .main-content { padding: 18px; }
+        .main-content { 
+          padding: var(--space-md); 
+        }
 
-        .profile-card { border-radius: 22px; overflow: hidden; box-shadow: 0 20px 60px rgba(6,20,40,0.06); background: transparent; }
-        .cover { height: 140px; background: linear-gradient(90deg, #274a66, #3e6f93); background-size: cover; }
+        .cover { 
+          height: 140px; 
+          background: linear-gradient(90deg, var(--color-sky-soft), var(--color-aqua-mist)); 
+        }
+        
         .profile-body {
           background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
           padding: 16px;
         }
 
-        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); over[...] }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; display:block; }
+        .avatar { 
+          width: 72px; 
+          height: 72px; 
+          border-radius: 14px; 
+          background: #fff; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          overflow: hidden; 
+          box-shadow: 0 8px 20px rgba(6,20,40,0.08);
+        }
+        
+        .avatar img { 
+          width: 100%; 
+          height: 100%; 
+          object-fit: cover; 
+          display: block; 
+        }
 
-        .cta-row { display:flex; gap:10px; align-items:center; margin-top:8px; }
-        .tabs { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-        .tab { padding:8px 12px; border-radius:10px; background: transparent; border: 1px solid rgba(6,20,40,0.04); text-decoration:none; color:#183547; }
+        .cta-row { 
+          display: flex; 
+          gap: 10px; 
+          margin-top: 8px; 
+        }
+        
+        .tabs { 
+          display: flex; 
+          gap: 8px; 
+          margin-top: 12px; 
+          flex-wrap: wrap; 
+        }
+        
+        .tab { 
+          padding: 8px 12px; 
+          border-radius: 10px; 
+          background: transparent; 
+          border: 1px solid rgba(6,20,40,0.04); 
+          text-decoration: none; 
+          color: var(--text-primary); 
+        }
 
-        .content-card { margin-top:14px; padding:14px; border-radius:12px; background: linear-gradient(180deg, #ffffff, #fbfdff); color:#222; box-shadow: 0 8px 20px rgba(6,20,40,0.04); }
+        .quick-grid { 
+          display: grid; 
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+          gap: 10px; 
+          margin-top: 12px; 
+        }
+        
+        .quick-tile { 
+          display: block; 
+          padding: 12px; 
+          background: #fff; 
+          border-radius: 12px; 
+          text-decoration: none; 
+          color: var(--text-primary); 
+          box-shadow: 0 6px 18px rgba(20,40,60,0.04); 
+        }
+        
+        .quick-sub { 
+          font-size: 12px; 
+          color: var(--text-secondary); 
+          margin-top: 6px; 
+        }
 
-        .quick-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:10px; margin-top:12px; }
-        .quick-tile { display:block; padding:12px; background:#fff; border-radius:12px; text-decoration:none; color:#222; box-shadow: 0 6px 18px rgba(20,40,60,0.04); }
-        .quick-sub { font-size:12px; color:#617489; margin-top:6px; }
+        .divider { 
+          margin: 16px 0; 
+          border: none; 
+          border-top: 1px solid #eee; 
+        }
 
-        .divider { margin: 16px 0; border: none; border-top: 1px solid #eee; }
+        .get-in-touch { 
+          display: flex; 
+          justify-content: space-between; 
+          align-items: center; 
+          gap: 12px; 
+        }
+        
+        .muted-label { 
+          color: var(--text-muted); 
+          font-weight: 700; 
+          margin-bottom: 4px; 
+        }
 
-        .get-in-touch { display:flex; justify-content:space-between; width:100%; align-items:center; gap:12px; }
-        .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
+        .social-row { 
+          display: flex; 
+          gap: 8px; 
+          flex-wrap: wrap; 
+          margin-top: 12px; 
+        }
+        
+        .social-btn { 
+          display: inline-flex; 
+          align-items: center; 
+          justify-content: center; 
+          width: 38px; 
+          height: 38px; 
+          border-radius: 10px; 
+          background: transparent; 
+          border: 1px solid rgba(6,20,40,0.04); 
+          color: var(--text-secondary); 
+          text-decoration: none;
+        }
 
-        .social-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:transparent; border: 1px solid rgba(6,20,40,0.04); color:[...] }
+        .footer-actions { 
+          display: flex; 
+          gap: 12px; 
+          justify-content: center; 
+        }
+        
+        .pill-link { 
+          background: #f1f1f1; 
+          padding: 12px 18px; 
+          border-radius: 14px; 
+          text-decoration: none; 
+          color: var(--text-primary); 
+        }
+        
+        .pill-link.primary { 
+          background: var(--cta-strong); 
+          color: #fff; 
+        }
 
-        .footer-actions { display:flex; gap:12px; justify-content:center; }
-        .pill-link { background: #f1f1f1; padding: 12px 18px; border-radius: 14px; text-decoration: none; color: #222; }
-        .pill-link.primary { background: linear-gradient(90deg,#d8b37b,#c87a3c); color: #fff; }
-
-        .site-footer { margin-top: 18px; padding: 18px; font-size: 13px; color: #7b8899; text-align:center; }
+        .site-footer { 
+          margin-top: var(--space-md); 
+          padding: var(--space-md); 
+          font-size: 13px; 
+          color: var(--text-muted); 
+          text-align: center; 
+        }
+        
+        .dashboard-quote {
+          margin-top: var(--space-lg);
+        }
 
         @media (max-width: 420px) {
-          .cover { height:120px; }
-          .avatar { width:64px; height:64px; }
+          .cover { height: 120px; }
+          .avatar { width: 64px; height: 64px; }
           .profile-body { padding: 12px; }
         }
       `}</style>
