@@ -3,8 +3,10 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * InviteWidget (pastel, theme-adaptive)
  *
- * Uses global .btn, .btn-outline, .btn-strong tokens from styles/globals.css.
- * Keeps component-local layout / surface variables but does not override button tokens.
+ * NOTE: This component no longer overrides global .btn tokens.
+ * Instead it exposes per-component CSS custom properties (prefixed with
+ * --component-*) so the global token set (styles/globals.css) can pick up
+ * the component's preferred colors without being overridden at :root.
  */
 export default function InviteWidget({ visible = false, onClose = () => {}, inviteCode = '', inviteLink = '' }) {
   const modalRef = useRef(null);
@@ -68,14 +70,20 @@ export default function InviteWidget({ visible = false, onClose = () => {}, invi
         </header>
 
         <div className="invite-body">
-          <div className="invite-card">
+          <div className="invite-card" aria-hidden={false}>
             <div className="invite-code">{inviteCode || '—'}</div>
             <div className="invite-sub muted">{inviteLink || ''}</div>
             <div className="invite-actions">
               <button className="btn btn-outline" onClick={handleCopy}>
                 {copied ? 'Copied!' : 'Copy invite link'}
               </button>
-              <a className="btn btn-strong" href={inviteLink || '#'} onClick={(e) => { /* anchor navigation */ }}>
+              <a
+                className="btn btn-strong"
+                href={inviteLink || '#'}
+                target={inviteLink ? '_blank' : undefined}
+                rel={inviteLink ? 'noopener noreferrer' : undefined}
+                onClick={(e) => { /* anchor navigation */ }}
+              >
                 Open link
               </a>
             </div>
@@ -84,18 +92,17 @@ export default function InviteWidget({ visible = false, onClose = () => {}, invi
       </div>
 
       <style jsx>{`
-        :root {
-          --invite-bg: linear-gradient(180deg,#fffafb, #f6fcff);
-          --invite-surface: #ffffff;
-          --muted: #6b7280;
-        }
-        @media (prefers-color-scheme: dark) {
-          :root {
-            --invite-bg: linear-gradient(180deg,#071122,#061018);
-            --invite-surface: #071124;
-            --muted: #9aa6b2;
-          }
-        }
+        /*
+         * The component exposes per-component tokens that the global
+         * .btn rules will consume if present. These variables are
+         * intentionally named --component-* so they don't collide with
+         * site-level :root tokens.
+         *
+         * We removed the previous local .btn overrides so visual
+         * behavior is controlled by the global token set in
+         * styles/globals.css (which now prefers component variables
+         * when available).
+         */
 
         .invite-backdrop {
           position: fixed;
@@ -110,7 +117,7 @@ export default function InviteWidget({ visible = false, onClose = () => {}, invi
           top: 50%;
           transform: translate(-50%, -50%);
           width: min(92vw, 460px);
-          background: var(--invite-surface);
+          background: var(--component-surface, var(--invite-surface, #fff));
           border-radius: 12px;
           padding: 16px;
           box-shadow: 0 12px 40px rgba(6,20,40,0.12);
@@ -118,40 +125,64 @@ export default function InviteWidget({ visible = false, onClose = () => {}, invi
           display: flex;
           flex-direction: column;
           gap: 12px;
+          color: var(--component-text, var(--invite-text, inherit));
         }
 
         .invite-header { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
-        .invite-header h2 { margin: 0; font-size: 18px; color: var(--text-primary, #183547); }
-        .muted { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+        .invite-header h2 { margin: 0; font-size: 18px; color: var(--component-text-primary, var(--invite-text-primary, var(--text-primary, #183547))); }
+        .muted { color: var(--component-muted, var(--invite-muted, #6b7280)); font-size: 13px; margin: 4px 0 0; }
 
         .invite-body { display:flex; justify-content:center; }
         .invite-card {
           width:100%;
           border-radius:10px;
-          background: var(--invite-bg);
+          background: var(--component-bg, var(--invite-bg, linear-gradient(180deg,#fffafb, #f6fcff)));
           padding:12px;
           display:flex;
           flex-direction:column;
           gap:10px;
           align-items:stretch;
           text-align:center;
+
+          /* per-component tokens (read by styles/globals.css) */
+          --component-bg: linear-gradient(180deg,#fffafb, #f6fcff);
+          --component-surface: #ffffff;
+          --component-muted: #6b7280;
+          --component-text: #183547;
+          --component-text-primary: #183547;
+          --component-cta: #0ea5a4;          /* used by .btn-strong */
+          --component-cta-text: #ffffff;     /* used by .btn-strong */
+          --component-btn-text: #183547;     /* used by .btn and .btn-outline */
+          --component-btn-border: rgba(27,59,58,0.12);
+        }
+
+        @media (prefers-color-scheme: dark) {
+          .invite-card {
+            --component-bg: linear-gradient(180deg,#071122,#061018);
+            --component-surface: #071124;
+            --component-muted: #9aa6b2;
+            --component-text: #d6eef6;
+            --component-text-primary: #d6eef6;
+            --component-cta: #06b6d4;
+            --component-cta-text: #071124;
+            --component-btn-text: #d6eef6;
+            --component-btn-border: rgba(214,238,246,0.08);
+          }
         }
 
         .invite-code {
           font-weight:800;
           letter-spacing:0.12em;
           font-size:20px;
-          color:var(--text-primary, #1b3b3a);
+          color:var(--component-text, var(--text-primary, #1b3b3a));
           background: rgba(255,255,255,0.6);
           padding:10px 12px;
           border-radius:8px;
         }
 
-        .invite-sub { font-size:12px; overflow-wrap:anywhere; color:var(--muted); }
+        .invite-sub { font-size:12px; overflow-wrap:anywhere; color:var(--component-muted, var(--muted)); }
 
         .invite-actions { display:flex; gap:10px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
-
-        /* No .btn rules here — buttons use global styles from styles/globals.css */
 
         @media (max-width: 420px) {
           .invite-modal { width: calc(100vw - 24px); left:12px; right:12px; transform:none; top:12px; bottom:auto; }
