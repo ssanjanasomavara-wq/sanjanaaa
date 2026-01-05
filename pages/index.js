@@ -352,7 +352,7 @@ export default function IndexPage() {
               <button onClick={showForgot} className="muted small">Forgot Password?</button>
             </div>
 
-            <div className="google-row">
+            <center><div className="google-row">
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false" role="img">
                   <path fill="#fbbc05" d="M43.6 20.1H42V20H24v8h11.2c-1.1 4-4 7.4-8.2 9.2l0 .1 6.2 4.8c3.6-3.3 6-8.2 6-13.9 0-1.1-.1-2.1-.6-3.2z"/>
@@ -362,7 +362,7 @@ export default function IndexPage() {
                 </svg>
                 <span style={{ marginLeft: 6 }}>Continue with Google</span>
               </button>
-            </div>
+            </div></center>
 
             <div className="message" aria-live="polite">{authMessage}</div>
           </div>
