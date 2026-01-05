@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import { initFirebaseWithConfig } from '../../lib/firebaseClient';
 
 /**
  * Join / Landing page

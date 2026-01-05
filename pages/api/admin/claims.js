@@ -11,6 +11,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { initFirebaseWithConfig } from '../../../lib/firebaseClient';
+
 
 export default function ClaimsAdmin() {
   const [uid, setUid] = useState('');
