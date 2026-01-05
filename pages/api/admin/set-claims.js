@@ -12,8 +12,6 @@
 // FIREBASE_ADMIN_SERVICE_ACCOUNT='{"type":"service_account",...}'
 // (or set GOOGLE_APPLICATION_CREDENTIALS pointing to a file on the server)
 
-import { buffer } from 'micro';
-
 let admin = null;
 function initAdmin() {
   if (admin) return admin;
