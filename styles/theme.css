@@ -1,0 +1,311 @@
+/* 
+ * Centralized Seaside Theme - Pastel Color Palette
+ * Provides CSS variables, Google Fonts, and reusable UI components
+ */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+/* CSS Variables - Seaside Pastel Palette */
+:root {
+  /* Primary Palette */
+  --seaside-sky: #b8e0d9;
+  --seaside-sand: #e9cfa6;
+  --seaside-ocean: #6a9ab8;
+  --seaside-coral: #f4c4b3;
+  --seaside-seafoam: #d4f1e8;
+  --seaside-sunset: #ffd9b3;
+  
+  /* Neutral Colors */
+  --seaside-white: #fdfeff;
+  --seaside-cream: #faf8f5;
+  --seaside-gray-light: #e8ecef;
+  --seaside-gray: #9aa6b2;
+  --seaside-gray-dark: #556670;
+  --seaside-navy: #2c4a5e;
+  --seaside-deep: #183547;
+  
+  /* Semantic Colors */
+  --bg-primary: var(--seaside-cream);
+  --bg-secondary: var(--seaside-white);
+  --text-primary: var(--seaside-deep);
+  --text-secondary: var(--seaside-gray-dark);
+  --text-muted: var(--seaside-gray);
+  --border-light: rgba(42, 74, 94, 0.08);
+  --shadow-soft: rgba(28, 53, 71, 0.08);
+  
+  /* Buttons & CTAs */
+  --cta-gradient-start: var(--seaside-sand);
+  --cta-gradient-end: var(--seaside-sky);
+  --cta-text: var(--seaside-deep);
+  
+  /* Spacing & Layout */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-2xl: 48px;
+  
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
+  --border-radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-xs: 0 2px 4px var(--shadow-soft);
+  --shadow-sm: 0 4px 12px var(--shadow-soft);
+  --shadow-md: 0 8px 24px var(--shadow-soft);
+  --shadow-lg: 0 16px 40px rgba(28, 53, 71, 0.12);
+  
+  /* Typography */
+  --font-ui: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+}
+
+/* Global Typography */
+body {
+  font-family: var(--font-ui);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+
+/* Utility Classes */
+
+/* Card Component */
+.card {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-light);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Topbar Component */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-light);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(8px);
+  background: rgba(253, 254, 255, 0.95);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* Brand Avatar */
+.brand-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--seaside-seafoam);
+  box-shadow: var(--shadow-xs);
+}
+
+.brand-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Button Components */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: 10px 18px;
+  border-radius: var(--border-radius-md);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+  border-color: var(--seaside-ocean);
+  color: var(--seaside-ocean);
+  background: rgba(106, 154, 184, 0.05);
+}
+
+.btn-strong {
+  background: linear-gradient(135deg, var(--cta-gradient-start), var(--cta-gradient-end));
+  color: var(--cta-text);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-strong:hover {
+  box-shadow: var(--shadow-md);
+  filter: brightness(1.05);
+}
+
+/* Text Utilities */
+.muted {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* Quote Banner Component */
+.quote-banner {
+  background: linear-gradient(135deg, var(--seaside-seafoam) 0%, var(--seaside-sky) 100%);
+  border-radius: var(--border-radius-xl);
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  margin: var(--spacing-lg) 0;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.quote-banner__text {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  line-height: 1.5;
+  color: var(--seaside-deep);
+  font-style: italic;
+  margin: 0 0 var(--spacing-md);
+}
+
+.quote-banner__author {
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.quote-banner__author::before {
+  content: "— ";
+}
+
+/* Image Grid Component */
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+}
+
+.image-grid__item {
+  position: relative;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+  background: var(--seaside-gray-light);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.image-grid__item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.image-grid__image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  display: block;
+}
+
+.image-grid__caption {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-secondary);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Icon Styling Hooks */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Responsive Helpers */
+.desktop-only {
+  display: none;
+}
+
+.mobile-only {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .desktop-only {
+    display: block;
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+  
+  .image-grid {
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--spacing-lg);
+  }
+  
+  .image-grid__image {
+    height: 240px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .image-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Smooth animations with accessibility considerations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

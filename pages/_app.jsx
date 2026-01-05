@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import '../styles/globals.css';
+import '../styles/theme.css'; // Centralized seaside theme
 import React from 'react';
 import '../prototype/find-the-calm.css'; // global prototype styles
 import '../styles.css'; // keep your existing global styles if present
