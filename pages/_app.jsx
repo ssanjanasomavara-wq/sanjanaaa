@@ -1,4 +1,5 @@
 import Head from 'next/head';
+import '../styles/theme.css'; // centralized pastel seaside theme
 import '../styles/globals.css';
 import '../styles/theme.css'; // Centralized seaside theme
 import React from 'react';
@@ -12,7 +13,7 @@ export default function MyApp({ Component, pageProps }) {
         <title>Semi‑Colonic</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/semicolonic-ico.png" />
-        <meta name="theme-color" content="#0b1324" />
+        <meta name="theme-color" content="#e8f4f8" />
       </Head>
       <Component {...pageProps} />
     </>

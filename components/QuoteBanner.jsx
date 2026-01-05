@@ -1,21 +1,14 @@
 import React from 'react';
 
 /**
- * QuoteBanner - Displays an inspirational quote with author attribution
- * Uses DM Serif Display for quote text and Poppins for author
- * 
- * @param {string} quote - The quote text to display
- * @param {string} author - The author's name
+ * QuoteBanner component - displays an inspirational quote with author
+ * Uses the DM Serif Display font for elegant quote styling
  */
-export default function QuoteBanner({ quote, author }) {
+export default function QuoteBanner({ text, author, className = '' }) {
   return (
-    <div className="quote-banner">
-      <blockquote className="quote-banner__text">
-        "{quote}"
-      </blockquote>
-      {author && (
-        <p className="quote-banner__author">{author}</p>
-      )}
+    <div className={`quote-banner ${className}`}>
+      <p className="quote-banner__text">{text}</p>
+      {author && <p className="quote-banner__author">— {author}</p>}
     </div>
   );
 }

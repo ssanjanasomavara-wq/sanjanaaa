@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import QuoteBanner from '../components/QuoteBanner';
+import Heart from '../components/icons/Heart';
+import Leaf from '../components/icons/Leaf';
 
 const BOOKS = [
   { title: 'Prozac Nation', author: 'Elizabeth Wurtzel', category: 'Memoir' },
@@ -40,20 +43,28 @@ export default function Resources() {
 
   return (
     <div className="site-root">
-      <div className="site" style={{ padding: 18 }}>
-        <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          <button onClick={() => router.back()} className="btn-back" aria-label="Go back" style={{ cursor: 'pointer' }}>
+      <div className="site">
+        <header className="page-header">
+          <button onClick={() => router.back()} className="btn btn-outline" aria-label="Go back">
             ← Back
           </button>
           <h1 style={{ margin: 0, fontSize: 22, color: '#183547' }}>Resources — Books on Mental Health & Comfort Reading</h1>
         </header>
 
-        <p style={{ color: '#556', marginTop: 6 }}>
-          A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
-          Each item links to Amazon.in search results for the title + author so you can find editions available in India.
-        </p>
+        <QuoteBanner 
+          text="Books are lighthouses in the storm, guiding us to safer shores."
+          author="A Reading Friend"
+        />
 
-        <div style={{ overflowX: 'auto', marginTop: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: '#4b6b7a' }}>
+          <Heart size={20} color="#f4b8a4" className="icon-small" />
+          <p style={{ margin: 0 }}>
+            A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
+            Each item links to Amazon.in search results for the title + author so you can find editions available in India.
+          </p>
+        </div>
+
+        <div className="card" style={{ overflowX: 'auto', marginTop: 18 }}>
           <table className="books-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
             <thead>
               <tr>
@@ -74,7 +85,7 @@ export default function Resources() {
                       href={amazonSearchLink(b.title, b.author)}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 600 }}
+                      style={{ color: '#b8e0d9', textDecoration: 'none', fontWeight: 600 }}
                     >
                       View on Amazon.in
                     </a>
@@ -85,35 +96,53 @@ export default function Resources() {
           </table>
         </div>
 
-        <section style={{ marginTop: 22 }}>
-          <h2 style={{ margin: '8px 0 6px' }}>Notes</h2>
-          <ul style={{ color: '#556' }}>
+        <section className="content-card" style={{ marginTop: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Leaf size={24} color="#a8d5ba" />
+            <h2 style={{ margin: 0 }}>Notes</h2>
+          </div>
+          <ul style={{ color: '#4b6b7a', paddingLeft: 20 }}>
             <li>Memoirs and first-person accounts can be powerful and sometimes triggering — please approach at your own pace.</li>
             <li>Picture books listed are gentle reads for kids (and adults) to help discuss feelings, worry and connection.</li>
             <li>If you want, I can replace the search links with specific Amazon product pages (please provide preferred editions or I can look them up).</li>
           </ul>
         </section>
 
-        <footer style={{ marginTop: 26, color: '#7b8899', fontSize: 13 }}>
+        <footer style={{ marginTop: 28, color: '#7b8899', fontSize: 13, textAlign: 'center' }}>
           © {new Date().getFullYear()} Semi‑Colonic — Resources
         </footer>
       </div>
 
       <style jsx>{`
-        .btn-back {
-          background: transparent;
-          border: 1px solid rgba(6,20,40,0.06);
-          padding: 8px 10px;
-          border-radius: 8px;
+        .site-root {
+          min-height: 100vh;
+          background: linear-gradient(180deg, #e8f4f8, #d8eef5);
         }
+        
+        .site {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 18px;
+        }
+        
+        .page-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 18px;
+          flex-wrap: wrap;
+        }
+        
         .books-table th, .books-table td {
           padding: 12px 14px;
           border-bottom: 1px solid rgba(6,20,40,0.04);
           text-align: left;
           vertical-align: middle;
         }
+        
         @media (max-width: 640px) {
           .books-table { min-width: 520px; }
+          .page-header h1 { font-size: 18px; }
         }
       `}</style>
     </div>

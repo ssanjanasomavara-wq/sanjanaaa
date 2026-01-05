@@ -5,23 +5,17 @@ import React from 'react';
  * 
  * @param {Array} images - Array of image objects with {src, alt, caption}
  */
-export default function ImageGrid({ images = [] }) {
+
+export default function ImageGrid({ images = [], className = '' }) {
   if (!images || images.length === 0) {
     return null;
   }
 
   return (
-    <div className="image-grid">
+    <div className={`image-grid ${className}`}>
       {images.map((image, index) => (
         <div key={index} className="image-grid__item">
-          <img
-            src={image.src}
-            alt={image.alt || ''}
-            className="image-grid__image"
-          />
-          {image.caption && (
-            <div className="image-grid__caption">{image.caption}</div>
-          )}
+          <img src={image.src} alt={image.alt || `Image ${index + 1}`} />
         </div>
       ))}
     </div>
