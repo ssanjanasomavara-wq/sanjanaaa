@@ -1,5 +1,10 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import QuoteBanner from '../components/QuoteBanner';
+import Heart from '../components/icons/Heart';
+import Leaf from '../components/icons/Leaf';
+import Lightbulb from '../components/icons/Lightbulb';
+import { QUOTES } from '../lib/themeConstants';
 
 export default function Features() {
   const router = useRouter();
@@ -56,6 +61,17 @@ export default function Features() {
           <p style={{ color: '#617489' }}>
             Small tools, prototyping pages and helpful interactions. Click any tile to open a feature.
           </p>
+
+          <QuoteBanner 
+            quote={QUOTES.features.quote}
+            author={QUOTES.features.author}
+          />
+
+          <div style={{ display: 'flex', gap: 16, justifyContent: 'center', margin: '24px 0', color: 'var(--seaside-ocean)' }}>
+            <Heart size={32} />
+            <Leaf size={32} />
+            <Lightbulb size={32} />
+          </div>
 
           <div
             className="features-grid"

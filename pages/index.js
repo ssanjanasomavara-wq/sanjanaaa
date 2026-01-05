@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import QuoteBanner from '../components/QuoteBanner';
+import ImageGrid from '../components/ImageGrid';
+import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -399,6 +402,14 @@ export default function IndexPage() {
 
               <div className="card content-card">
                 <p>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
+                
+                <QuoteBanner 
+                  quote={QUOTES.home.quote}
+                  author={QUOTES.home.author}
+                />
+                
+                <ImageGrid images={SEASIDE_IMAGES} />
+                
                 <hr/>
                 <div className="get-in-touch">
                   <div>

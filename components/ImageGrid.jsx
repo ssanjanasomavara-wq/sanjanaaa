@@ -1,10 +1,11 @@
 import React from 'react';
 
 /**
- * ImageGrid component - displays a responsive grid of images
- * @param {Array} images - Array of image objects with { src, alt } properties
- * @param {string} className - Additional CSS classes
+ * ImageGrid - Displays a responsive grid of images with captions
+ * 
+ * @param {Array} images - Array of image objects with {src, alt, caption}
  */
+
 export default function ImageGrid({ images = [], className = '' }) {
   if (!images || images.length === 0) {
     return null;

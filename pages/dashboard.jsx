@@ -6,6 +6,7 @@ import InviteWidget from '../components/InviteWidget';
 import ChatPopup from '../components/ChatPopup';
 import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
+import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -167,6 +168,11 @@ export default function Dashboard() {
               <div className="content-card">
                 <p style={{ marginTop: 0 }}>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
 
+                <QuoteBanner 
+                  quote={QUOTES.dashboard.quote}
+                  author={QUOTES.dashboard.author}
+                />
+
                 <div className="quick-grid" role="list">
                   <Link href="/posts" legacyBehavior>
                     <a className="quick-tile" role="listitem">Posts<div className="quick-sub">Browse community posts</div></a>
@@ -184,6 +190,8 @@ export default function Dashboard() {
                     <a className="quick-tile" role="listitem">Games<div className="quick-sub">Relaxing mini-games</div></a>
                   </Link>
                 </div>
+
+                <ImageGrid images={SEASIDE_IMAGES} />
 
                 <hr className="divider" />
 
