@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import QuoteBanner from '../components/QuoteBanner';
+import Heart from '../components/icons/Heart';
+import Leaf from '../components/icons/Leaf';
 
 const BOOKS = [
   { title: 'Prozac Nation', author: 'Elizabeth Wurtzel', category: 'Memoir' },
@@ -40,20 +43,28 @@ export default function Resources() {
 
   return (
     <div className="site-root">
-      <div className="site" style={{ padding: 18 }}>
-        <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
-          <button onClick={() => router.back()} className="btn-back" aria-label="Go back" style={{ cursor: 'pointer' }}>
+      <div className="site" style={{ padding: var(--space-md) }}>
+        <header className="page-header">
+          <button onClick={() => router.back()} className="btn btn-outline" aria-label="Go back">
             ← Back
           </button>
-          <h1 style={{ margin: 0, fontSize: 22, color: '#183547' }}>Resources — Books on Mental Health & Comfort Reading</h1>
+          <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text-primary)' }}>Resources — Books on Mental Health & Comfort Reading</h1>
         </header>
 
-        <p style={{ color: '#556', marginTop: 6 }}>
-          A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
-          Each item links to Amazon.in search results for the title + author so you can find editions available in India.
-        </p>
+        <QuoteBanner 
+          text="Books are lighthouses in the storm, guiding us to safer shores."
+          author="A Reading Friend"
+        />
 
-        <div style={{ overflowX: 'auto', marginTop: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 'var(--space-md)', color: 'var(--text-secondary)' }}>
+          <Heart size={20} color="var(--color-coral-soft)" className="icon-small" />
+          <p style={{ margin: 0 }}>
+            A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
+            Each item links to Amazon.in search results for the title + author so you can find editions available in India.
+          </p>
+        </div>
+
+        <div className="card" style={{ overflowX: 'auto', marginTop: 'var(--space-md)' }}>
           <table className="books-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
             <thead>
               <tr>
@@ -74,7 +85,7 @@ export default function Resources() {
                       href={amazonSearchLink(b.title, b.author)}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: '#1a73e8', textDecoration: 'none', fontWeight: 600 }}
+                      style={{ color: 'var(--color-aqua-mist)', textDecoration: 'none', fontWeight: 600 }}
                     >
                       View on Amazon.in
                     </a>
@@ -85,35 +96,53 @@ export default function Resources() {
           </table>
         </div>
 
-        <section style={{ marginTop: 22 }}>
-          <h2 style={{ margin: '8px 0 6px' }}>Notes</h2>
-          <ul style={{ color: '#556' }}>
+        <section className="content-card" style={{ marginTop: 'var(--space-lg)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+            <Leaf size={24} color="var(--color-seafoam)" />
+            <h2 style={{ margin: 0 }}>Notes</h2>
+          </div>
+          <ul style={{ color: 'var(--text-secondary)', paddingLeft: 20 }}>
             <li>Memoirs and first-person accounts can be powerful and sometimes triggering — please approach at your own pace.</li>
             <li>Picture books listed are gentle reads for kids (and adults) to help discuss feelings, worry and connection.</li>
             <li>If you want, I can replace the search links with specific Amazon product pages (please provide preferred editions or I can look them up).</li>
           </ul>
         </section>
 
-        <footer style={{ marginTop: 26, color: '#7b8899', fontSize: 13 }}>
+        <footer style={{ marginTop: 'var(--space-lg)', color: 'var(--text-muted)', fontSize: 13, textAlign: 'center' }}>
           © {new Date().getFullYear()} Semi‑Colonic — Resources
         </footer>
       </div>
 
       <style jsx>{`
-        .btn-back {
-          background: transparent;
-          border: 1px solid rgba(6,20,40,0.06);
-          padding: 8px 10px;
-          border-radius: 8px;
+        .site-root {
+          min-height: 100vh;
+          background: var(--bg-gradient);
         }
+        
+        .site {
+          max-width: var(--max-width);
+          margin: 0 auto;
+          padding: var(--space-md);
+        }
+        
+        .page-header {
+          display: flex;
+          align-items: center;
+          gap: var(--space-sm);
+          margin-bottom: var(--space-md);
+          flex-wrap: wrap;
+        }
+        
         .books-table th, .books-table td {
           padding: 12px 14px;
           border-bottom: 1px solid rgba(6,20,40,0.04);
           text-align: left;
           vertical-align: middle;
         }
+        
         @media (max-width: 640px) {
           .books-table { min-width: 520px; }
+          .page-header h1 { font-size: 18px; }
         }
       `}</style>
     </div>
