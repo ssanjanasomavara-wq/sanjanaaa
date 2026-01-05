@@ -350,13 +350,10 @@ export default function IndexPage() {
             <div className="row action-row">
               <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
               <button onClick={() => { showHome(); setUserInfo('Guest — limited access.'); }} className="muted">Guest</button>
+              <button onClick={showForgot} className="muted small">Forgot Password?</button>
             </div>
 
-            <div className="centered-row">
-              <button onClick={showForgot} className="muted small-btn">Forgot Password?</button>
-            </div>
-
-            <div className="row" style={{ marginTop: 12 }}>
+            <div className="google-row">
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false" role="img">
                   <path fill="#fbbc05" d="M43.6 20.1H42V20H24v8h11.2c-1.1 4-4 7.4-8.2 9.2l0 .1 6.2 4.8c3.6-3.3 6-8.2 6-13.9 0-1.1-.1-2.1-.6-3.2z"/>
@@ -538,11 +535,21 @@ export default function IndexPage() {
           font-size: 1.95rem; 
           font-weight: 700; 
           margin-bottom: 12px; 
-          color: var(--text-light); 
+          color: var(--text-primary); 
           display: flex; 
           align-items: center; 
           justify-content: center; 
           gap: 10px; 
+        }
+
+        /* ensure logo images are centered and constrained to brand-friendly size */
+        .logo img {
+          display: block;
+          margin: 0 auto;
+          max-width: 300px;
+          max-height: 300px;
+          width: auto;
+          height: auto;
         }
         
         .subtitle { 
@@ -581,19 +588,29 @@ export default function IndexPage() {
           cursor: pointer;
         }
 
+        /* Muted buttons now size to content and center as a group */
         .muted { 
           background: transparent; 
           border: 1px solid rgba(255,255,255,0.06); 
           color: rgba(255,255,255,0.92); 
-          padding: 10px; 
-          width: 48%; 
+          padding: 10px 14px; 
+          display: inline-block;
+          border-radius: 10px;
+          cursor: pointer;
+          font-weight: 600;
+        }
+
+        .muted.small {
+          padding: 8px 10px;
+          font-size: 0.92rem;
         }
 
         .row.action-row { 
           display: flex; 
           gap: 12px; 
           justify-content: center; 
-          margin-top: 8px; 
+          margin-top: 8px;
+          flex-wrap: wrap;
         }
 
         .centered-row { 
@@ -602,13 +619,19 @@ export default function IndexPage() {
           margin-top: 8px; 
         }
 
+        .google-row {
+          display: flex;
+          justify-content: center;
+          margin-top: 12px;
+        }
+
         .google-btn {
-          margin: 12px auto 0;
+          margin: 0;
           background: rgba(255,255,255,0.98);
           color: #0b1b2b;
           border-radius: 999px;
           padding: 10px 14px;
-          max-width: 280px;
+          max-width: 300px;
           width: 100%;
           display: inline-flex;
           align-items: center;
