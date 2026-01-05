@@ -1,119 +1,204 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-export default function InviteWidget({ visible, onClose, inviteCode = 'TTASOK', inviteLink }) {
-  const [copied, setCopied] = useState('');
+/**
+ * InviteWidget (pastel, theme-adaptive)
+ *
+ * Props:
+ * - visible (bool)
+ * - onClose (func)
+ * - inviteCode (string)
+ * - inviteLink (string)
+ *
+ * This component uses a pastel theme with good contrast, adapts to dark mode,
+ * and includes a copy-to-clipboard action with a small confirmation message.
+ */
+export default function InviteWidget({ visible = false, onClose = () => {}, inviteCode = '', inviteLink = '' }) {
+  const modalRef = useRef(null);
+  const [copied, setCopied] = useState(false);
+
   useEffect(() => {
-    if (!visible) setCopied('');
-  }, [visible]);
+    if (!visible) return;
+    const prev = document.activeElement;
+    const site = document.querySelector('.site');
+    if (site) site.setAttribute('aria-hidden', 'true');
+    // focus the modal for assistive tech
+    setTimeout(() => modalRef.current?.focus?.(), 60);
+
+    const handleKey = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('keydown', handleKey);
+      if (site) site.removeAttribute('aria-hidden');
+      if (prev && prev.focus) prev.focus();
+    };
+  }, [visible, onClose]);
+
+  useEffect(() => {
+    if (!copied) return;
+    const t = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(t);
+  }, [copied]);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteLink || inviteCode || '');
+      setCopied(true);
+    } catch (err) {
+      console.error('copy failed', err);
+      setCopied(false);
+    }
+  };
 
   if (!visible) return null;
 
-  const textToShare = `Join me on Semi-colonic! Use code ${inviteCode}. ${inviteLink || ''}`;
-
-  async function handleWhatsAppShare() {
-    const base = 'https://wa.me/?text=' + encodeURIComponent(textToShare);
-    window.open(base, '_blank', 'noopener,noreferrer');
-  }
-
-  function handleInstagram() {
-    window.open('https://instagram.com', '_blank', 'noopener,noreferrer');
-  }
-
-  function handleTikTok() {
-    window.open('https://tiktok.com', '_blank', 'noopener,noreferrer');
-  }
-
-  async function handleCopy(text, label) {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(label);
-      setTimeout(() => setCopied(''), 2000);
-    } catch (err) {
-      console.error('Copy failed', err);
-    }
-  }
-
-  async function handleNativeShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'Semi-colonic invite',
-          text: textToShare,
-          url: inviteLink,
-        });
-      } catch (err) {
-        console.error('Share failed', err);
-      }
-    } else {
-      // fallback to copy
-      handleCopy(textToShare, 'link');
-    }
-  }
-
   return (
-    <div className="invite-overlay" role="dialog" aria-modal="true" aria-label="Invite others">
-      <div className="invite-modal">
-        <div className="invite-header">
-          <strong>Invite friends</strong>
-          <button aria-label="Close invite" onClick={onClose} className="close-btn">✕</button>
-        </div>
+    <>
+      <div className="invite-backdrop" onClick={onClose} />
+
+      <div
+        className="invite-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Invite dialog"
+        ref={modalRef}
+        tabIndex={-1}
+      >
+        <header className="invite-header">
+          <div>
+            <h2>Invite a friend</h2>
+            <p className="muted">Share this code or link to join the community</p>
+          </div>
+          <button className="btn btn-plain" aria-label="Close invite" onClick={onClose}>✕</button>
+        </header>
 
         <div className="invite-body">
-          <p>Share Semi-colonic with friends. Use invite code <strong>{inviteCode}</strong>.</p>
-
-          <div className="actions">
-            <button className="btn" onClick={handleWhatsAppShare}>Share on WhatsApp</button>
-            <button className="btn" onClick={handleInstagram}>Open Instagram</button>
-            <button className="btn" onClick={handleTikTok}>Open TikTok</button>
-            <button className="btn" onClick={() => handleCopy(inviteLink || window.location.href, 'link')}>Copy invite link</button>
-            <button className="btn" onClick={() => handleCopy(inviteCode, 'code')}>Copy invite code</button>
-            <button className="btn" onClick={handleNativeShare}>Native share</button>
-          </div>
-
-          <div style={{ marginTop: 10, color: '#444' }}>
-            {copied ? <em>Copied {copied} ✓</em> : <span>Share via social apps or copy the invite.</span>}
+          <div className="invite-card">
+            <div className="invite-code">{inviteCode || '—'}</div>
+            <div className="invite-sub muted">{inviteLink || ''}</div>
+            <div className="invite-actions">
+              <button className="btn btn-outline" onClick={handleCopy}>
+                {copied ? 'Copied!' : 'Copy invite link'}
+              </button>
+              <a className="btn btn-strong" href={inviteLink || '#'} onClick={(e) => { /* navigation handled by anchor */ }}>
+                Open link
+              </a>
+            </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        .invite-overlay {
+        :root {
+          --invite-bg: linear-gradient(180deg,#fffafb, #f6fcff);
+          --invite-surface: #ffffff;
+          --muted: #6b7280;
+          --outline-bg: rgba(115, 197, 179, 0.12); /* soft mint */
+          --outline-border: rgba(115,197,179,0.26);
+          --outline-color: #0f5132;
+          --strong-bg: linear-gradient(90deg,#ffd6e0,#fff1c9);
+          --strong-color: #2f1313;
+        }
+        @media (prefers-color-scheme: dark) {
+          :root {
+            --invite-bg: linear-gradient(180deg,#071122,#061018);
+            --invite-surface: #071124;
+            --muted: #9aa6b2;
+            --outline-bg: rgba(50,150,120,0.06);
+            --outline-border: rgba(50,150,120,0.18);
+            --outline-color: #8ee1c7;
+            --strong-bg: linear-gradient(90deg,#663342,#4f3f2d);
+            --strong-color: #fff8f6;
+          }
+        }
+
+        .invite-backdrop {
           position: fixed;
           inset: 0;
+          background: rgba(6,20,40,0.36);
           z-index: 1200;
-          background: rgba(6,20,40,0.45);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 20px;
         }
+
         .invite-modal {
-          width: 100%;
-          max-width: 520px;
-          background: #fff;
+          position: fixed;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          width: min(92vw, 460px);
+          background: var(--invite-surface);
           border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 24px 80px rgba(6,20,40,0.3);
+          padding: 16px;
+          box-shadow: 0 12px 40px rgba(6,20,40,0.12);
+          z-index: 1201;
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
         }
+
         .invite-header {
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          padding: 14px 16px;
-          border-bottom: 1px solid #eee;
-          font-size: 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          gap: 12px;
         }
-        .invite-body { padding: 16px; }
-        .close-btn { background: transparent; border: none; font-size: 18px; cursor:pointer; }
-        .actions { display:flex; gap:10px; flex-wrap:wrap; margin-top: 8px; }
-        .btn {
-          padding: 8px 10px;
-          background: #f6f7f9;
-          border: 1px solid #e7e9ee;
+        .invite-header h2 { margin: 0; font-size: 18px; color: var(--text-primary, #183547); }
+        .muted { color: var(--muted); font-size: 13px; margin: 4px 0 0; }
+
+        .invite-body { display: flex; justify-content: center; }
+        .invite-card {
+          width: 100%;
+          border-radius: 10px;
+          background: var(--invite-bg);
+          padding: 12px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+          align-items: stretch;
+          text-align: center;
+        }
+
+        .invite-code {
+          font-weight: 800;
+          letter-spacing: 0.12em;
+          font-size: 20px;
+          color: var(--text-primary, #1b3b3a);
+          background: rgba(255,255,255,0.6);
+          padding: 10px 12px;
           border-radius: 8px;
-          cursor: pointer;
+        }
+
+        .invite-sub { font-size: 12px; overflow-wrap: anywhere; color: var(--muted); }
+
+        .invite-actions {
+          display: flex;
+          gap: 10px;
+          justify-content: center;
+          margin-top: 6px;
+          flex-wrap: wrap;
+        }
+
+        .btn { font-weight: 700; padding: 10px 14px; border-radius: 10px; cursor: pointer; border: none; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+
+        .btn.btn-plain { background: transparent; color: var(--muted); }
+
+        .btn.btn-outline {
+          background: var(--outline-bg);
+          color: var(--outline-color);
+          border: 1px solid var(--outline-border);
+        }
+
+        .btn.btn-strong {
+          background: var(--strong-bg);
+          color: var(--strong-color);
+          box-shadow: 0 8px 20px rgba(17,24,39,0.06);
+        }
+
+        @media (max-width: 420px) {
+          .invite-modal { width: calc(100vw - 24px); left: 12px; right: 12px; transform: none; top: 12px; bottom: auto; }
+          .invite-card { padding: 10px; }
         }
       `}</style>
-    </div>
+    </>
   );
 }
