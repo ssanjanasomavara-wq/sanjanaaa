@@ -5,9 +5,8 @@ import Link from 'next/link';
 /**
  * MobileDrawer (Portal)
  *
- * - Ensures Invite/Chat buttons are visible by scoping button styles inside
- *   the drawer and using accessible pastel colors with good contrast.
- * - Theme-aware: adapts for light/dark with prefers-color-scheme queries.
+ * Renders the drawer into a portal attached to document.body.
+ * Uses global .btn, .btn-outline and .btn-strong styles provided by styles/globals.css.
  */
 export default function MobileDrawer({
   open = false,
@@ -162,33 +161,9 @@ export default function MobileDrawer({
             Chat
           </button>
         </div>
+      </aside>
 
       <style jsx>{`
-        /* Drawer-scoped pastel theme variables */
-        :root {
-          --drawer-bg: #ffffff;
-          --drawer-accent: #e6f9f4; /* mint pastel */
-          --drawer-accent-2: #fff0f3; /* soft coral pastel */
-          --btn-outline-bg: rgba(46, 204, 183, 0.12); /* mint-ish soft */
-          --btn-outline-border: rgba(46, 204, 183, 0.28);
-          --btn-outline-color: #0f5a48; /* darker mint for text */
-          --btn-strong-bg: linear-gradient(90deg, #ffcfda, #ffd6a8); /* warm pastel */
-          --btn-strong-color: #3a1f1f;
-        }
-
-        @media (prefers-color-scheme: dark) {
-          :root {
-            --drawer-bg: #0b1220;
-            --drawer-accent: rgba(255,255,255,0.03);
-            --drawer-accent-2: rgba(255,255,255,0.02);
-            --btn-outline-bg: rgba(46, 204, 183, 0.08);
-            --btn-outline-border: rgba(46, 204, 183, 0.22);
-            --btn-outline-color: #9fe7d4;
-            --btn-strong-bg: linear-gradient(90deg, #6b2b32, #6b4b2a);
-            --btn-strong-color: #fff7f5;
-          }
-        }
-
         /* Backdrop */
         .drawer-backdrop {
           position: fixed;
@@ -212,7 +187,7 @@ export default function MobileDrawer({
           bottom: 0;
           width: min(84vw, 360px);
           max-width: 420px;
-          background: var(--drawer-bg);
+          background: var(--surface, #fff);
           box-shadow: -16px 0 40px rgba(6,20,40,0.12);
           transform: translateX(100%);
           z-index: 1001;
@@ -224,77 +199,22 @@ export default function MobileDrawer({
           transition: transform 300ms cubic-bezier(.2,.9,.2,1);
           -webkit-overflow-scrolling: touch;
         }
-        .mobile-drawer.open {
-          transform: translateX(0);
-        }
+        .mobile-drawer.open { transform: translateX(0); }
 
-        .drawer-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-        .drawer-brand {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .drawer-title {
-          font-weight: 700;
-          color: var(--text-primary, #183547);
-        }
-        .drawer-nav {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          margin-top: 4px;
-        }
-        .drawer-nav a {
-          padding: 10px 8px;
-          border-radius: 8px;
-          text-decoration: none;
-          color: var(--text-primary, #183547);
-        }
+        .drawer-header { display:flex; justify-content:space-between; align-items:center; }
+        .drawer-brand { display:flex; align-items:center; gap:10px; }
+        .drawer-title { font-weight:700; color:var(--text-primary, #183547); }
+        .drawer-nav { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+        .drawer-nav a { padding:10px 8px; border-radius:8px; text-decoration:none; color:var(--text-primary, #183547); }
 
-        /* Button styles scoped inside the drawer to avoid leaking */
-        .mobile-drawer .btn {
-          font-weight: 700;
-          border-radius: 10px;
-          padding: 10px 12px;
-          cursor: pointer;
-          border: none;
-        }
-
-        /* Outline-style (pastel, good contrast) */
-        .mobile-drawer .btn.btn-outline {
-          background: var(--btn-outline-bg);
-          color: var(--btn-outline-color);
-          border: 1px solid var(--btn-outline-border);
-        }
-
-        /* Strong CTA (warm pastel gradient with clear text) */
-        .mobile-drawer .btn.btn-strong {
-          background: var(--btn-strong-bg);
-          color: var(--btn-strong-color);
-          box-shadow: 0 6px 18px rgba(17,24,39,0.06);
-        }
-
-        /* Slightly different treatments for the drawer variant CTA */
-        .drawer-invite { /* friendly, mint pastel */
-          background: var(--btn-outline-bg);
-          color: var(--btn-outline-color);
-          border: 1px solid var(--btn-outline-border);
-        }
-        .drawer-chat { /* stronger warm CTA */
-          background: var(--btn-strong-bg);
-          color: var(--btn-strong-color);
-        }
+        .drawer-actions { display:flex; gap:8px; margin-top:auto; justify-content:space-between; }
 
         @media (prefers-reduced-motion: reduce) {
           .drawer-backdrop { transition: none; }
-          .mobile-drawer { transition: none; transform: none !important; right: 0; width: 100%; }
+          .mobile-drawer { transition: none; transform: none !important; right:0; width:100%; }
         }
 
-        /* Make drawer full-screen on narrow / taller phones (covers iPhone 13 Pro) */
+        /* Full-screen on narrow/tall devices (iPhone 13 Pro-ish) */
         @media (max-width: 430px) and (min-height: 800px) {
           .mobile-drawer {
             width: 100vw;
@@ -310,7 +230,6 @@ export default function MobileDrawer({
           }
         }
 
-        /* very small phones fallback */
         @media (max-width: 420px) {
           .mobile-drawer { width: 100vw; }
         }
