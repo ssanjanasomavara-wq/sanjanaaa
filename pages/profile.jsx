@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -18,8 +19,7 @@ export default function ProfilePage() {
 
   const authRef = useRef(null);
   const authModRef = useRef(null);
-  const dbRef = useRef(null);
-  const dbModRef = useRef(null);
+  const firestoreRef = useRef(null);
   const cfgRef = useRef(null);
   const mountedRef = useRef(true);
   const uidRef = useRef(null);
@@ -27,6 +27,7 @@ export default function ProfilePage() {
   useEffect(() => {
     mountedRef.current = true;
     let unsub = null;
+
     (async () => {
       try {
         const resp = await fetch('/api/firebase-config', { cache: 'no-store' });
@@ -34,62 +35,45 @@ export default function ProfilePage() {
         const cfg = await resp.json();
         cfgRef.current = cfg;
 
-        const init = await initFirebaseWithConfig(cfg);
-        // initFirebaseWithConfig is used in dashboard — try to pull auth/authMod & db/dbMod
-        const { auth, authMod, db, dbMod } = init || {};
+        const init = await initFirebaseWithConfig(cfg) || {};
 
-        authRef.current = auth;
-        authModRef.current = authMod;
-        dbRef.current = db;
-        dbModRef.current = dbMod;
+        // Try to extract auth/authMod and Firestore
+        const { auth, authMod, app, firestore, firestoreMod } = init;
+        authRef.current = auth || null;
+        authModRef.current = authMod || null;
 
-        // helper to load profile once we have uid
+        // Derive a Firestore instance in a robust way:
+        let firestoreInstance = null;
+        if (firestore) {
+          firestoreInstance = firestore;
+        } else if (firestoreMod && typeof firestoreMod.getFirestore === 'function') {
+          // init may export modular helpers
+          firestoreInstance = firestoreMod.getFirestore(app);
+        } else if (app) {
+          // fallback to our imported getFirestore
+          try {
+            firestoreInstance = getFirestore(app);
+          } catch (err) {
+            console.warn('getFirestore fallback failed', err);
+          }
+        }
+        firestoreRef.current = firestoreInstance;
+
         const loadProfile = async (uid, userEmail) => {
           uidRef.current = uid;
           setEmail(userEmail || '');
           setStatusMsg('Loading profile...');
           try {
-            let data = null;
-            const path = `profiles/${uid}`;
-
-            // Try modular SDK: dbMod.get(dbMod.ref(db, path))
-            if (dbMod && typeof dbMod.get === 'function' && typeof dbMod.ref === 'function' && db) {
-              const profileRef = dbMod.ref(db, path);
-              const snap = await dbMod.get(profileRef);
-              if (snap && snap.exists && typeof snap.val === 'function') data = snap.val();
+            if (!firestoreRef.current) {
+              setStatusMsg('No Firestore initialized');
+              setLoading(false);
+              return;
             }
-            // Try modular onValue fallback
-            else if (dbMod && typeof dbMod.onValue === 'function' && typeof dbMod.ref === 'function' && db) {
-              // read once using promise wrapper
-              data = await new Promise((resolve) => {
-                const profileRef = dbMod.ref(db, path);
-                const off = dbMod.onValue(profileRef, (snap) => {
-                  if (snap && snap.exists && typeof snap.val === 'function') {
-                    resolve(snap.val());
-                  } else {
-                    resolve(null);
-                  }
-                  if (typeof off === 'function') off();
-                }, { onlyOnce: true });
-              });
-            }
-            // Namespaced SDK: db.ref(path).once('value')
-            else if (db && typeof db.ref === 'function' && typeof db.ref().once === 'function') {
-              const snap = await db.ref(path).once('value');
-              data = snap && snap.val ? snap.val() : null;
-            }
-            // Fallback to REST if databaseURL provided in config
-            else if (cfg && cfg.databaseURL) {
-              const url = `${cfg.databaseURL.replace(/\/$/, '')}/${path}.json`;
-              const r = await fetch(url, { method: 'GET' });
-              if (r.ok) {
-                const j = await r.json();
-                data = j;
-              }
-            }
-
+            const ref = doc(firestoreRef.current, 'profiles', uid);
+            const snap = await getDoc(ref);
             if (!mountedRef.current) return;
-            if (data) {
+            if (snap && snap.exists()) {
+              const data = snap.data();
               setFirstName(data.firstName || '');
               setLastName(data.lastName || '');
               setPhone(data.phone || '');
@@ -104,7 +88,7 @@ export default function ProfilePage() {
           }
         };
 
-        // Listen for auth state
+        // Auth handling similar to dashboard
         if (authMod && typeof authMod.onAuthStateChanged === 'function') {
           unsub = authMod.onAuthStateChanged(auth, (user) => {
             if (!mountedRef.current) return;
@@ -115,11 +99,11 @@ export default function ProfilePage() {
             loadProfile(user.uid, user.email || '');
           });
 
-          // In case currentUser already set
+          // If already signed in
           const cur = auth && auth.currentUser;
           if (cur) loadProfile(cur.uid, cur.email || '');
         } else {
-          // Namespaced or other: try auth.currentUser directly
+          // namespaced style or other: try auth.currentUser
           const cur = auth && auth.currentUser;
           if (!cur) {
             router.replace('/');
@@ -146,6 +130,8 @@ export default function ProfilePage() {
       const uid = uidRef.current;
       if (!uid) throw new Error('No user id');
 
+      if (!firestoreRef.current) throw new Error('No Firestore instance');
+
       const payload = {
         firstName: firstName || '',
         lastName: lastName || '',
@@ -156,44 +142,17 @@ export default function ProfilePage() {
         updatedAt: new Date().toISOString()
       };
 
-      const path = `profiles/${uid}`;
-
-      const db = dbRef.current;
-      const dbMod = dbModRef.current;
-      const cfg = cfgRef.current;
-
-      // Try modular SDK set: dbMod.set(dbMod.ref(db, path), payload)
-      if (dbMod && typeof dbMod.set === 'function' && typeof dbMod.ref === 'function' && db) {
-        const profileRef = dbMod.ref(db, path);
-        await dbMod.set(profileRef, payload);
-      }
-      // Try namespaced: db.ref(path).set(payload)
-      else if (db && typeof db.ref === 'function' && typeof db.ref().set === 'function') {
-        await db.ref(path).set(payload);
-      }
-      // Fallback to REST (requires databaseURL in config)
-      else if (cfg && cfg.databaseURL) {
-        const url = `${cfg.databaseURL.replace(/\/$/, '')}/${path}.json`;
-        const r = await fetch(url, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-        if (!r.ok) {
-          throw new Error('Failed to save profile via REST API');
-        }
-      } else {
-        throw new Error('No supported Realtime DB interface found');
-      }
+      const ref = doc(firestoreRef.current, 'profiles', uid);
+      // merge:true behavior to allow partial updates and avoid overwriting unexpected fields
+      await setDoc(ref, payload, { merge: true });
 
       if (mountedRef.current) {
         setStatusMsg('Profile saved');
-        // small delay then clear status
-        setTimeout(() => { if (mountedRef.current) setStatusMsg(''); }, 1800);
+        setTimeout(() => { if (mountedRef.current) setStatusMsg(''); }, 1600);
       }
     } catch (err) {
       console.error('Save profile failed', err);
-      if (mountedRef.current) setStatusMsg('Save failed');
+      if (mountedRef.current) setStatusMsg('Save failed: ' + (err.message || ''));
     } finally {
       if (mountedRef.current) setSaving(false);
     }
