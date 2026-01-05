@@ -347,8 +347,8 @@ export default function IndexPage() {
             <button id="sign-in-btn" onClick={handleSignIn} className="btn-cta">Log in</button>
 
             <div className="row action-row">
-              <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
               <button onClick={() => { showHome(); setUserInfo('Guest — limited access.'); }} className="muted">Guest</button>
+              <button id="show-signup-btn" onClick={showSignUp} className="muted">Sign up</button>
               <button onClick={showForgot} className="muted small">Forgot Password?</button>
             </div>
 
