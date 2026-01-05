@@ -169,6 +169,7 @@ export default function MobileDrawer({
             Chat
           </button>
         </div>
+      </aside>
 
       <style jsx>{`
         /* Backdrop */
