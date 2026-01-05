@@ -339,7 +339,6 @@ export default function IndexPage() {
             <a href="/" className="brand-logo" aria-label="Semi-colonic home">
               <img src="/semi-colonic-logo.png" alt="Semi-colonic" />
             </a>
-            Semi‑Colonic
           </div>
 
           <div className="card" id="login-card" role="region" aria-labelledby="login-title">
