@@ -43,12 +43,12 @@ export default function Resources() {
 
   return (
     <div className="site-root">
-      <div className="site" style={{ padding: var(--space-md) }}>
+      <div className="site">
         <header className="page-header">
           <button onClick={() => router.back()} className="btn btn-outline" aria-label="Go back">
             ← Back
           </button>
-          <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text-primary)' }}>Resources — Books on Mental Health & Comfort Reading</h1>
+          <h1 style={{ margin: 0, fontSize: 22, color: '#183547' }}>Resources — Books on Mental Health & Comfort Reading</h1>
         </header>
 
         <QuoteBanner 
@@ -56,15 +56,15 @@ export default function Resources() {
           author="A Reading Friend"
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 'var(--space-md)', color: 'var(--text-secondary)' }}>
-          <Heart size={20} color="var(--color-coral-soft)" className="icon-small" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: '#4b6b7a' }}>
+          <Heart size={20} color="#f4b8a4" className="icon-small" />
           <p style={{ margin: 0 }}>
             A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
             Each item links to Amazon.in search results for the title + author so you can find editions available in India.
           </p>
         </div>
 
-        <div className="card" style={{ overflowX: 'auto', marginTop: 'var(--space-md)' }}>
+        <div className="card" style={{ overflowX: 'auto', marginTop: 18 }}>
           <table className="books-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
             <thead>
               <tr>
@@ -85,7 +85,7 @@ export default function Resources() {
                       href={amazonSearchLink(b.title, b.author)}
                       target="_blank"
                       rel="noreferrer"
-                      style={{ color: 'var(--color-aqua-mist)', textDecoration: 'none', fontWeight: 600 }}
+                      style={{ color: '#b8e0d9', textDecoration: 'none', fontWeight: 600 }}
                     >
                       View on Amazon.in
                     </a>
@@ -96,19 +96,19 @@ export default function Resources() {
           </table>
         </div>
 
-        <section className="content-card" style={{ marginTop: 'var(--space-lg)' }}>
+        <section className="content-card" style={{ marginTop: 28 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Leaf size={24} color="var(--color-seafoam)" />
+            <Leaf size={24} color="#a8d5ba" />
             <h2 style={{ margin: 0 }}>Notes</h2>
           </div>
-          <ul style={{ color: 'var(--text-secondary)', paddingLeft: 20 }}>
+          <ul style={{ color: '#4b6b7a', paddingLeft: 20 }}>
             <li>Memoirs and first-person accounts can be powerful and sometimes triggering — please approach at your own pace.</li>
             <li>Picture books listed are gentle reads for kids (and adults) to help discuss feelings, worry and connection.</li>
             <li>If you want, I can replace the search links with specific Amazon product pages (please provide preferred editions or I can look them up).</li>
           </ul>
         </section>
 
-        <footer style={{ marginTop: 'var(--space-lg)', color: 'var(--text-muted)', fontSize: 13, textAlign: 'center' }}>
+        <footer style={{ marginTop: 28, color: '#7b8899', fontSize: 13, textAlign: 'center' }}>
           © {new Date().getFullYear()} Semi‑Colonic — Resources
         </footer>
       </div>
@@ -116,20 +116,20 @@ export default function Resources() {
       <style jsx>{`
         .site-root {
           min-height: 100vh;
-          background: var(--bg-gradient);
+          background: linear-gradient(180deg, #e8f4f8, #d8eef5);
         }
         
         .site {
-          max-width: var(--max-width);
+          max-width: 1200px;
           margin: 0 auto;
-          padding: var(--space-md);
+          padding: 18px;
         }
         
         .page-header {
           display: flex;
           align-items: center;
-          gap: var(--space-sm);
-          margin-bottom: var(--space-md);
+          gap: 12px;
+          margin-bottom: 18px;
           flex-wrap: wrap;
         }
         
