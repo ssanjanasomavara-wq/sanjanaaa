@@ -190,7 +190,7 @@ export default function Dashboard() {
               </div>
 
               <div className="cta-row" style={{ marginTop: 12 }}>
-                <button className="btn btn-outline" onClick={() => setShowInvite(true)}>Invite</button>
+                <button className="btn btn-strong" onClick={() => setShowInvite(true)}>Invite</button>
                 <button className="btn btn-strong" onClick={() => setShowChat(true)}>Chat with Us</button>
               </div>
 
@@ -232,19 +232,6 @@ export default function Dashboard() {
 
                 <hr className="divider" />
 
-                <div className="get-in-touch" style={{ alignItems: 'center' }}>
-                  <div>
-                    <div className="muted-label">Get in Touch</div>
-                    <div style={{ color: '#222' }}>Semi-colonic</div>
-                  </div>
-                  <Link href="/message" legacyBehavior><a className="btn btn-outline small">Message</a></Link>
-                </div>
-
-                <div style={{ marginTop: 12 }}>
-                  <div className="muted-label">Invite Code</div>
-                  <div style={{ color: '#222' }}>TTASOK</div>
-                </div>
-
                 <div className="social-row" role="navigation" aria-label="Social links" style={{ marginTop: 14 }}>
                   {/* SVG icons omitted here for brevity; kept in original file */}
                   <a className="social-btn" href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
@@ -282,7 +269,7 @@ export default function Dashboard() {
         </main>
 
         <footer className="site-footer">
-          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
+          © {new Date().getFullYear()} Semi‑Colonic. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
 
@@ -290,8 +277,8 @@ export default function Dashboard() {
       <InviteWidget
         visible={showInvite}
         onClose={() => setShowInvite(false)}
-        inviteCode="TTASOK"
-        inviteLink={`${typeof window !== 'undefined' ? window.location.origin : ''}/join?code=TTASOK`}
+        inviteCode="SEMICOLON"
+        inviteLink={`${typeof window !== 'undefined' ? window.location.origin : ''}/join?code=SEMICOLON`}
       />
 
       <ChatPopup visible={showChat} onClose={() => setShowChat(false)} />
