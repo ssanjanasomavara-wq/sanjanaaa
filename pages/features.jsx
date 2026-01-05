@@ -4,6 +4,7 @@ import QuoteBanner from '../components/QuoteBanner';
 import Heart from '../components/icons/Heart';
 import Leaf from '../components/icons/Leaf';
 import Lightbulb from '../components/icons/Lightbulb';
+import { QUOTES } from '../lib/themeConstants';
 
 export default function Features() {
   const router = useRouter();
@@ -62,8 +63,8 @@ export default function Features() {
           </p>
 
           <QuoteBanner 
-            quote="Find peace in small moments. Explore features designed to support your wellness journey."
-            author="Semi-colonic"
+            quote={QUOTES.features.quote}
+            author={QUOTES.features.author}
           />
 
           <div style={{ display: 'flex', gap: 16, justifyContent: 'center', margin: '24px 0', color: 'var(--seaside-ocean)' }}>

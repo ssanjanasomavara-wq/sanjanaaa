@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
+import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -403,18 +404,11 @@ export default function IndexPage() {
                 <p>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
                 
                 <QuoteBanner 
-                  quote="The tide goes out. The tide comes back. You're safe to pause here."
-                  author="Semi-colonic"
+                  quote={QUOTES.home.quote}
+                  author={QUOTES.home.author}
                 />
                 
-                <ImageGrid 
-                  images={[
-                    { src: '/images/sea1.jpg', alt: 'Calming ocean gradient', caption: 'Ocean Serenity' },
-                    { src: '/images/sea2.jpg', alt: 'Warm sand gradient', caption: 'Sandy Shores' },
-                    { src: '/images/sea3.jpg', alt: 'Seafoam gradient', caption: 'Gentle Waves' },
-                    { src: '/images/sea4.jpg', alt: 'Sunset gradient', caption: 'Peaceful Sunset' }
-                  ]}
-                />
+                <ImageGrid images={SEASIDE_IMAGES} />
                 
                 <hr/>
                 <div className="get-in-touch">

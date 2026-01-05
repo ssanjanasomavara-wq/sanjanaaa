@@ -6,6 +6,7 @@ import InviteWidget from '../components/InviteWidget';
 import ChatPopup from '../components/ChatPopup';
 import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
+import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -168,8 +169,8 @@ export default function Dashboard() {
                 <p style={{ marginTop: 0 }}>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
 
                 <QuoteBanner 
-                  quote="Not the end—just a moment to rest."
-                  author="Semi-colonic"
+                  quote={QUOTES.dashboard.quote}
+                  author={QUOTES.dashboard.author}
                 />
 
                 <div className="quick-grid" role="list">
@@ -190,14 +191,7 @@ export default function Dashboard() {
                   </Link>
                 </div>
 
-                <ImageGrid 
-                  images={[
-                    { src: '/images/sea1.jpg', alt: 'Calming ocean gradient', caption: 'Ocean Serenity' },
-                    { src: '/images/sea2.jpg', alt: 'Warm sand gradient', caption: 'Sandy Shores' },
-                    { src: '/images/sea3.jpg', alt: 'Seafoam gradient', caption: 'Gentle Waves' },
-                    { src: '/images/sea4.jpg', alt: 'Sunset gradient', caption: 'Peaceful Sunset' }
-                  ]}
-                />
+                <ImageGrid images={SEASIDE_IMAGES} />
 
                 <hr className="divider" />
 
