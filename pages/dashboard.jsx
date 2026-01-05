@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 import InviteWidget from '../components/InviteWidget';
 import ChatPopup from '../components/ChatPopup';
+import QuoteBanner from '../components/QuoteBanner';
+import ImageGrid from '../components/ImageGrid';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -165,6 +167,11 @@ export default function Dashboard() {
               <div className="content-card">
                 <p style={{ marginTop: 0 }}>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
 
+                <QuoteBanner 
+                  quote="Not the end—just a moment to rest."
+                  author="Semi-colonic"
+                />
+
                 <div className="quick-grid" role="list">
                   <Link href="/posts" legacyBehavior>
                     <a className="quick-tile" role="listitem">Posts<div className="quick-sub">Browse community posts</div></a>
@@ -182,6 +189,15 @@ export default function Dashboard() {
                     <a className="quick-tile" role="listitem">Games<div className="quick-sub">Relaxing mini-games</div></a>
                   </Link>
                 </div>
+
+                <ImageGrid 
+                  images={[
+                    { src: '/images/sea1.jpg', alt: 'Calming ocean gradient', caption: 'Ocean Serenity' },
+                    { src: '/images/sea2.jpg', alt: 'Warm sand gradient', caption: 'Sandy Shores' },
+                    { src: '/images/sea3.jpg', alt: 'Seafoam gradient', caption: 'Gentle Waves' },
+                    { src: '/images/sea4.jpg', alt: 'Sunset gradient', caption: 'Peaceful Sunset' }
+                  ]}
+                />
 
                 <hr className="divider" />
 

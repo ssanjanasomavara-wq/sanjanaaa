@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import QuoteBanner from '../components/QuoteBanner';
+import ImageGrid from '../components/ImageGrid';
 
 export default function IndexPage() {
   const router = useRouter();
@@ -399,6 +401,21 @@ export default function IndexPage() {
 
               <div className="card content-card">
                 <p>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
+                
+                <QuoteBanner 
+                  quote="The tide goes out. The tide comes back. You're safe to pause here."
+                  author="Semi-colonic"
+                />
+                
+                <ImageGrid 
+                  images={[
+                    { src: '/images/sea1.jpg', alt: 'Calming ocean gradient', caption: 'Ocean Serenity' },
+                    { src: '/images/sea2.jpg', alt: 'Warm sand gradient', caption: 'Sandy Shores' },
+                    { src: '/images/sea3.jpg', alt: 'Seafoam gradient', caption: 'Gentle Waves' },
+                    { src: '/images/sea4.jpg', alt: 'Sunset gradient', caption: 'Peaceful Sunset' }
+                  ]}
+                />
+                
                 <hr/>
                 <div className="get-in-touch">
                   <div>
