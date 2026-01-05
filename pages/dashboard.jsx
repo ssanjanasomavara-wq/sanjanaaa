@@ -123,6 +123,7 @@ export default function Dashboard() {
               <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
               <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
               <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
+              <Link href="/resources" legacyBehavior><a className="nav-link">Resources</a></Link>
             </nav>
           </div>
 
@@ -207,7 +208,7 @@ export default function Dashboard() {
                     aria-label="Instagram"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zM18 7.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                      <path fill="currentColor" d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 6.2A3.8 3.8 0 1 0 15.8 12 3.8 3.8 0 0 0 12 8.2zM18 7.5a1 1 0 1 0 0-2 1 1 0 [...]" />
                     </svg>
                   </a>
 
@@ -220,7 +221,7 @@ export default function Dashboard() {
                     aria-label="Facebook"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7H8.3v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.98v7A10 10 0 0 0 22 12z"/>
+                      <path fill="currentColor" d="M22 12a10 10 0 1 0-11.5 9.9v-7H8.3v-2.9h2.2V9.3c0-2.2 1.3-3.5 3.3-3.5.95 0 1.95.17 1.95.17v2.1h-1.07c-1.06 0-1.39.66-1.39 1.33v1.6h2.36l-.38 2.9h-1.9[...]" />
                     </svg>
                   </a>
 
@@ -233,7 +234,7 @@ export default function Dashboard() {
                     aria-label="X"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                      <path fill="currentColor" d="M21 6.5c-.6.3-1.2.5-1.8.6.7-.4 1.2-1 1.4-1.7-.7.4-1.5.7-2.3.9C17 5 16 5 15.2 4.5c-1-.6-2.2-1-3.5-1 0 .1 0 .2 0 .3C9.6 4 8 5 7.3 6.3c-.6 1.2-.3 2.6.7 3.3-.5 0-1-.1-1.5-.4 0 1.6 1.1 3 2.8 3.3-.5.1-1 .2-1.5.1.4 1.4 1.7 2.4 3.2 2.4C9.9 19 7.8 19.6 5.6 19.6 4.9 19.6 4.2 19.5 3.5 19.3c1.6 1 3.5 1.6 5.6 1.6 6.7 0 10.4-5.6 10.4-10.4v-.5c.7-.5 1.2-1.2 1.6-2z"/>
+                      <path fill="currentColor" d="M21 6.5c-.6.3-1.2.5-1.8.6.7-.4 1.2-1 1.4-1.7-.7.4-1.5.7-2.3.9C17 5 16 5 15.2 4.5c-1-.6-2.2-1-3.5-1 0 .1 0 .2 0 .3C9.6 4 8 5 7.3 6.3c-.6 1.2-.3 2.6.7 [...]" />
                     </svg>
                   </a>
 
@@ -246,7 +247,7 @@ export default function Dashboard() {
                     aria-label="YouTube"
                   >
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
-                      <path fill="currentColor" d="M23 7s-.2-1.6-.8-2.3C21 3 19.7 3 19 3H5C4.3 3 3 3 1.8 4.7 1.2 5.4 1 7 1 7S1 8.9 1 10.8v2.4C1 16.1 1.2 17.6 1.8 18.3 3 20 4.3 20 5 20h14c.7 0 2 0 3.2-1.7.6-.7.8-2.2.8-2.2V7zM10 14V8l5 3-5 3z"/>
+                      <path fill="currentColor" d="M23 7s-.2-1.6-.8-2.3C21 3 19.7 3 19 3H5C4.3 3 3 3 1.8 4.7 1.2 5.4 1 7 1 7S1 8.9 1 10.8v2.4C1 16.1 1.2 17.6 1.8 18.3 3 20 4.3 20 5 20h14c.7 0 2 0 3.2-[...]" />
                     </svg>
                   </a>
 
@@ -340,7 +341,7 @@ export default function Dashboard() {
           padding: 16px;
         }
 
-        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); overflow:hidden; }
+        .avatar { width:72px; height:72px; border-radius:14px; background:#fff; display:flex; align-items:center; justify-content:center; color:#1f3f57; box-shadow: 0 8px 20px rgba(6,20,40,0.08); over[...] }
         .avatar img { width: 100%; height: 100%; object-fit: cover; display:block; }
 
         .cta-row { display:flex; gap:10px; align-items:center; margin-top:8px; }
@@ -359,7 +360,7 @@ export default function Dashboard() {
         .muted-label { color:#7b8899; font-weight:700; margin-bottom:4px; }
 
         .social-row { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
-        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:transparent; border: 1px solid rgba(6,20,40,0.04); color:inherit; text-decoration:none; }
+        .social-btn { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:10px; background:transparent; border: 1px solid rgba(6,20,40,0.04); color:[...] }
 
         .footer-actions { display:flex; gap:12px; justify-content:center; }
         .pill-link { background: #f1f1f1; padding: 12px 18px; border-radius: 14px; text-decoration: none; color: #222; }
