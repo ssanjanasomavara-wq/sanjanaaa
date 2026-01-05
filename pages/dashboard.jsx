@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -18,6 +19,11 @@ export default function Dashboard() {
 
   const [showInvite, setShowInvite] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const mobileMenuButtonRef = useRef(null);
+  const drawerRef = useRef(null);
+  const previousActiveElementRef = useRef(null);
 
   useEffect(() => {
     let mounted = true;
@@ -78,6 +84,64 @@ export default function Dashboard() {
     };
   }, []);
 
+  // Focus-trap & accessibility for mobile drawer
+  useEffect(() => {
+    const drawer = drawerRef.current;
+    if (showMenu) {
+      previousActiveElementRef.current = document.activeElement;
+      // set aria-hidden on main site area to help screen readers
+      const site = document.querySelector('.site');
+      if (site) site.setAttribute('aria-hidden', 'true');
+
+      // focus first focusable element in drawer
+      const focusables = drawer ? drawer.querySelectorAll('a,button,[tabindex]:not([tabindex="-1"])') : [];
+      if (focusables && focusables.length > 0) {
+        focusables[0].focus();
+      }
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          setShowMenu(false);
+          return;
+        }
+
+        if (e.key === 'Tab') {
+          // implement simple focus trap
+          const nodes = Array.from(focusables);
+          if (nodes.length === 0) return;
+          const first = nodes[0];
+          const last = nodes[nodes.length - 1];
+          if (e.shiftKey) {
+            if (document.activeElement === first) {
+              e.preventDefault();
+              last.focus();
+            }
+          } else {
+            if (document.activeElement === last) {
+              e.preventDefault();
+              first.focus();
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown, { capture: true });
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown, { capture: true });
+      };
+    } else {
+      // restore
+      const site = document.querySelector('.site');
+      if (site) site.removeAttribute('aria-hidden');
+      if (previousActiveElementRef.current && typeof previousActiveElementRef.current.focus === 'function') {
+        previousActiveElementRef.current.focus();
+      } else if (mobileMenuButtonRef.current) {
+        mobileMenuButtonRef.current.focus();
+      }
+    }
+  }, [showMenu]);
+
   async function handleSignOut() {
     try {
       const auth = authRef.current;
@@ -96,8 +160,14 @@ export default function Dashboard() {
 
   if (loading) return <div style={{ padding: 20, textAlign: 'center' }}>Loading dashboard…</div>;
 
+  const closeMenu = () => setShowMenu(false);
+
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
+
       <div className="site">
         {/* Top navigation */}
         <header className="topbar" role="banner">
@@ -130,15 +200,72 @@ export default function Dashboard() {
             </nav>
           </div>
 
-          <div className="topbar-actions" role="navigation" aria-label="Top actions" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="topbar-actions" role="navigation" aria-label="Top actions">
             <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
             <button aria-label="Messages" className="btn" title="Messages">💬</button>
-              <div className="user-email">{userEmail}</div>
+              <div className="user-email" title={userEmail}>{userEmail}</div>
               <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
+
+            <button
+              ref={mobileMenuButtonRef}
+              className="mobile-menu-button"
+              aria-label="Open menu"
+              aria-expanded={showMenu}
+              aria-controls="mobile-drawer"
+              onClick={() => setShowMenu((s) => !s)}
+              title="Menu"
+            >
+              ☰
+            </button>
           </div>
+
+          {/* Drawer & Backdrop */}
+          <div
+            className={`drawer-backdrop ${showMenu ? 'visible' : ''}`}
+            onClick={closeMenu}
+            aria-hidden={!showMenu}
+          />
+
+          <aside
+            id="mobile-drawer"
+            ref={drawerRef}
+            className={`mobile-drawer ${showMenu ? 'open' : ''}`}
+            role="dialog"
+            aria-modal="true"
+            aria-hidden={!showMenu}
+          >
+            <div className="drawer-header">
+              <div className="drawer-brand">
+                <div className="brand-avatar" aria-hidden="true">
+                  <img src="/semi-colonic-logo.png" alt="" />
+                </div>
+                <div className="drawer-title">Semi-colonic</div>
+              </div>
+              <button
+                className="btn btn-plain drawer-close"
+                aria-label="Close menu"
+                onClick={closeMenu}
+              >
+                ✕
+              </button>
+            </div>
+
+            <nav className="drawer-nav" aria-label="Mobile primary navigation">
+              <Link href="/posts" legacyBehavior><a onClick={closeMenu}>Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a onClick={closeMenu}>Chat</a></Link>
+              <Link href="/features" legacyBehavior><a onClick={closeMenu}>Features</a></Link>
+              <Link href="/resources" legacyBehavior><a onClick={closeMenu}>Resources</a></Link>
+              <Link href="/settings" legacyBehavior><a onClick={closeMenu}>Settings</a></Link>
+            </nav>
+
+            <div className="drawer-actions">
+              <button className="btn btn-outline" onClick={() => { setShowInvite(true); closeMenu(); }}>Invite</button>
+              <button className="btn btn-strong" onClick={() => { setShowChat(true); closeMenu(); }}>Chat</button>
+            </div>
+          </aside>
         </header>
 
-        <main className="main-content">
+        <main className="main-content" id="main-content">
           <section className="profile-card" aria-labelledby="profile-title">
             <div className="cover" />
             <div className="profile-body">
@@ -147,7 +274,7 @@ export default function Dashboard() {
                   <img src="/semi-colonic-logo.png" alt="avatar" />
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h1 id="profile-title" style={{ margin: 0, fontSize: 20, color: '#183547' }}>Semi-colonic</h1>
+                  <h1 id="profile-title" style={{ margin: 0, fontSize: 'clamp(18px, 3.4vw, 22px)', color: '#183547' }}>Semi-colonic</h1>
                   <p style={{ margin: '6px 0 0', color: '#617489' }}>Not the end—just a moment to rest.</p>
                 </div>
               </div>
@@ -319,15 +446,27 @@ export default function Dashboard() {
       <ChatPopup visible={showChat} onClose={() => setShowChat(false)} />
 
       <style jsx>{`
+        /* Basic iOS & typography tweaks */
+        :root {
+          --max-width: 980px;
+        }
+        html, body {
+          -webkit-text-size-adjust: 100%; /* iOS Safari: avoid automatic font-size adjustments */
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
         /* Minimal dashboard-specific styles - most styling from theme.css */
         .site-root {
           min-height: 100vh;
           padding: 0;
+          background: var(--bg, #fff);
         }
         
         .site {
           max-width: var(--max-width);
           margin: 0 auto;
+          padding: 0 18px;
         }
 
         .brand-text {
@@ -359,20 +498,26 @@ export default function Dashboard() {
         .user-email { 
           color: var(--text-secondary); 
           font-size: 14px; 
+          max-width: 140px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .main-content { 
-          padding: var(--space-md); 
+          padding: var(--space-md, 20px); 
         }
 
         .cover { 
           height: 140px; 
-          background: linear-gradient(90deg, var(--color-sky-soft), var(--color-aqua-mist)); 
+          background: linear-gradient(90deg, var(--color-sky-soft, #dff2ff), var(--color-aqua-mist, #e9fbff)); 
+          border-radius: 12px 12px 0 0;
         }
         
         .profile-body {
           background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92));
           padding: 16px;
+          border-radius: 0 0 12px 12px;
         }
 
         .avatar { 
@@ -398,6 +543,7 @@ export default function Dashboard() {
           display: flex; 
           gap: 10px; 
           margin-top: 8px; 
+          flex-wrap: wrap;
         }
         
         .tabs { 
@@ -482,6 +628,7 @@ export default function Dashboard() {
           display: flex; 
           gap: 12px; 
           justify-content: center; 
+          flex-wrap: wrap;
         }
         
         .pill-link { 
@@ -493,7 +640,7 @@ export default function Dashboard() {
         }
         
         .pill-link.primary { 
-          background: var(--cta-strong); 
+          background: var(--cta-strong, #1f9fff); 
           color: #fff; 
         }
 
@@ -509,10 +656,138 @@ export default function Dashboard() {
           margin-top: var(--space-lg);
         }
 
-        @media (max-width: 420px) {
+        /* Mobile / small-screen improvements */
+        .topbar {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          padding: 12px 0;
+          position: relative;
+        }
+
+        .brand-avatar {
+          width: 44px;
+          height: 44px;
+          border-radius: 10px;
+          overflow: hidden;
+          flex: 0 0 44px;
+        }
+
+        .mobile-menu-button {
+          display: none;
+          background: transparent;
+          border: none;
+          font-size: 20px;
+          padding: 6px 8px;
+          margin-left: 6px;
+        }
+
+        /* Drawer styles */
+        .drawer-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(6,20,40,0.36);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 220ms ease;
+          z-index: 30;
+        }
+        .drawer-backdrop.visible {
+          opacity: 1;
+          pointer-events: auto;
+        }
+
+        .mobile-drawer {
+          position: fixed;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: min(84vw, 360px);
+          max-width: 420px;
+          background: #fff;
+          box-shadow: -16px 0 40px rgba(6,20,40,0.12);
+          transform: translateX(100%);
+          z-index: 40;
+          display: flex;
+          flex-direction: column;
+          padding: 12px;
+          gap: 12px;
+          border-left: 1px solid rgba(6,20,40,0.04);
+          /* default transition - respects prefers-reduced-motion below */
+          transition: transform 300ms cubic-bezier(.2,.9,.2,1);
+        }
+        .mobile-drawer.open {
+          transform: translateX(0);
+        }
+
+        .drawer-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .drawer-brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+        }
+        .drawer-title {
+          font-weight: 700;
+          color: var(--text-primary);
+        }
+        .drawer-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 4px;
+        }
+        .drawer-nav a {
+          padding: 10px 8px;
+          border-radius: 8px;
+          text-decoration: none;
+          color: var(--text-primary);
+        }
+        .drawer-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: auto;
+          justify-content: space-between;
+        }
+
+        /* Respect reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+          .drawer-backdrop {
+            transition: none;
+          }
+          .mobile-drawer {
+            transition: none;
+            transform: none !important;
+            right: 0;
+            width: 100%;
+          }
+        }
+
+        /* Hide desktop nav and adjust layout on small screens */
+        @media (max-width: 600px) {
+          .desktop-nav { display: none; }
+          .mobile-menu-button { display: inline-flex; }
+          .brand-text { font-size: 14px; }
+          .site { padding: 0 12px; }
+          .main-content { padding: 14px 6px; }
           .cover { height: 120px; }
           .avatar { width: 64px; height: 64px; }
           .profile-body { padding: 12px; }
+          .topbar-actions { gap: 8px; align-items: center; }
+          .user-email { max-width: 110px; font-size: 13px; }
+          .mobile-drawer { width: min(92vw, 360px); }
+        }
+
+        /* Very narrow devices (e.g. older phones) */
+        @media (max-width: 420px) {
+          .cover { height: 110px; }
+          .avatar { width: 56px; height: 56px; }
+          .brand-avatar { width: 40px; height: 40px; }
+          .brand-text { display: none; } /* keep header compact */
+          .mobile-drawer { width: 100vw; }
         }
       `}</style>
     </div>
