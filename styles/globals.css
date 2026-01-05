@@ -1,151 +1,89 @@
-/* Palette A — soft blue-green (variant A)
-   Branch: feature/palette-a
-   Purpose: lighter, airy, calming blue-green background with warm sand accents.
-*/
-
 :root {
-  --bg-start: #eaf7fb;
-  --bg-end: #d8f1ee;
-  --panel-glass: rgba(255,255,255,0.92);
+  /* layout / sizing */
+  --btn-radius: 10px;
+  --btn-padding-y: 10px;
+  --btn-padding-x: 14px;
 
-  --cta-1: #e9cfa6; /* sand */
-  --cta-2: #b8e0d9; /* soft aqua */
-  --cta-text: #07233e;
-  --muted-text: #4b6b73;
+  /* surface & text */
+  --surface: #ffffff;
+  --text-primary: #183547;
+  --text-on-strong: #3a1f1f;
 
-  --night-bg: #071025; /* fallback for login dark view */
-  --night-card: rgba(11,20,40,0.72);
-  --text-light: #eef1ff;
-  --muted-light: #9aa6d9;
+  /* Outline (mint pastel) - light mode */
+  --btn-outline-bg: #E6F9F4;
+  --btn-outline-border: rgba(46, 204, 183, 0.28);
+  --btn-outline-color: #0F5132;
 
-  --card-radius: 18px;
-  --max-width: 960px;
-  --container-width: 420px;
-  --gap-sm: 12px;
-  --gap-md: 18px;
-  --primary-cta: var(--cta-1);
-  --primary-cta-strong: var(--cta-2);
+  /* Strong CTA (warm pastel) - light mode */
+  --btn-strong-bg: linear-gradient(90deg, #ffd6e0, #fff1c9);
+  --btn-strong-color: var(--text-on-strong);
+
+  /* Focus ring */
+  --focus-ring: rgba(20, 150, 120, 0.28);
 }
 
-/* ---------- Global layout ---------- */
-* { box-sizing: border-box; }
-html, body, #__next { height: 100%; }
-body {
-  margin: 0;
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(180deg, var(--bg-start), var(--bg-end));
-  color: var(--muted-text);
-  min-height: 100vh;
-  -webkit-font-variant-ligatures: normal;
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #071124;
+    --text-primary: #d7eef0;
+    --btn-outline-bg: rgba(46, 204, 183, 0.08);
+    --btn-outline-border: rgba(46, 204, 183, 0.22);
+    --btn-outline-color: #9fe7d4;
+    --btn-strong-bg: linear-gradient(90deg, #6b2b32, #6b4b2a);
+    --btn-strong-color: #fff7f5;
+    --focus-ring: rgba(160, 230, 200, 0.18);
+  }
 }
 
-/* Centering */
-.page-root, .site-root {
-  min-height: 100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding: 18px;
+/* Base button styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: var(--btn-padding-y) var(--btn-padding-x);
+  border-radius: var(--btn-radius);
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Container size */
-.container {
-  width:100%;
-  max-width: var(--container-width);
-  padding: 26px;
-  text-align: center;
-  backdrop-filter: blur(4px);
+/* Accessible focus state for keyboard users */
+.btn:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
-/* Brand */
-.brand-logo {
-  display:inline-flex;
-  align-items:center;
-  gap:12px;
-  text-decoration:none;
-}
-.brand-logo img { height: 36px; width:auto; display:block; }
-
-/* Buttons */
-.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:none; cursor:pointer; border-radius:14px; padding:10px 14px; font-weight:700; }
-.btn-block { width:100%; }
-.btn-primary { background: linear-gradient(90deg,var(--cta-1),var(--cta-2)); color: var(--cta-text); box-shadow: 0 10px 30px rgba(120,140,160,0.08); }
-.btn-strong { background: linear-gradient(90deg,var(--primary-cta),var(--primary-cta-strong)); color:#fff; }
-
-/* Cards: glassy, airy */
-.card {
-  border-radius: 16px;
-  padding: 18px;
-  box-shadow: 0 18px 45px rgba(20,35,50,0.06);
-  background: linear-gradient(180deg, var(--panel-glass), rgba(255,255,255,0.85));
-  border: 1px solid rgba(10,20,30,0.04);
+/* Outline variant (pastel accessible) */
+.btn-outline {
+  background: var(--btn-outline-bg);
+  color: var(--btn-outline-color);
+  border: 1px solid var(--btn-outline-border);
+  box-shadow: none;
 }
 
-/* Login (night) — keep a deeper card for contrast when in login flow */
-body.login {
-  background: radial-gradient(900px 500px at 50% -20%, #0f234d, transparent), linear-gradient(180deg, var(--bg-start), var(--bg-end));
-  color: var(--text-light);
-}
-.login .card { background: linear-gradient(180deg,#102847,var(--night-card)); color: var(--text-light); }
-.login input { background: rgba(255,255,255,0.03); color:var(--text-light); border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.04); }
-
-/* Home (sea) */
-body.home {
-  color: var(--muted-text);
-}
-.home .card { background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95)); color: var(--muted-text); }
-
-/* Profile / dashboard */
-.profile-card {
-  border-radius: var(--card-radius);
-  overflow:hidden;
-  box-shadow: 0 12px 40px rgba(2,8,20,0.06);
-  background: transparent;
-}
-.cover { height:140px; background: linear-gradient(90deg, #cfeff0, #b7e6dd); background-size: cover; }
-.profile-body {
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.96));
-  border-top-left-radius: var(--card-radius);
-  border-top-right-radius: var(--card-radius);
-  transform: translateY(-36px);
-  padding: 14px 18px 20px 18px;
-  box-shadow: 0 6px 20px rgba(15,30,50,0.04);
+/* Strong / primary CTA variant */
+.btn-strong {
+  background: var(--btn-strong-bg);
+  color: var(--btn-strong-color);
+  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.06);
 }
 
-/* Social / small helpers */
-.social-row { display:flex; gap:8px; margin-top:14px; }
-.social-btn { flex:1; padding:10px; border-radius:999px; background:#fff; border:1px solid rgba(0,0,0,0.05); text-align:center; color: var(--primary-cta-strong); font-weight:700; }
-
-/* Input width enforcement across the app */
-input[type="email"], input[type="password"], input[type="text"], textarea {
-  max-width: 200px;  /* important requirement */
-  width: 100%;
-  display:block;
-  margin: 8px auto;
+/* Small / compact button helper */
+.btn.small, .btn.btn-small {
+  padding: 6px 10px;
+  font-size: 13px;
 }
 
-/* Motion helpers */
-@keyframes floatSlow {
-  0% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
-  100% { transform: translateY(0); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .cover, .card, .btn-primary { animation: none; transition: none; transform: none; }
-}
+/* Ensure links styled as buttons inherit the same look */
+a.btn { display: inline-flex; }
 
-/* Responsive */
-@media (max-width: 420px) {
-  .cover { height:120px; }
-  .avatar { width:64px; height:64px; transform: translateY(-32px); margin-bottom:-22px; }
-  .profile-body { padding: 12px 14px 18px; transform: translateY(-32px); }
-  .container { padding: 18px; max-width: 420px; }
+/* Helpful utilities for high contrast debugging */
+@media (prefers-contrast: more) {
+  .btn-outline { border-width: 2px; }
+  .btn-strong { box-shadow: none; }
 }
-@media (min-width: 768px) {
-  .container { max-width: 720px; }
-  .cover { height:200px; animation: floatSlow 6s ease-in-out infinite; }
-  .avatar { width:88px; height:88px; border-radius:18px; transform: translateY(-44px); margin-bottom:-34px; }
-}
-@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
