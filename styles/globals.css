@@ -1,89 +1,135 @@
+/* Import the requested fonts (Poppins for main UI, DM Serif Display for quotes) */
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@300;400;600;700;800&display=swap');
+
 :root {
-  /* layout / sizing */
-  --btn-radius: 10px;
-  --btn-padding-y: 10px;
-  --btn-padding-x: 14px;
+  /* Brand tokens (pastel sky / teal / warm peach) */
+  --brand-text: #183547;                /* primary text (deep blue-teal) */
+  --brand-muted: #9AA6B2;               /* muted / captions */
+  --brand-surface: #FFFFFF;             /* page surface */
+  --brand-panel: #EFECEC;               /* pale panel / block background */
 
-  /* surface & text */
-  --surface: #ffffff;
-  --text-primary: #183547;
-  --text-on-strong: #3a1f1f;
+  --brand-accent: #7FD1D0;              /* soft teal pastel (primary accent) */
+  --brand-accent-strong: #06B6D4;       /* stronger cyan-teal for CTAs/fallback */
+  --brand-warm: #FFD9CC;                /* pale peach for highlights */
+  --brand-cool: #CFEFF8;                /* pale sky-blue (gradients) */
 
-  /* Outline (mint pastel) - light mode */
-  --btn-outline-bg: #E6F9F4;
-  --btn-outline-border: rgba(46, 204, 183, 0.28);
-  --btn-outline-color: #0F5132;
+  --brand-border: rgba(24,53,71,0.08);
 
-  /* Strong CTA (warm pastel) - light mode */
-  --btn-strong-bg: linear-gradient(90deg, #ffd6e0, #fff1c9);
-  --btn-strong-color: var(--text-on-strong);
+  /* Default button tokens (site-wide defaults) */
+  --btn-bg: var(--brand-accent-strong);
+  --btn-text: #ffffff;
+  --btn-border: transparent;
 
-  /* Focus ring */
-  --focus-ring: rgba(20, 150, 120, 0.28);
+  --btn-outline-border: rgba(24,53,71,0.12);
+  --btn-outline-text: var(--brand-text);
+  --btn-strong-bg: var(--btn-bg);
+  --btn-strong-text: var(--btn-text);
 }
 
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --surface: #071124;
-    --text-primary: #d7eef0;
-    --btn-outline-bg: rgba(46, 204, 183, 0.08);
-    --btn-outline-border: rgba(46, 204, 183, 0.22);
-    --btn-outline-color: #9fe7d4;
-    --btn-strong-bg: linear-gradient(90deg, #6b2b32, #6b4b2a);
-    --btn-strong-color: #fff7f5;
-    --focus-ring: rgba(160, 230, 200, 0.18);
-  }
+/* Apply Poppins as the global UI font */
+html, body {
+  font-family: 'Poppins', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--brand-text);
+  background: var(--brand-surface);
 }
 
-/* Base button styles */
+/* Utility for quotes / display text */
+.quote, blockquote, .serif-display {
+  font-family: 'DM Serif Display', ui-serif, Georgia, 'Times New Roman', serif;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+/*
+ * Icon defaults: line-based, rounded caps and joins to match the requested
+ * rounded, line-based symbol style (hearts, leaves, light bulbs).
+ */
+svg.icon {
+  display: inline-block;
+  width: 1.2em;
+  height: 1.2em;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vertical-align: middle;
+}
+
+/* Global button rules
+ *
+ * These rules prefer per-component variables (prefixed with --component-*)
+ * when present. That allows a component to set its own colors without
+ * overriding :root variables for the whole site.
+ *
+ * Order of precedence:
+ * 1) per-component (--component-*)
+ * 2) site-level (--btn-* / --brand-*)
+ * 3) hardcoded fallback
+ */
+
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: var(--btn-padding-y) var(--btn-padding-x);
-  border-radius: var(--btn-radius);
-  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  border: none;
+
+  color: var(--btn-text,
+          var(--component-btn-text,
+            #ffffff));
+
+  background: var(--btn-bg,
+             var(--component-cta,
+               var(--brand-accent, #7FD1D0)));
+
+  border: 1px solid var(--btn-border,
+            var(--component-btn-border,
+              transparent));
   text-decoration: none;
-  line-height: 1;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Accessible focus state for keyboard users */
-.btn:focus-visible {
-  outline: 3px solid var(--focus-ring);
+/* Primary (strong) button — uses strong-specific tokens first, then falls back. */
+.btn-strong {
+  background: var(--btn-strong-bg,
+               var(--component-cta,
+                 var(--btn-bg, var(--brand-accent-strong, #06B6D4))));
+  color: var(--btn-strong-text,
+           var(--component-cta-text,
+             var(--btn-text, #ffffff)));
+  border: 1px solid transparent;
+}
+
+/* Outline variant — transparent bg but visible border and text.
+ * It will pick up per-component btn text and border tokens if provided.
+ */
+.btn-outline {
+  background: transparent;
+  color: var(--btn-outline-text,
+           var(--component-btn-text,
+             var(--btn-text, var(--brand-text))));
+  border: 1px solid var(--btn-outline-border,
+               var(--component-btn-border,
+                 var(--brand-border, rgba(24,53,71,0.08))));
+}
+
+/* Plain / small variants */
+.btn-plain {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  font-weight: 700;
+}
+
+/* Add focus / accessibility styles that remain consistent across components */
+.btn:focus {
+  outline: 3px solid rgba(14,165,164,0.12);
   outline-offset: 2px;
 }
 
-/* Outline variant (pastel accessible) */
-.btn-outline {
-  background: var(--btn-outline-bg);
-  color: var(--btn-outline-color);
-  border: 1px solid var(--btn-outline-border);
-  box-shadow: none;
-}
-
-/* Strong / primary CTA variant */
-.btn-strong {
-  background: var(--btn-strong-bg);
-  color: var(--btn-strong-color);
-  box-shadow: 0 6px 18px rgba(17, 24, 39, 0.06);
-}
-
-/* Small / compact button helper */
-.btn.small, .btn.btn-small {
-  padding: 6px 10px;
-  font-size: 13px;
-}
-
-/* Ensure links styled as buttons inherit the same look */
-a.btn { display: inline-flex; }
-
-/* Helpful utilities for high contrast debugging */
-@media (prefers-contrast: more) {
-  .btn-outline { border-width: 2px; }
-  .btn-strong { box-shadow: none; }
-}
+/* Keep other global utilities here... */
