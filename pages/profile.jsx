@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -20,6 +19,7 @@ export default function ProfilePage() {
   const authRef = useRef(null);
   const authModRef = useRef(null);
   const firestoreRef = useRef(null);
+  const firestoreModRef = useRef(null);
   const cfgRef = useRef(null);
   const mountedRef = useRef(true);
   const uidRef = useRef(null);
@@ -37,38 +37,33 @@ export default function ProfilePage() {
 
         const init = await initFirebaseWithConfig(cfg) || {};
 
-        // Try to extract auth/authMod and Firestore
-        const { auth, authMod, app, firestore, firestoreMod } = init;
+        const { auth, authMod, firestore, firestoreMod, app } = init;
         authRef.current = auth || null;
         authModRef.current = authMod || null;
+        firestoreRef.current = firestore || null;
+        firestoreModRef.current = firestoreMod || null;
 
-        // Derive a Firestore instance in a robust way:
-        let firestoreInstance = null;
-        if (firestore) {
-          firestoreInstance = firestore;
-        } else if (firestoreMod && typeof firestoreMod.getFirestore === 'function') {
-          // init may export modular helpers
-          firestoreInstance = firestoreMod.getFirestore(app);
-        } else if (app) {
-          // fallback to our imported getFirestore
+        // If firestore wasn't returned, attempt to construct from firestoreMod or fallback
+        if (!firestoreRef.current && firestoreModRef.current && typeof firestoreModRef.current.getFirestore === 'function') {
           try {
-            firestoreInstance = getFirestore(app);
+            firestoreRef.current = firestoreModRef.current.getFirestore(app);
           } catch (err) {
-            console.warn('getFirestore fallback failed', err);
+            console.warn('Could not derive firestore instance', err);
           }
         }
-        firestoreRef.current = firestoreInstance;
 
         const loadProfile = async (uid, userEmail) => {
           uidRef.current = uid;
           setEmail(userEmail || '');
           setStatusMsg('Loading profile...');
           try {
-            if (!firestoreRef.current) {
-              setStatusMsg('No Firestore initialized');
+            if (!firestoreRef.current || !firestoreModRef.current) {
+              setStatusMsg('Firestore not available');
               setLoading(false);
               return;
             }
+
+            const { doc, getDoc } = firestoreModRef.current;
             const ref = doc(firestoreRef.current, 'profiles', uid);
             const snap = await getDoc(ref);
             if (!mountedRef.current) return;
@@ -88,7 +83,7 @@ export default function ProfilePage() {
           }
         };
 
-        // Auth handling similar to dashboard
+        // Auth handling (modular style)
         if (authMod && typeof authMod.onAuthStateChanged === 'function') {
           unsub = authMod.onAuthStateChanged(auth, (user) => {
             if (!mountedRef.current) return;
@@ -103,7 +98,6 @@ export default function ProfilePage() {
           const cur = auth && auth.currentUser;
           if (cur) loadProfile(cur.uid, cur.email || '');
         } else {
-          // namespaced style or other: try auth.currentUser
           const cur = auth && auth.currentUser;
           if (!cur) {
             router.replace('/');
@@ -130,7 +124,7 @@ export default function ProfilePage() {
       const uid = uidRef.current;
       if (!uid) throw new Error('No user id');
 
-      if (!firestoreRef.current) throw new Error('No Firestore instance');
+      if (!firestoreRef.current || !firestoreModRef.current) throw new Error('No Firestore instance');
 
       const payload = {
         firstName: firstName || '',
@@ -142,6 +136,7 @@ export default function ProfilePage() {
         updatedAt: new Date().toISOString()
       };
 
+      const { doc, setDoc } = firestoreModRef.current;
       const ref = doc(firestoreRef.current, 'profiles', uid);
       // merge:true behavior to allow partial updates and avoid overwriting unexpected fields
       await setDoc(ref, payload, { merge: true });
