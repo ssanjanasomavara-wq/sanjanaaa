@@ -385,8 +385,8 @@ export default function IndexPage() {
               </div>
 
               <div className="cta-row">
-                <button className="btn btn-outline">Invite</button>
-                <button className="btn btn-primary" onClick={() => alert('Chat placeholder')}>Chat with Us</button>
+                <button className="btn btn-primary">Invite</button>
+                <button className="btn btn-primary" onClick={() => alert('Sign-in to chat with us')}>Chat with Us</button>
               </div>
 
               <nav className="tabs">
@@ -407,24 +407,7 @@ export default function IndexPage() {
                 <ImageGrid images={SEASIDE_IMAGES} />
                 
                 <hr/>
-                <div className="get-in-touch">
-                  <div>
-                    <div className="muted-label">Get in Touch</div>
-                    <div>Semi-colonic</div>
-                  </div>
-                  <button className="btn btn-outline small">Message</button>
-                </div>
-                <div className="invite-code">
-                  <div className="muted-label">TTASOK</div>
-                  <div>Invite Code</div>
-                </div>
-                <div className="social-row">
-                  <button className="social-btn">IG</button>
-                  <button className="social-btn">FB</button>
-                  <button className="social-btn">X</button>
-                  <button className="social-btn">YT</button>
-                  <button className="social-btn">TT</button>
-                </div>
+                
               </div>
 
               <div className="enter-row">
