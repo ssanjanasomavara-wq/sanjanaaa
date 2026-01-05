@@ -2,32 +2,26 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 
 const BOOKS = [
-  // Memoirs & First-Person Mental Health Journeys
   { title: 'Prozac Nation', author: 'Elizabeth Wurtzel', category: 'Memoir' },
   { title: 'Girl, Interrupted', author: 'Susanna Kaysen', category: 'Memoir' },
   { title: 'An Unquiet Mind', author: 'Kay Redfield Jamison', category: 'Memoir' },
   { title: 'Reasons to Stay Alive', author: 'Matt Haig', category: 'Memoir' },
   { title: 'I Want to Die but I Want to Eat Tteokbokki', author: 'Baek Sehee', category: 'Memoir' },
 
-  // Personal stories tackling specific conditions
   { title: 'Good Girls: A Story and Study of Anorexia', author: 'Hadley Freeman', category: 'Memoir / Eating disorders' },
   { title: 'My Schizophrenic Life', author: 'Sandra Yuen MacKay', category: 'Memoir / Psychosis' },
   { title: 'Louise: Amended', author: 'Louise Krug', category: 'Memoir / Recovery' },
   { title: 'Asylum (An Alcoholic Takes the Cure)', author: 'William Seabrook', category: 'Historic memoir' },
 
-  // Other Deep or Complementary Reads
   { title: 'The Bell Jar', author: 'Sylvia Plath', category: 'Fictionalized memoir' },
   { title: 'Darkness Visible: A Memoir of Madness', author: 'William Styron', category: 'Memoir' },
 
-  // Humor & unconventional approaches
   { title: 'Sure I’ll Join Your Cult', author: 'Maria Bamford', category: 'Humor / Memoir' },
   { title: 'Furiously Happy', author: 'Jenny Lawson', category: 'Humor / Memoir' },
 
-  // Non-fiction, research & practical
   { title: 'The Body Keeps the Score', author: 'Bessel van der Kolk, M.D.', category: 'Non-fiction / Trauma' },
   { title: "It's OK That You're Not OK", author: 'Megan Devine', category: 'Non-fiction / Grief' },
 
-  // Picture books & gentle children's reads (from image)
   { title: 'Cicada', author: '', category: 'Picture book' },
   { title: 'The Rabbit Listened', author: 'Cori Doerrfeld', category: 'Picture book — gentle healing journey' },
   { title: 'The Color Monster', author: 'Anna Llenas', category: 'Picture book — emotions' },
@@ -37,7 +31,6 @@ const BOOKS = [
 ];
 
 function amazonSearchLink(title, author) {
-  // Build an Amazon.in search URL for book + author (safer than hard-coding product pages)
   const q = encodeURIComponent((title + (author ? ' ' + author : '')).trim());
   return `https://www.amazon.in/s?k=${q}&i=stripbooks`;
 }
@@ -127,7 +120,6 @@ export default function Resources() {
   );
 }
 
-// Inline styles used for clarity and reuse
 const thStyle = {
   padding: '12px 14px',
   textAlign: 'left',
