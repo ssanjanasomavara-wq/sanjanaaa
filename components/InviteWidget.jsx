@@ -12,16 +12,15 @@ export default function InviteWidget({ visible, onClose, inviteCode = 'TTASOK', 
 
   async function handleWhatsAppShare() {
     const base = 'https://wa.me/?text=' + encodeURIComponent(textToShare);
-    window.open(base, '_blank', 'noopener');
+    window.open(base, '_blank', 'noopener,noreferrer');
   }
 
   function handleInstagram() {
-    // Instagram doesn't support direct text share; open a profile or suggest copy
-    window.open('https://instagram.com', '_blank', 'noopener');
+    window.open('https://instagram.com', '_blank', 'noopener,noreferrer');
   }
 
   function handleTikTok() {
-    window.open('https://tiktok.com', '_blank', 'noopener');
+    window.open('https://tiktok.com', '_blank', 'noopener,noreferrer');
   }
 
   async function handleCopy(text, label) {
