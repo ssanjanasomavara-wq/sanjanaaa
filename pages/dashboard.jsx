@@ -8,7 +8,7 @@ import ChatPopup from '../components/ChatPopup';
 import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
 import MobileDrawer from '../components/MobileDrawer';
-import { THINGS_IMAGES, QUOTES } from '../lib/themeConstants';
+import { THINGS_ITEMS, THINGS_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -230,7 +230,8 @@ export default function Dashboard() {
                   </Link>
                 </div>
 
-                  <ImageGrid images={THINGS_IMAGES} />
+                {/* Use THINGS_ITEMS which contains image and text tiles (with hrefs) */}
+                <ImageGrid items={THINGS_ITEMS} />
                 <hr className="divider" />
 
       
@@ -308,7 +309,7 @@ export default function Dashboard() {
         .muted-label { color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
 
         .social-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-        .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: transparent; border: 1px solid rgba(6,20,40,0.04); color: var(--text-secondary); text-decoration: none; }
+        .social-btn { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; background: transparent; border: 1px solid rgba(6,20,40,0.04); }
 
         .footer-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
         .pill-link { background: #f1f1f1; padding: 12px 18px; border-radius: 14px; text-decoration: none; color: var(--text-primary); }

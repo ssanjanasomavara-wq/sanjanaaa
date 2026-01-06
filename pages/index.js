@@ -432,7 +432,7 @@ export default function IndexPage() {
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="ne[...]
             <button id="create-account-btn" onClick={handleSignUp} className="btn-cta">Create account</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
@@ -495,6 +495,11 @@ export default function IndexPage() {
           max-width: 420px; 
           margin: 0 auto; 
           text-align: center; 
+        }
+
+        /* Set body background for login/signup/forgot/reset screens */
+        body.login {
+          background-color: #B0E0E6;
         }
 
         /* Login-specific dark card override */

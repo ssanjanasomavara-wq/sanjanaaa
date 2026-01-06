@@ -57,6 +57,46 @@ export default function Features() {
             }}
             role="list"
           >
+            <Link href="/features/mood" legacyBehavior>
+              <a
+                className="feature-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>📝</div>
+                <div style={{ fontWeight: 700 }}>Mood Checkin</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Daily Mood check-in</div>
+              </a>
+            </Link>
+
+            <Link href="/features/mindscape" legacyBehavior>
+              <a
+                className="feature-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>📝</div>
+                <div style={{ fontWeight: 700 }}>Mindscape</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Reflect and Respond</div>
+              </a>
+            </Link>
+
             <Link href="/features/checkin" legacyBehavior>
               <a
                 className="feature-tile"
