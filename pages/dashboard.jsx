@@ -135,6 +135,7 @@ export default function Dashboard() {
               <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
               <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
               <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
+              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
               <Link href="/resources" legacyBehavior><a className="nav-link">Resources</a></Link>
             </nav>
           </div>
@@ -170,6 +171,7 @@ export default function Dashboard() {
             { href: '/posts', label: 'Posts' },
             { href: '/chat', label: 'Chat' },
             { href: '/features', label: 'Features' },
+            { href: '/games', label: 'Games' },
             { href: '/resources', label: 'Resources' },
             { href: '/settings', label: 'Settings' },
           ]}
