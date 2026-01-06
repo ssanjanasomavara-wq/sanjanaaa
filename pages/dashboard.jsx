@@ -246,7 +246,7 @@ export default function Dashboard() {
           </section>
 
           <QuoteBanner 
-            text="Not the end—just a moment to rest. The tide goes out. The tide comes back."
+            text="The tide goes out. The tide comes back."
             author="Semi-colonic"
             className="dashboard-quote"
           />
