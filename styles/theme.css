@@ -27,7 +27,7 @@
   --text-secondary: #4b6b7a;
   --text-muted: #7b8899;
   --text-light: #eef1ff;
-  --text-on-dark: #ffffff;
+  --text-on-dark: #7fd1d0;
   
   /* CTA and interactive colors */
   --cta-gradient: linear-gradient(90deg, var(--color-sand-warm), var(--color-aqua-mist));
