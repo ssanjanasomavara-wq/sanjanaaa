@@ -63,11 +63,11 @@ export default function Resources() {
               Resources — Books on Mental Health & Comfort Reading
             </h1>
           </header>
-
-          <QuoteBanner
-            text="Books are lighthouses in the storm, guiding us to safer shores."
-            author="A Reading Friend"
+          <QuoteBanner 
+            text={QUOTES.games.quote}
+            author={QUOTES.games.author}
           />
+          
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: 'var(--text-secondary, #4b6b7a)' }}>
             <Heart size={20} color="#f4b8a4" className="icon-small" />
@@ -108,7 +108,10 @@ export default function Resources() {
               </tbody>
             </table>
           </div>
-
+          <QuoteBanner
+            text="Books are lighthouses in the storm, guiding us to safer shores."
+            author="A Reading Friend"
+          />
           <section className="content-card" style={{ marginTop: 28 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
               <Leaf size={24} color="#a8d5ba" />
