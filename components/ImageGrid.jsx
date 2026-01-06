@@ -1,5 +1,5 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import Link from 'next/link';
 
 /**
  * ImageGrid - Displays a responsive grid of images or text tiles, each optionally linking to a destination.
@@ -22,6 +22,7 @@ export default function ImageGrid({ items = null, images = [], className = '' })
   }
 
   const isExternal = (href) => typeof href === 'string' && /^https?:\/\//i.test(href);
+  const isInternal = (href) => typeof href === 'string' && href.startsWith('/');
 
   return (
     <div className={`image-grid ${className}`.trim()}>
@@ -29,7 +30,7 @@ export default function ImageGrid({ items = null, images = [], className = '' })
         const key = item.id || item.src || item.title || index;
         const href = item.href || item.link || null;
 
-        // Determine content: image (if item.src present) or text tile (title)
+        // Image content vs text tile
         const content = item.src ? (
           <>
             <img
@@ -47,16 +48,30 @@ export default function ImageGrid({ items = null, images = [], className = '' })
           </div>
         );
 
-        // Wrap with anchor if href provided, otherwise plain div
+        const ariaLabel = item.ariaLabel || item.title || item.alt || `Item ${index + 1}`;
+
+        // If we have an href, prefer Next.js Link for internal links,
+        // plain anchor for external links.
         if (href) {
+          if (isInternal(href)) {
+            return (
+              <Link key={key} href={href} legacyBehavior>
+                <a className="image-grid__item image-grid__link" aria-label={ariaLabel}>
+                  {content}
+                </a>
+              </Link>
+            );
+          }
+
+          // external link
           return (
             <a
               key={key}
               className="image-grid__item image-grid__link"
               href={href}
-              target={isExternal(href) ? '_blank' : undefined}
-              rel={isExternal(href) ? 'noopener noreferrer' : undefined}
-              aria-label={item.ariaLabel || item.title || item.alt || `Link ${index + 1}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={ariaLabel}
             >
               {content}
             </a>
@@ -71,7 +86,7 @@ export default function ImageGrid({ items = null, images = [], className = '' })
               type="button"
               className="image-grid__item image-grid__button"
               onClick={item.onClick}
-              aria-label={item.ariaLabel || item.title || item.alt || `Button ${index + 1}`}
+              aria-label={ariaLabel}
             >
               {content}
             </button>
@@ -87,28 +102,3 @@ export default function ImageGrid({ items = null, images = [], className = '' })
     </div>
   );
 }
-
-ImageGrid.propTypes = {
-  // Preferred generic prop
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      // image shape
-      src: PropTypes.string,
-      alt: PropTypes.string,
-      caption: PropTypes.string,
-      // tile shape
-      title: PropTypes.string,
-      subtitle: PropTypes.string,
-      // linking
-      href: PropTypes.string,
-      link: PropTypes.string, // alternative name
-      onClick: PropTypes.func,
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-      loading: PropTypes.oneOf(['eager', 'lazy']),
-      ariaLabel: PropTypes.string,
-    })
-  ),
-  // Backwards compatibility
-  images: PropTypes.array,
-  className: PropTypes.string,
-};
