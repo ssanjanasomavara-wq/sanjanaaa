@@ -5,6 +5,8 @@ import QuoteBanner from '../components/QuoteBanner';
 import Heart from '../components/icons/Heart';
 import Leaf from '../components/icons/Leaf';
 import Lightbulb from '../components/icons/Lightbulb';
+import MoodIcon from '../components/icons/Mood';
+import MindscapeIcon from '../components/icons/Mindscape';
 import { QUOTES } from '../lib/themeConstants';
 import ImageGrid from '../components/ImageGrid';
 
@@ -71,7 +73,9 @@ export default function Features() {
                   boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
                 }}
               >
-                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>📝</div>
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>
+                  <MoodIcon size={48} />
+                </div>
                 <div style={{ fontWeight: 700 }}>Mood Checkin</div>
                 <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Daily Mood check-in</div>
               </a>
@@ -91,7 +95,9 @@ export default function Features() {
                   boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
                 }}
               >
-                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>📝</div>
+                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>
+                  <MindscapeIcon size={48} />
+                </div>
                 <div style={{ fontWeight: 700 }}>Mindscape</div>
                 <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Reflect and Respond</div>
               </a>

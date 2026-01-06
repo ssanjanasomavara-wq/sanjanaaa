@@ -1,7 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import Topbar from '../../components/Topbar';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export default function MoodCheckIn() {
   const [entries, setEntries] = useState([]);
@@ -9,6 +9,7 @@ export default function MoodCheckIn() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const stored = JSON.parse(localStorage.getItem('moodCheckIns') || '[]');
+    // keep newest first in UI
     setEntries(stored.slice().reverse());
   }, []);
 
@@ -66,6 +67,13 @@ export default function MoodCheckIn() {
                     {item.note && <div className="entry-text">{item.note}</div>}
                   </div>
                 ))}
+              </div>
+
+              {/* Graph output area - responsive placeholder and simple SVG chart */}
+              <div className="graph-area" aria-hidden={entries.length === 0 ? 'true' : 'false'}>
+                <div className="graph-card" role="img" aria-label="Mood summary graph">
+                  <MoodGraph entries={entries} />
+                </div>
               </div>
 
               <div style={{ marginTop: 14, textAlign: 'center' }}>
@@ -147,11 +155,39 @@ export default function MoodCheckIn() {
 
         .site-footer { margin-top: 18px; padding: 12px 0; font-size: 13px; color: var(--muted); text-align: center; }
 
+        /* Graph area styling - reserved space at bottom of card for chart */
+        .graph-area {
+          margin-top: 14px;
+        }
+        .graph-card {
+          width: 100%;
+          min-height: 140px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(180deg, rgba(246,247,251,0.7), rgba(238,242,255,0.6));
+          border-radius: 12px;
+          padding: 12px;
+          box-sizing: border-box;
+          border: 1px dashed rgba(6,20,40,0.04);
+        }
+        .graph-empty {
+          color: var(--muted);
+          font-size: 13px;
+        }
+
+        .message-small {
+          margin-top: 10px;
+          color: #374151;
+          font-size: 14px;
+        }
+
         /* iPhone 13 Pro ~390px */
         @media (max-width: 430px) {
           .card { max-width: 360px; padding: 18px; border-radius: 14px; }
           .moods { gap:6px; }
           .main { padding: 18px 12px; min-height: calc(100vh - 100px); }
+          .graph-card { min-height: 120px; padding: 10px; }
         }
 
         /* iPad portrait/landscape ~768px and small laptops */
@@ -169,6 +205,7 @@ export default function MoodCheckIn() {
   );
 }
 
+/* MoodForm - unchanged behavior, kept formatting */
 function MoodForm({ onSave }) {
   const [selected, setSelected] = useState('');
   const [note, setNote] = useState('');
@@ -217,11 +254,74 @@ function MoodForm({ onSave }) {
 
       <button className="submit" onClick={submit}>Check In</button>
 
-      {message && <div style={{ marginTop: 10, color: '#374151', fontSize: 14 }}>{message}</div>}
+      {message && <div className="message-small">{message}</div>}
     </div>
   );
 }
 
+/* MoodGraph - in-file simple SVG bar chart rendered from local entries */
+function MoodGraph({ entries = [] }) {
+  const moods = useMemo(() => moodList(), []);
+  const counts = useMemo(() => {
+    const c = moods.reduce((acc, m) => { acc[m.key] = 0; return acc; }, {});
+    // entries are reverse-ordered for the UI; use them all for counts
+    entries.forEach((e) => {
+      if (e && e.mood && c[e.mood] !== undefined) c[e.mood] += 1;
+    });
+    return c;
+  }, [entries, moods]);
+
+  const total = Object.values(counts).reduce((s, n) => s + n, 0);
+  const maxCount = Math.max(...Object.values(counts), 1); // avoid div-by-zero
+
+  if (total === 0) {
+    return <div className="graph-empty">No data yet — your check‑ins will appear here.</div>;
+  }
+
+  // Render an accessible simple bar chart using inline SVG
+  const width = 500;
+  const height = 120;
+  const padding = 20;
+  const availableWidth = width - padding * 2;
+  const barGap = 12;
+  const barCount = moods.length;
+  const barWidth = (availableWidth - barGap * (barCount - 1)) / barCount;
+
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      width="100%"
+      height="100%"
+      role="img"
+      aria-label="Mood summary chart"
+      preserveAspectRatio="xMidYMid meet"
+    >
+      <rect x="0" y="0" width={width} height={height} fill="transparent" />
+      {/* y-axis grid lines */}
+      {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+        const y = padding + (height - padding * 2) * (1 - t);
+        return <line key={i} x1={padding - 6} x2={width - padding} y1={y} y2={y} stroke="rgba(6,20,40,0.06)" strokeWidth="1" strokeDasharray="2 3" />;
+      })}
+      {/* bars */}
+      {moods.map((m, i) => {
+        const count = counts[m.key] || 0;
+        const h = ((height - padding * 2) * count) / maxCount;
+        const x = padding + i * (barWidth + barGap);
+        const y = height - padding - h;
+        const barColor = '#6faab6';
+        return (
+          <g key={m.key}>
+            <rect x={x} y={y} width={barWidth} height={h} rx="6" ry="6" fill={barColor} />
+            <text x={x + barWidth / 2} y={y - 6} fontSize="11" textAnchor="middle" fill="#0f1724" fontWeight="700">{count}</text>
+            <text x={x + barWidth / 2} y={height - padding + 14} fontSize="12" textAnchor="middle" fill="#475569">{m.emoji}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* helpers */
 function moodList() {
   return [
     { key: 'happy', emoji: '😊', label: 'Happy' },

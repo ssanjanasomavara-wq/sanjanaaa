@@ -212,24 +212,6 @@ export default function Dashboard() {
                   author={QUOTES.dashboard.author}
                 />
 
-                <div className="quick-grid" role="list">
-                  <Link href="/posts" legacyBehavior>
-                    <a className="quick-tile" role="listitem">Posts<div className="quick-sub">Browse community posts</div></a>
-                  </Link>
-
-                  <Link href="/chat" legacyBehavior>
-                    <a className="quick-tile" role="listitem">Chat<div className="quick-sub">Join community conversations</div></a>
-                  </Link>
-
-                  <Link href="/features" legacyBehavior>
-                    <a className="quick-tile" role="listitem">Features<div className="quick-sub">Explore app features</div></a>
-                  </Link>
-
-                  <Link href="/games" legacyBehavior>
-                    <a className="quick-tile" role="listitem">Games<div className="quick-sub">Relaxing mini-games</div></a>
-                  </Link>
-                </div>
-
                 {/* Use THINGS_ITEMS which contains image and text tiles (with hrefs) */}
                 <ImageGrid items={THINGS_ITEMS} />
                 <hr className="divider" />
