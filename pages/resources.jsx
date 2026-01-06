@@ -1,10 +1,12 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Topbar from '../components/Topbar';
 import QuoteBanner from '../components/QuoteBanner';
 import Heart from '../components/icons/Heart';
 import Leaf from '../components/icons/Leaf';
-import Topbar from '../components/Topbar';
+import Lightbulb from '../components/icons/Lightbulb';
+import { QUOTES } from '../lib/themeConstants';
 
 const BOOKS = [
   { title: 'Prozac Nation', author: 'Elizabeth Wurtzel', category: 'Memoir' },
