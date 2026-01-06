@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import QuoteBanner from '../components/QuoteBanner';
@@ -14,6 +15,10 @@ export default function Features() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
+
       <div className="site">
         {/* Top navigation (matches dashboard layout & sizing) */}
         <header className="topbar" role="banner">
@@ -56,7 +61,7 @@ export default function Features() {
           </div>
         </header>
 
-        <main style={{ padding: 18 }}>
+        <main className="main-content">
           <h1 style={{ marginTop: 0 }}>Features</h1>
           <p style={{ color: '#617489' }}>
             Small tools, prototyping pages and helpful interactions. Click any tile to open a feature.
@@ -171,6 +176,49 @@ export default function Features() {
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
+
+      <style jsx>{`
+        :root { --max-width: 980px; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
+        /* topbar */
+        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; position: relative; }
+        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
+        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
+        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+        .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .btn-outline { border: 1px solid rgba(6,20,40,0.08); background: transparent; padding: 6px 8px; border-radius: 8px; }
+        .btn-strong { background: var(--cta-strong, #1f9fff); color: #fff; padding: 8px 12px; border-radius: 8px; }
+
+        .main-content { padding: var(--space-md, 20px); }
+
+        .features-grid { margin-bottom: 8px; }
+
+        .site-footer { margin-top: 12px; padding: 12px 0; font-size: 13px; color: var(--text-muted, #7b8899); text-align: center; }
+
+        @media (max-width: 980px) {
+          .site { padding: 0 14px; }
+        }
+
+        @media (max-width: 820px) {
+          .desktop-nav { display: none; }
+          .site { padding: 0 12px; }
+          .main-content { padding: 14px 6px; }
+        }
+
+        @media (max-width: 420px) {
+          .brand-avatar { width: 36px; height: 36px; }
+        }
+      `}</style>
     </div>
   );
 }
