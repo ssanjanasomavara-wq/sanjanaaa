@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -157,10 +158,37 @@ export default function ProfilePage() {
 
   return (
     <div className="site-root">
+      <Head>
+        <title>Your Profile — Semi‑Colonic</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+      </Head>
+
       <div className="site" style={{ padding: 18 }}>
-        <header style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-          <Link href="/" legacyBehavior><a style={{ textDecoration: 'none', color: '#183547', fontWeight: 700 }}>← Back</a></Link>
-          <h2 style={{ margin: 0 }}>Your Profile</h2>
+        <header className="topbar" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link href="/" legacyBehavior>
+              <a className="brand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="brand-avatar" style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden' }}>
+                  <img src="/semi-colonic-logo.png" alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <span className="brand-text" style={{ fontWeight: 700 }}>Semi-colonic</span>
+              </a>
+            </Link>
+
+            <nav className="desktop-nav" aria-label="Primary">
+              <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
+              <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
+              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
+              <Link href="/resources" legacyBehavior><a className="nav-link">Resources</a></Link>
+            </nav>
+          </div>
+
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Link href="/dashboard" legacyBehavior><a className="btn">Dashboard</a></Link>
+            <Link href="/settings" legacyBehavior><a className="btn btn-primary">Settings</a></Link>
+          </div>
         </header>
 
         <main style={{ maxWidth: 760, margin: '0 auto' }}>
@@ -201,12 +229,27 @@ export default function ProfilePage() {
       </div>
 
       <style jsx>{`
-        .content-card {
-          padding: 16px;
-          border-radius: 12px;
-          background: linear-gradient(180deg,#ffffff,#fbfdff);
-          box-shadow: 0 8px 20px rgba(6,20,40,0.04);
+        :root {
+          --cta-strong: #1f9fff;
+          --text-primary: #183547;
+          --text-secondary: #617489;
         }
+
+        .site-root {
+          min-height: 100vh;
+          background: linear-gradient(180deg, #e8f4f8, #d8eef5);
+          font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .site { max-width: 980px; margin: 0 auto; }
+
+        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; }
+        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
+        .brand-text { font-weight: 700; color: var(--text-primary); }
+
+        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
+        .nav-link { margin-right: 12px; color: var(--text-primary); text-decoration: none; font-weight: 600; }
+
         .muted-label { display:block; color:#7b8899; font-weight:700; margin-bottom:6px; font-size:13px; }
         input {
           width: 100%;
@@ -216,9 +259,20 @@ export default function ProfilePage() {
           outline: none;
           font-size: 14px;
         }
-        .btn { background: transparent; border: none; font-weight:700; padding:8px 10px; border-radius:10px; cursor:pointer; }
-        .btn-outline { border: 1px solid rgba(20,40,60,0.06); padding: 8px 12px; background: transparent; }
-        .btn-strong { background: linear-gradient(90deg,#d8b37b,#c87a3c); color: #fff; padding: 8px 12px; border-radius: 12px; }
+
+        /* Buttons: Ensure visible brand color in light theme */
+        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 10px; border-radius: 10px; cursor: pointer; color: var(--text-primary); font-weight:700; }
+        .btn-outline { border: 1px solid rgba(20,40,60,0.06); padding: 8px 12px; background: transparent; color: var(--text-primary); }
+        .btn-strong, .btn-primary { background: linear-gradient(90deg,var(--cta-strong),#c87a3c); color: #fff; padding: 8px 12px; border-radius: 12px; border: none; }
+        .btn-ghost { background: transparent; }
+
+        .content-card {
+          padding: 16px;
+          border-radius: 12px;
+          background: linear-gradient(180deg,#ffffff,#fbfdff);
+          box-shadow: 0 8px 20px rgba(6,20,40,0.04);
+        }
+
         @media (max-width: 560px) {
           .content-card { padding: 12px; }
           div[style*="grid-template-columns"] { grid-template-columns: 1fr; }
