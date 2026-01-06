@@ -53,10 +53,6 @@
   /* Layout constraints */
   --max-width: 1200px;
   --container-width: 420px;
-
-  /* Brand colors from _app.jsx */
-  --brand-color: #1f9fff;
-  --brand-strong: #1f9fff;
 }
 
 /* ===================================================================
@@ -363,60 +359,3 @@ html, body {
   outline: 2px solid var(--color-aqua-mist);
   outline-offset: 2px;
 }
-
-/* ===================================================================
-   Additional Global Styles from _app.jsx
-   =================================================================== */
-html, body, #__next {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: var(--bg, #fff);
-  color: var(--text-primary);
-}
-
-/* Button defaults to use brand colors on light theme */
-.btn {
-  border: none;
-  background: transparent;
-  padding: 6px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  color: var(--brand-color);
-  font-weight: 600;
-  font-family: inherit;
-}
-
-.btn-outline {
-  border: 1px solid var(--brand-color);
-  background: transparent;
-  padding: 6px 8px;
-  border-radius: 8px;
-  color: var(--brand-color);
-}
-
-.btn-strong {
-  background: var(--brand-strong);
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(0,0,0,0.04);
-}
-
-.btn-delete {
-  background: #c0392b;
-  color: #fff;
-  padding: 6px 8px;
-  border-radius: 8px;
-}
-
-/* Utility globals used across pages */
-.site-root { min-height: 100vh; }
-.site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
-
-/* Small responsive tweaks to ensure centered content */
-@media (max-width: 980px) { .site { padding: 0 14px; } }
-@media (max-width: 600px) { .site { padding: 0 12px; } }
