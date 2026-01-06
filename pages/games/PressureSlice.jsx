@@ -1,17 +1,15 @@
+import Head from 'next/head';
 import React, { useEffect, useRef } from "react";
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import Topbar from '../../components/Topbar';
 
 /**
  * Pressure Slice
- * Converted from index (11).html
+ * - Replaced local header with shared <Topbar /> so sign-out UI and mobile drawer are consistent with other pages
+ * - Keeps responsive layout for iPhone 13 Pro, iPad and PC
+ * - Center-aligns the game area
  */
 export default function PressureSlice() {
-  const router = useRouter();
-  function handleSignOut() {
-    router.replace('/');
-  }
-
   const canvasRef = useRef(null);
   const dotRef = useRef(null);
   const lastRef = useRef({ x: null, y: null });
@@ -22,8 +20,12 @@ export default function PressureSlice() {
     const dot = dotRef.current;
 
     // initial surface
-    ctx.fillStyle = "#f2c58f";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    function fillSurface() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#f2c58f";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    fillSurface();
 
     function onPointerMove(e) {
       const rect = canvas.getBoundingClientRect();
@@ -45,7 +47,7 @@ export default function PressureSlice() {
     }
 
     function slice(ctx, x1, y1, x2, y2, pressure) {
-      const depth = pressure * 14;
+      const depth = (pressure || 0.5) * 14;
       ctx.lineWidth = depth;
       ctx.lineCap = "round";
       ctx.strokeStyle = "#7c1626";
@@ -79,67 +81,118 @@ export default function PressureSlice() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>Pressure Slice — Semi‑Colonic</title>
+      </Head>
+
+      {/* Shared Topbar provides sign-in/sign-out and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+
+      ]} />
+
       <div className="site">
-        {/* Top navigation */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  className="brand-avatar"
-                  aria-hidden
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    flex: '0 0 40px',
-                  }}
-                >
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-              </a>
-            </Link>
+        <main className="games-main" role="main">
+          <div className="games-center">
+            <div className="games-card">
+              <h1 style={{ margin: 0, textAlign: 'center' }}>Pressure Slice</h1>
+              <p style={{ marginTop: 8, color: '#617489', textAlign: 'center' }}>Press, drag and release to slice the surface.</p>
 
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a style={{ marginRight: 12 }}>Games</a></Link>
-            </nav>
-          </div>
+              <div className="canvas-wrap" style={{ position: 'relative', marginTop: 16 }}>
+                <div ref={dotRef} id="dot" className="dot" />
+                {/* Keep reasonable drawing buffer but make the canvas visually responsive */}
+                <canvas ref={canvasRef} width={900} height={560} className="responsive-canvas" />
+              </div>
 
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
+              <div style={{ textAlign: 'center', marginTop: 12 }}>
+                <button onClick={restart} className="restart-btn">Restart</button>
+              </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>guest</div>
-              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
+              <div style={{ marginTop: 12, textAlign: 'center' }}>
+                <Link href="/games" legacyBehavior><a className="btn-link">← Back to games</a></Link>
+              </div>
             </div>
-          </div>
-        </header>
-
-        <main style={{ padding: 18, display: 'flex', justifyContent: 'center' }}>
-          <div style={styles.container}>
-            <div ref={dotRef} id="dot" style={styles.dot} />
-            <canvas ref={canvasRef} width={720} height={480} style={styles.canvas} />
-            <button onClick={restart} style={styles.button}>Restart</button>
           </div>
         </main>
 
         <footer className="site-footer">
-          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
+          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved.
         </footer>
       </div>
+
+      <style jsx>{`
+        :root { --max-width: 980px; --text-primary: #183547; --muted: #7b8899; --cta-strong: #1f9fff; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          color: var(--text-primary);
+        }
+
+        .site-root { min-height: 100vh; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
+        /* Centering layout */
+        .games-main { padding: 20px 18px; display:flex; justify-content:center; align-items:flex-start; }
+        .games-center { width:100%; display:flex; justify-content:center; align-items:center; }
+        .games-card { width:100%; max-width:980px; display:flex; flex-direction:column; align-items:center; padding:12px; box-sizing:border-box; }
+
+        .canvas-wrap { width: 100%; display:flex; justify-content:center; align-items:center; }
+
+        /* Make the canvas responsive visually while keeping a fixed drawing buffer */
+        .responsive-canvas {
+          width: 100%;
+          max-width: 900px;
+          height: auto;
+          border-radius: 18px;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+          touch-action: none;
+          cursor: none;
+        }
+
+        .dot {
+          position: absolute;
+          width: 14px;
+          height: 14px;
+          border: 2px solid #6b0f1a;
+          border-radius: 50%;
+          pointer-events: none;
+          transform: translate(-50%, -50%);
+          z-index: 10;
+        }
+
+        .restart-btn {
+          margin-top: 12px;
+          padding: 10px 20px;
+          border-radius: 20px;
+          border: none;
+          background: #7c1626;
+          color: white;
+          cursor: pointer;
+        }
+
+        .btn-link { color: var(--text-primary); text-decoration: none; font-weight:600; }
+
+        .site-footer { margin-top: 18px; padding: 12px 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+        @media (max-width: 820px) {
+          .responsive-canvas { max-width: 720px; }
+          .games-card { padding: 10px; }
+        }
+
+        @media (max-width: 420px) {
+          .responsive-canvas { max-width: 340px; }
+          .games-main { padding: 14px 12px; }
+          .restart-btn { padding: 8px 14px; }
+        }
+      `}</style>
     </div>
   );
 }
-
-const styles = {
-  container: { display: "flex", flexDirection: "column", alignItems: "center", gap: 12, paddingTop: 16 },
-  canvas: { borderRadius: 18, boxShadow: "0 20px 40px rgba(0,0,0,0.25)", touchAction: "none", cursor: "none" },
-  dot: { position: "absolute", width: 14, height: 14, border: "2px solid #6b0f1a", borderRadius: "50%", pointerEvents: "none", transform: "translate(-50%, -50%)" },
-  button: { marginTop: 12, padding: "10px 20px", borderRadius: 20, border: "none", background: "#7c1626", color: "white", cursor: "pointer" },
-};

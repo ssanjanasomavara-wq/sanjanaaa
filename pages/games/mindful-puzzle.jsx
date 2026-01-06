@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
@@ -5,9 +6,6 @@ import Topbar from '../../components/Topbar';
 
 export default function MindfulPuzzle() {
   const router = useRouter();
-  function handleSignOut() {
-    router.replace('/');
-  }
 
   // Check-in entries (same pattern as pages/features/checkin.jsx)
   const [entries, setEntries] = useState([]);
@@ -95,126 +93,154 @@ export default function MindfulPuzzle() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>Mindful Puzzle — Semi‑Colonic</title>
+      </Head>
+
+      {/* Shared Topbar provides sign-in / sign-out and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+
+      ]} />
+
       <div className="site">
-        {/* Top navigation (matches dashboard layout & sizing) */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  className="brand-avatar"
-                  aria-hidden
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    flex: '0 0 40px',
-                  }}
-                >
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-              </a>
-            </Link>
-
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a style={{ marginRight: 12 }}>Games</a></Link>
-            </nav>
-          </div>
-
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>guest</div>
-              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
-            </div>
-          </div>
-        </header>
-
-        <main style={{ padding: 18, display: 'flex', justifyContent: 'center' }}>
-          <div style={{ maxWidth: 640, width: '100%' }}>
-            <div style={{ background: '#fdfefe', padding: 24, borderRadius: 18, boxShadow: '0 10px 25px rgba(70,110,120,0.2)' }}>
-              <h2 style={{ marginBottom: 6, textAlign: 'center', color: '#3b6f7d', fontWeight: 600 }}>Mindful Puzzle</h2>
-              <div style={{ textAlign: 'center', fontSize: 13, color: '#7a9a8f', marginBottom: 14 }}>
+        <main className="games-main">
+          <div className="games-center">
+            <div className="games-card">
+              <h2 className="title">Mindful Puzzle</h2>
+              <p className="lede">
                 Take a moment. You’re allowed to feel. Click the tiles in ascending order and follow the coping activity at each step.
+              </p>
+
+              <div className="puzzle-wrap">
+                <div
+                  id="puzzle-container"
+                  className="puzzle-grid"
+                  role="grid"
+                  aria-label="Mindful puzzle tiles"
+                >
+                  {numbers.map((n) => {
+                    const isCleared = cleared.has(n);
+                    return (
+                      <button
+                        key={n}
+                        onClick={() => handleTileClick(n)}
+                        aria-label={`Tile ${n}`}
+                        className={`tile ${isCleared ? 'cleared' : ''}`}
+                      >
+                        {n}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div id="message" className="message">{message}</div>
+
+                <div className="controls">
+                  <button onClick={startGame} className="primary">Restart Puzzle</button>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start', flexDirection: 'column' }}>
-                {/* Puzzle area */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div
-                    id="puzzle-container"
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(3, 90px)',
-                      gridGap: 10,
-                      justifyContent: 'center',
-                      marginBottom: 12,
-                    }}
-                  >
-                    {numbers.map((n) => {
-                      const isCleared = cleared.has(n);
-                      return (
-                        <button
-                          key={n}
-                          onClick={() => handleTileClick(n)}
-                          aria-label={`Tile ${n}`}
-                          style={{
-                            width: 90,
-                            height: 90,
-                            background: isCleared ? '#264653' : '#e76f51',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: 10,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: 22,
-                            cursor: 'pointer',
-                            userSelect: 'none',
-                          }}
-                        >
-                          {n}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  <div id="message" style={{ marginTop: 6, fontSize: 14, color: '#264653', textAlign: 'center', maxWidth: 420 }}>
-                    {message}
-                  </div>
-
-                  <button
-                    onClick={startGame}
-                    style={{
-                      marginTop: 12,
-                      padding: '10px 18px',
-                      fontSize: 14,
-                      border: 'none',
-                      borderRadius: 8,
-                      background: '#2a9d8f',
-                      color: '#fff',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Restart Puzzle
-                  </button>
-                </div>
+              <div className="back-link">
+                <Link href="/games" legacyBehavior><a>← Back to games</a></Link>
               </div>
             </div>
           </div>
         </main>
 
         <footer className="site-footer">
-          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
+          © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved.
         </footer>
       </div>
+
+      <style jsx>{`
+        :root { --max-width: 980px; --cta-strong: #1f9fff; --text-primary: #183547; --muted: #7b8899; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          color: var(--text-primary);
+        }
+
+        .site-root { min-height: 100vh; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
+        /* Centering layout */
+        .games-main { padding: 20px 18px; display:flex; justify-content:center; align-items:flex-start; }
+        .games-center { width:100%; display:flex; justify-content:center; align-items:center; }
+        .games-card { width:100%; max-width:640px; display:flex; flex-direction:column; align-items:center; padding:12px; box-sizing:border-box; }
+
+        .title { margin-bottom: 6px; text-align:center; color:#3b6f7d; font-weight:600; }
+        .lede { text-align:center; font-size:13px; color: #7a9a8f; margin-bottom: 16px; max-width:620px; }
+
+        .puzzle-wrap { width:100%; display:flex; flex-direction:column; align-items:center; gap:12px; }
+
+        .puzzle-grid {
+          display:grid;
+          grid-template-columns: repeat(3, 90px);
+          grid-gap: 10px;
+          justify-content:center;
+        }
+
+        .tile {
+          width: 90px;
+          height: 90px;
+          background: #e76f51;
+          color: #fff;
+          border: none;
+          border-radius: 10px;
+          font-size: 22px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          cursor:pointer;
+          user-select:none;
+        }
+
+        .tile.cleared {
+          background: #264653;
+        }
+
+        .message { margin-top:6px; font-size:14px; color:#264653; text-align:center; max-width:420px; }
+
+        .controls .primary {
+          margin-top: 8px;
+          padding: 10px 18px;
+          font-size: 14px;
+          border: none;
+          border-radius: 8px;
+          background: #2a9d8f;
+          color: white;
+          cursor: pointer;
+        }
+
+        .back-link { margin-top: 12px; text-align:center; }
+        .back-link a { color: var(--text-primary); text-decoration: none; font-weight:600; }
+
+        .site-footer { margin-top: 18px; padding: 12px 0; font-size: 13px; color: var(--muted); text-align: center; }
+
+        /* Responsive tweaks for iPad / iPhone 13 Pro and small screens */
+        @media (max-width: 820px) {
+          .puzzle-grid { grid-template-columns: repeat(3, minmax(64px, 1fr)); gap: 8px; }
+          .tile { width: 72px; height: 72px; font-size: 18px; }
+          .games-card { padding: 10px; }
+        }
+
+        @media (max-width: 420px) {
+          .puzzle-grid { grid-template-columns: repeat(3, minmax(56px, 1fr)); gap: 6px; }
+          .tile { width: 60px; height: 60px; font-size: 16px; border-radius: 8px; }
+          .lede { font-size: 12px; }
+          .message { font-size: 13px; max-width: 300px; }
+          .games-main { padding: 14px 12px; }
+        }
+      `}</style>
     </div>
   );
 }
