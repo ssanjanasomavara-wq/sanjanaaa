@@ -499,7 +499,7 @@ export default function IndexPage() {
 
         /* Login-specific dark card override */
         body.login .card, #login-card {
-          background: linear-gradient(180deg, rgba(18,34,64,0.96), rgba(8,15,30,0.95));
+          background: linear-gradient(180deg, #06b6d4, rgba(8, 15, 30, .95));
           color: var(--text-light);
         }
 
@@ -572,9 +572,9 @@ export default function IndexPage() {
 
         /* Muted buttons now size to content and center as a group */
         .muted { 
-          background: transparent; 
+          background:var(--cta-gradient); 
           border: 1px solid rgba(255,255,255,0.06); 
-          color: rgba(255,255,255,0.92); 
+          color: rgba(155, 220, 220, 0.85); 
           padding: 10px 14px; 
           display: inline-block;
           border-radius: 10px;

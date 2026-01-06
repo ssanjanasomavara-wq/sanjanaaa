@@ -230,7 +230,7 @@ export default function Dashboard() {
                   </Link>
                 </div>
 
-                <ImageGrid images={SEASIDE_IMAGES} />
+                <ImageGrid images={THINGS_IMAGES} />
 
                 <hr className="divider" />
 
@@ -243,15 +243,6 @@ export default function Dashboard() {
             text="The tide goes out. The tide comes back."
             author="Semi-colonic"
             className="dashboard-quote"
-          />
-
-          <ImageGrid 
-            images={[
-              { src: '/images/placeholder-1.svg', alt: 'Peaceful seaside moment 1' },
-              { src: '/images/placeholder-2.svg', alt: 'Peaceful seaside moment 2' },
-              { src: '/images/placeholder-3.svg', alt: 'Peaceful seaside moment 3' },
-              { src: '/images/placeholder-4.svg', alt: 'Peaceful seaside moment 4' },
-            ]}
           />
 
           <div className="footer-actions" style={{ marginTop: 18 }}>
