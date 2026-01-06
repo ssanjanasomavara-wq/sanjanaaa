@@ -230,7 +230,6 @@ export default function Dashboard() {
                   </Link>
                 </div>
 
-                <ImageGrid images={THINGS_IMAGES} />
 
                 <hr className="divider" />
 
