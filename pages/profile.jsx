@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import Topbar from '../components/Topbar';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -164,34 +165,24 @@ export default function ProfilePage() {
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* Shared Topbar provides sign-in / sign-out button and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+      ]} />
+
       <div className="site" style={{ padding: 18 }}>
-        <header className="topbar" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="brand-avatar" style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden' }}>
-                  <img src="/semi-colonic-logo.png" alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <span className="brand-text" style={{ fontWeight: 700 }}>Semi-colonic</span>
-              </a>
-            </Link>
-
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
-              <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
-              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
-              <Link href="/resources" legacyBehavior><a className="nav-link">Resources</a></Link>
-            </nav>
-          </div>
-
-          <div style={{ marginLeft: 'auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+        <main style={{ maxWidth: 760, margin: '0 auto' }}>
+          {/* keep dashboard/settings quick-actions near the content since header is now Topbar */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
             <Link href="/dashboard" legacyBehavior><a className="btn">Dashboard</a></Link>
             <Link href="/settings" legacyBehavior><a className="btn btn-primary">Settings</a></Link>
+            <div style={{ marginLeft: 'auto', color: '#617489' }}>{statusMsg}</div>
           </div>
-        </header>
 
-        <main style={{ maxWidth: 760, margin: '0 auto' }}>
           <section className="content-card">
             <div style={{ marginBottom: 12 }}>
               <label className="muted-label">Email (from account)</label>
@@ -243,13 +234,6 @@ export default function ProfilePage() {
 
         .site { max-width: 980px; margin: 0 auto; }
 
-        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; }
-        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
-        .brand-text { font-weight: 700; color: var(--text-primary); }
-
-        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
-        .nav-link { margin-right: 12px; color: var(--text-primary); text-decoration: none; font-weight: 600; }
-
         .muted-label { display:block; color:#7b8899; font-weight:700; margin-bottom:6px; font-size:13px; }
         input {
           width: 100%;
@@ -261,7 +245,7 @@ export default function ProfilePage() {
         }
 
         /* Buttons: Ensure visible brand color in light theme */
-        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 10px; border-radius: 10px; cursor: pointer; color: var(--text-primary); font-weight:700; }
+        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 10px; border-radius: 10px; cursor: pointer; color: var(--text-primary); font-weight:700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
         .btn-outline { border: 1px solid rgba(20,40,60,0.06); padding: 8px 12px; background: transparent; color: var(--text-primary); }
         .btn-strong, .btn-primary { background: linear-gradient(90deg,var(--cta-strong),#c87a3c); color: #fff; padding: 8px 12px; border-radius: 12px; border: none; }
         .btn-ghost { background: transparent; }

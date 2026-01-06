@@ -232,13 +232,14 @@ export default function Chat() {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
 
-      {/* Shared Topbar provides sign-in / sign-out button and mobile drawer */}
+      {/* Shared top navigation / theme component (includes mobile drawer) */}
       <Topbar links={[
-        { href: '/posts', label: 'Posts' },
-        { href: '/chat', label: 'Chat' },
-        { href: '/features', label: 'Features' },
-        { href: '/games', label: 'Games' },
-      ]} />
+          { href: '/posts', label: 'Posts' },
+          { href: '/chat', label: 'Chat' },
+          { href: '/features', label: 'Features' },
+          { href: '/games', label: 'Games' },
+          { href: '/resources', label: 'Resources' },
+            ]} />
 
       <div className="site">
         <main style={{ padding: 18 }}>

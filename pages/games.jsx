@@ -28,6 +28,7 @@ export default function Games() {
         { href: '/chat', label: 'Chat' },
         { href: '/features', label: 'Features' },
         { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
       ]} />
 
       <div className="site">

@@ -6,6 +6,11 @@ import Heart from '../components/icons/Heart';
 import Leaf from '../components/icons/Leaf';
 import Lightbulb from '../components/icons/Lightbulb';
 import { QUOTES } from '../lib/themeConstants';
+import ImageGrid from '../components/ImageGrid';
+
+import { useEffect, useRef, useState } from 'react';
+import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import MobileDrawer from '../components/MobileDrawer';
 
 export default function Features() {
   return (
@@ -20,6 +25,8 @@ export default function Features() {
         { href: '/chat', label: 'Chat' },
         { href: '/features', label: 'Features' },
         { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+
       ]} />
 
       <div className="site">

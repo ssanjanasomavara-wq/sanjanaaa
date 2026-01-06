@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import Topbar from '../components/Topbar';
 
 const DEFAULT_SETTINGS = {
   displayName: '',
@@ -396,23 +397,23 @@ export default function SettingsPage() {
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
       </Head>
 
-      <div className="site" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 18px' }}>
-        <header className="topbar" style={{ padding: '12px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Link href="/" legacyBehavior><a className="brand" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div className="brand-avatar" style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden' }}>
-                <img src="/semi-colonic-logo.png" alt="logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-              <span className="brand-text" style={{ fontWeight: 700 }}>Semi-colonic</span>
-            </a></Link>
-          </div>
+      {/* Use shared Topbar so sign-out and mobile drawer are consistent with other pages */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
 
-          <div className="topbar-actions" style={{ marginLeft: 'auto' }}>
+      ]} />
+
+      <div className="site" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 18px' }}>
+        {/* Quick actions relocated near content because Topbar now provides global navigation */}
+        <main className="main-content" style={{ padding: '20px' }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 12 }}>
             <Link href="/dashboard" legacyBehavior><a className="btn">Dashboard</a></Link>
           </div>
-        </header>
 
-        <main className="main-content" style={{ padding: '20px' }}>
           <section className="card" style={{ padding: 16, borderRadius: 12, background: '#fff', boxShadow: '0 6px 18px rgba(20,40,60,0.04)' }}>
             <header style={{ marginBottom: 12 }}>
               <h1 style={{ margin: 0 }}>Settings</h1>
