@@ -59,7 +59,7 @@ export default function Games() {
             <button aria-label="Messages" className="btn" title="Messages">💬</button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>guest</div>
+              <div className="user-email" title={userEmail}>{userEmail}</div>
               <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
             </div>
           </div>
