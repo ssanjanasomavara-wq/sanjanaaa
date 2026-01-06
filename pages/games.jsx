@@ -1,6 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import QuoteBanner from '../components/QuoteBanner';
+import Heart from '../components/icons/Heart';
+import Leaf from '../components/icons/Leaf';
+import Lightbulb from '../components/icons/Lightbulb';
+import { QUOTES } from '../lib/themeConstants';
 
 export default function Games() {
   const router = useRouter();
@@ -70,7 +75,10 @@ export default function Games() {
           <p style={{ color: '#617489' }}>
             Relaxing mini-games and playful prototypes. Click any tile to open a game.
           </p>
-
+         <QuoteBanner 
+            quote={QUOTES.games.quote}
+            author={QUOTES.games.author}
+          />
           <div
             className="games-grid"
             style={{
