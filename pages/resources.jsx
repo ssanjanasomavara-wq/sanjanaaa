@@ -70,7 +70,6 @@ export default function Resources() {
             text={QUOTES.games.quote}
             author={QUOTES.games.author}
           />
-          
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: 'var(--text-secondary, #4b6b7a)' }}>
             <Heart size={20} color="#f4b8a4" className="icon-small" />
