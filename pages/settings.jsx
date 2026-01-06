@@ -392,6 +392,8 @@ export default function SettingsPage() {
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <title>Settings — Semi-colonic</title>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
       </Head>
 
       <div className="site" style={{ maxWidth: '980px', margin: '0 auto', padding: '0 18px' }}>
@@ -535,9 +537,21 @@ export default function SettingsPage() {
 
       <style jsx>{`
         /* small set of styles to match dashboard look & responsiveness */
+        :root {
+          --cta-strong: #1f9fff;
+          --text-primary: #183547;
+          --text-secondary: #617489;
+        }
+
+        .site-root {
+          min-height: 100vh;
+          font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          background: var(--bg, #fff);
+        }
+
         .brand-text { color: var(--text-primary, #183547); }
-        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 12px; border-radius: 10px; cursor: pointer; }
-        .btn-primary { background: var(--cta-strong, #1f9fff); color: #fff; border-color: transparent; }
+        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 12px; border-radius: 10px; cursor: pointer; color: var(--text-primary); }
+        .btn-primary { background: var(--cta-strong); color: #fff; border-color: transparent; }
         .btn-ghost { background: transparent; border: 1px solid rgba(6,20,40,0.04); }
         .btn-danger { color: #b00020; border-color: rgba(176,0,32,0.08); }
         .card { background: transparent; }
@@ -552,7 +566,8 @@ export default function SettingsPage() {
           border: 1px solid #e6eef6;
           margin-top: 6px;
         }
-        label.form-label { display: block; font-weight: 700; color: #183547; }
+        label.form-label { display: block; font-weight: 700; color: var(--text-primary); }
+
         /* theme classes applied to body by settings page */
         body.theme-dark { background: #071022; color: #d7eaf6; }
         body.theme-dark .card { background: #071a2a; }
