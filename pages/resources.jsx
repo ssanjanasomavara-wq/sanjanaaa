@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import QuoteBanner from '../components/QuoteBanner';
@@ -43,103 +44,157 @@ export default function Resources() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>Resources — Books on Mental Health & Comfort Reading</title>
+        {/* Load Poppins so pages consistently use the same font */}
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+      </Head>
+
       <div className="site">
-        <header className="page-header">
-          <button onClick={() => router.back()} className="btn btn-outline" aria-label="Go back">
-            ← Back
-          </button>
-          <h1 style={{ margin: 0, fontSize: 22, color: '#183547' }}>Resources — Books on Mental Health & Comfort Reading</h1>
+        {/* Top navigation (match dashboard layout) */}
+        <header className="topbar" role="banner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <Link href="/" legacyBehavior>
+              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div className="brand-avatar" aria-hidden="true" style={{ width: 44, height: 44, borderRadius: 10, overflow: 'hidden' }}>
+                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                </div>
+                <span className="brand-text">Semi-colonic</span>
+              </a>
+            </Link>
+
+            <nav className="desktop-nav" aria-label="Primary">
+              <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
+              <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
+              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
+              <Link href="/resources" legacyBehavior><a className="nav-link">Resources</a></Link>
+            </nav>
+          </div>
+
+          <div className="topbar-actions" role="navigation" aria-label="Top actions">
+            <button className="btn" onClick={() => router.back()} aria-label="Go back">← Back</button>
+            <Link href="/dashboard" legacyBehavior><a className="btn btn-primary">Dashboard</a></Link>
+          </div>
         </header>
 
-        <QuoteBanner 
-          text="Books are lighthouses in the storm, guiding us to safer shores."
-          author="A Reading Friend"
-        />
+        <main style={{ maxWidth: 980, margin: '0 auto', padding: 18 }}>
+          <header className="page-header" style={{ marginBottom: 12 }}>
+            <h1 style={{ margin: 0, fontSize: 22, color: 'var(--text-primary)' }}>Resources — Books on Mental Health & Comfort Reading</h1>
+          </header>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: '#4b6b7a' }}>
-          <Heart size={20} color="#f4b8a4" className="icon-small" />
-          <p style={{ margin: 0 }}>
-            A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
-            Each item links to Amazon.in search results for the title + author so you can find editions available in India.
-          </p>
-        </div>
+          <QuoteBanner
+            text="Books are lighthouses in the storm, guiding us to safer shores."
+            author="A Reading Friend"
+          />
 
-        <div className="card" style={{ overflowX: 'auto', marginTop: 18 }}>
-          <table className="books-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Title</th>
-                <th style={thStyle}>Author</th>
-                <th style={thStyle}>Category / Notes</th>
-                <th style={thStyle}>Amazon.in</th>
-              </tr>
-            </thead>
-            <tbody>
-              {BOOKS.map((b, i) => (
-                <tr key={i} style={i % 2 === 0 ? { background: 'rgba(20,40,60,0.02)' } : {}}>
-                  <td style={tdStyle}>{b.title}</td>
-                  <td style={tdStyle}>{b.author || '—'}</td>
-                  <td style={tdStyle}>{b.category}</td>
-                  <td style={tdStyle}>
-                    <a
-                      href={amazonSearchLink(b.title, b.author)}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{ color: '#b8e0d9', textDecoration: 'none', fontWeight: 600 }}
-                    >
-                      View on Amazon.in
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <section className="content-card" style={{ marginTop: 28 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-            <Leaf size={24} color="#a8d5ba" />
-            <h2 style={{ margin: 0 }}>Notes</h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 18, color: 'var(--text-secondary)' }}>
+            <Heart size={20} color="#f4b8a4" className="icon-small" />
+            <p style={{ margin: 0 }}>
+              A curated list of memoirs, personal stories, non-fiction reads and gentle picture books.
+              Each item links to Amazon.in search results for the title + author so you can find editions available in India.
+            </p>
           </div>
-          <ul style={{ color: '#4b6b7a', paddingLeft: 20 }}>
-            <li>Memoirs and first-person accounts can be powerful and sometimes triggering — please approach at your own pace.</li>
-            <li>Picture books listed are gentle reads for kids (and adults) to help discuss feelings, worry and connection.</li>
-            <li>If you want, I can replace the search links with specific Amazon product pages (please provide preferred editions or I can look them up).</li>
-          </ul>
-        </section>
 
-        <footer style={{ marginTop: 28, color: '#7b8899', fontSize: 13, textAlign: 'center' }}>
-          © {new Date().getFullYear()} Semi‑Colonic — Resources
-        </footer>
+          <div className="card" style={{ overflowX: 'auto', marginTop: 18 }}>
+            <table className="books-table" style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Title</th>
+                  <th style={thStyle}>Author</th>
+                  <th style={thStyle}>Category / Notes</th>
+                  <th style={thStyle}>Amazon.in</th>
+                </tr>
+              </thead>
+              <tbody>
+                {BOOKS.map((b, i) => (
+                  <tr key={i} style={i % 2 === 0 ? { background: 'rgba(20,40,60,0.02)' } : {}}>
+                    <td style={tdStyle}>{b.title}</td>
+                    <td style={tdStyle}>{b.author || '—'}</td>
+                    <td style={tdStyle}>{b.category}</td>
+                    <td style={tdStyle}>
+                      <a
+                        href={amazonSearchLink(b.title, b.author)}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ color: 'var(--cta-strong)', textDecoration: 'none', fontWeight: 600 }}
+                      >
+                        View on Amazon.in
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <section className="content-card" style={{ marginTop: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <Leaf size={24} color="#a8d5ba" />
+              <h2 style={{ margin: 0 }}>Notes</h2>
+            </div>
+            <ul style={{ color: 'var(--text-secondary)', paddingLeft: 20 }}>
+              <li>Memoirs and first-person accounts can be powerful and sometimes triggering — please approach at your own pace.</li>
+              <li>Picture books listed are gentle reads for kids (and adults) to help discuss feelings, worry and connection.</li>
+              <li>If you want, I can replace the search links with specific Amazon product pages (please provide preferred editions or I can look them up).</li>
+            </ul>
+          </section>
+
+          <footer style={{ marginTop: 28, color: 'var(--text-muted)', fontSize: 13, textAlign: 'center' }}>
+            © {new Date().getFullYear()} Semi‑Colonic — Resources
+          </footer>
+        </main>
       </div>
 
       <style jsx>{`
-        .site-root {
-          min-height: 100vh;
-          background: linear-gradient(180deg, #e8f4f8, #d8eef5);
+        :root {
+          --cta-strong: #1f9fff; /* brand */
+          --text-primary: #183547;
+          --text-secondary: #617489;
+          --text-muted: #7b8899;
         }
-        
+
+        /* Use Poppins across this page (fallback stack provided) */
+        .site-root { min-height: 100vh; background: linear-gradient(180deg, #e8f4f8, #d8eef5); font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
         .site {
-          max-width: 1200px;
+          max-width: 980px;
           margin: 0 auto;
           padding: 18px;
         }
-        
-        .page-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 18px;
-          flex-wrap: wrap;
-        }
-        
+
+        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; }
+        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
+        .brand-text { font-weight: 700; color: var(--text-primary); }
+
+        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
+        .nav-link { margin-right: 12px; color: var(--text-primary); text-decoration: none; font-weight: 600; }
+
+        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+        /* Buttons: ensure visible brand color in light theme */
+        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 12px; border-radius: 10px; cursor: pointer; color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-primary { background: var(--cta-strong); color: #fff; border-color: transparent; padding: 8px 12px; border-radius: 10px; text-decoration: none; }
+        .card { background: transparent; }
+
+        .page-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+
         .books-table th, .books-table td {
           padding: 12px 14px;
           border-bottom: 1px solid rgba(6,20,40,0.04);
           text-align: left;
           vertical-align: middle;
         }
-        
+
+        .content-card {
+          padding: 16px;
+          border-radius: 12px;
+          background: linear-gradient(180deg,#ffffff,#fbfdff);
+          box-shadow: 0 8px 20px rgba(6,20,40,0.04);
+        }
+
         @media (max-width: 640px) {
           .books-table { min-width: 520px; }
           .page-header h1 { font-size: 18px; }
