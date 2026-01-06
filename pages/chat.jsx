@@ -1,18 +1,15 @@
+import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig, isFirebaseInitialized } from '../lib/firebaseClient';
 
 /**
- * Community Chat page
+ * Community Chat page (responsive update)
  *
- * Features:
- * - Topic channels (General, Support, Off-topic, Resources)
- * - If Firebase Firestore + Auth are configured, uses Firestore for messages and auth for sender identity.
- * - Falls back to localStorage-based per-channel chat for guests / no-Firestore setup.
- * - Simple UI: channel list, message list, input box. Auto-scrolls to newest messages.
- *
- * Note: This is intentionally simple so it can be used as an example module or integrated into an open source product.
+ * - Styled to match dashboard.jsx layout (centered site container, top navigation)
+ * - Responsive for phones (iPhone), tablets (iPad) and desktop (PC)
+ * - Keeps Firestore/local fallback behavior unchanged
  */
 
 const CHANNELS = [
@@ -229,6 +226,10 @@ export default function Chat() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
+
       <div className="site">
         {/* Top navigation */}
         <header className="topbar" role="banner">
@@ -262,7 +263,7 @@ export default function Chat() {
         </header>
 
         <main style={{ padding: 18 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16 }}>
             {/* Channels */}
             <aside style={{ borderRadius: 12 }}>
               <div style={{ padding: 12, background: '#fff', borderRadius: 12, boxShadow: '0 6px 18px rgba(20,40,60,0.04)' }}>
@@ -361,9 +362,53 @@ export default function Chat() {
       </div>
 
       <style jsx>{`
-        .site-root { min-height: 100vh; }
+        :root { --max-width: 980px; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+
+        .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
         .brand-avatar img { display: block; }
         .channel-btn:focus { outline: 2px solid rgba(20,40,60,0.08); }
+
+        /* topbar and nav (match dashboard styles) */
+        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; position: relative; }
+        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
+        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
+        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+        .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .btn-outline { border: 1px solid rgba(6,20,40,0.08); background: transparent; padding: 6px 8px; border-radius: 8px; }
+        .btn-strong { background: var(--cta-strong, #1f9fff); color: #fff; padding: 8px 12px; border-radius: 8px; }
+
+        .site-footer { margin-top: 12px; padding: 12px 0; font-size: 13px; color: var(--text-muted, #7b8899); text-align: center; }
+
+        /* layout adjustments for responsiveness */
+        @media (max-width: 980px) {
+          .site { padding: 0 14px; }
+        }
+
+        @media (max-width: 820px) {
+          main > div { grid-template-columns: 1fr; }
+          aside { order: 2; }
+          section { order: 1; }
+        }
+
+        @media (max-width: 600px) {
+          .desktop-nav { display: none; }
+          .brand-avatar { width: 40px; height: 40px; }
+          .site { padding: 0 12px; }
+          main { padding: 14px; }
+        }
+
+        @media (max-width: 420px) {
+          .brand-avatar { width: 36px; height: 36px; }
+        }
       `}</style>
     </div>
   );
