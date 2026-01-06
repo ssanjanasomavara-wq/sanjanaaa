@@ -133,7 +133,7 @@ export default function MindfulPuzzle() {
                         aria-label={`Tile ${n}`}
                         className={`tile ${isCleared ? 'cleared' : ''}`}
                       >
-                        {n}
+                        <span className="tile-label">{n}</span>
                       </button>
                     );
                   })}
@@ -169,40 +169,53 @@ export default function MindfulPuzzle() {
           color: var(--text-primary);
         }
 
+        /* Prevent accidental horizontal overflow from long content */
+        .site-root, .site { overflow-x: hidden; }
+
         .site-root { min-height: 100vh; background: var(--bg, #fff); }
-        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; box-sizing: border-box; }
 
         /* Centering layout */
         .games-main { padding: 20px 18px; display:flex; justify-content:center; align-items:flex-start; }
         .games-center { width:100%; display:flex; justify-content:center; align-items:center; }
-        .games-card { width:100%; max-width:640px; display:flex; flex-direction:column; align-items:center; padding:12px; box-sizing:border-box; }
+        .games-card { width:100%; max-width:640px; display:flex; flex-direction:column; align-items:center; padding:12px; box-sizing:border-box; background: linear-gradient(180deg,#fdfefe,#fbfefe); border-radius:18px; box-shadow: 0 10px 25px rgba(70,110,120,0.06); }
 
-        .title { margin-bottom: 6px; text-align:center; color:#3b6f7d; font-weight:600; }
+        .title { margin-bottom: 6px; text-align:center; color:#3b6f7d; font-weight:600; font-size: clamp(20px, 2.6vw, 28px); }
         .lede { text-align:center; font-size:13px; color: #7a9a8f; margin-bottom: 16px; max-width:620px; }
 
         .puzzle-wrap { width:100%; display:flex; flex-direction:column; align-items:center; gap:12px; }
 
+        /* Make grid responsive and prevent overflow:
+           - grid columns are fractional so they shrink on small viewports
+           - cap the grid container width so it never exceeds the card
+           - tiles use aspect-ratio so they stay square while fluid */
         .puzzle-grid {
           display:grid;
-          grid-template-columns: repeat(3, 90px);
-          grid-gap: 10px;
-          justify-content:center;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 12px;
+          width: 100%;
+          max-width: 360px; /* ensures grid doesn't overflow card on small screens */
+          box-sizing: border-box;
+          justify-items: center;
         }
 
         .tile {
-          width: 90px;
-          height: 90px;
+          width: 100%;
+          aspect-ratio: 1 / 1;
           background: #e76f51;
           color: #fff;
           border: none;
           border-radius: 10px;
-          font-size: 22px;
           display:flex;
           align-items:center;
           justify-content:center;
           cursor:pointer;
           user-select:none;
+          font-size: clamp(16px, 2.6vw, 22px);
         }
+
+        /* keep number centered and maintain readable sizing */
+        .tile-label { line-height: 1; }
 
         .tile.cleared {
           background: #264653;
@@ -228,14 +241,12 @@ export default function MindfulPuzzle() {
 
         /* Responsive tweaks for iPad / iPhone 13 Pro and small screens */
         @media (max-width: 820px) {
-          .puzzle-grid { grid-template-columns: repeat(3, minmax(64px, 1fr)); gap: 8px; }
-          .tile { width: 72px; height: 72px; font-size: 18px; }
-          .games-card { padding: 10px; }
+          .puzzle-grid { gap: 10px; max-width: 340px; }
         }
 
         @media (max-width: 420px) {
-          .puzzle-grid { grid-template-columns: repeat(3, minmax(56px, 1fr)); gap: 6px; }
-          .tile { width: 60px; height: 60px; font-size: 16px; border-radius: 8px; }
+          .puzzle-grid { gap: 8px; max-width: 300px; }
+          .tile { font-size: 16px; border-radius: 8px; }
           .lede { font-size: 12px; }
           .message { font-size: 13px; max-width: 300px; }
           .games-main { padding: 14px 12px; }
