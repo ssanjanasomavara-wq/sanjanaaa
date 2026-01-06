@@ -2,6 +2,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import Topbar from '../../components/Topbar';
 
 /*
   Reactified / inlined version of prototype/find-the-calm.js
@@ -558,49 +559,16 @@ export default function Breathe() {
       </Head>
 
       <div className="site-root">
+        <Topbar links={[
+          { href: '/posts', label: 'Posts' },
+          { href: '/chat', label: 'Chat' },
+          { href: '/features', label: 'Features' },
+          { href: '/games', label: 'Games' },
+          { href: '/resources', label: 'Resources' },
+        ]} />
+
         <div className="site">
-          {/* Top navigation (matches dashboard layout & sizing) */}
-          <header className="topbar" role="banner">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-              <Link href="/" legacyBehavior>
-                <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div
-                    className="brand-avatar"
-                    aria-hidden
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 8,
-                      overflow: 'hidden',
-                      flex: '0 0 40px',
-                    }}
-                  >
-                    <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-                </a>
-              </Link>
-
-              <nav className="desktop-nav" aria-label="Primary">
-                <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-                <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-                <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-                <Link href="/games" legacyBehavior><a>Games</a></Link>
-              </nav>
-            </div>
-
-            <div className="topbar-actions" role="navigation" aria-label="Top actions">
-              <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-              <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ color: '#556', fontSize: 14 }}>guest</div>
-                <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
-              </div>
-            </div>
-          </header>
-
-          <main className="page" style={{ maxWidth: 980 }}>
+          <main className="page" style={{ maxWidth: 980, margin: '0 auto', textAlign: 'center' }}>
             <header className="hero">
               <div className="hero-inner">
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%' }}>
@@ -628,7 +596,7 @@ export default function Breathe() {
               </div>
             </header>
 
-            <section className="grid" aria-label="Sound layers">
+            <section className="grid" aria-label="Sound layers" style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <div className="card" data-track="rain" role="group" aria-label="Rain sound" tabIndex="0">
                 <svg className="icon" viewBox="0 0 64 64" aria-hidden>
                   <g fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2">
