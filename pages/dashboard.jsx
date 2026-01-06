@@ -208,7 +208,7 @@ export default function Dashboard() {
                 <p style={{ marginTop: 0 }}>Semi-colonic is where you can share posts, stay updated and chat with others in my community.</p>
 
                 <QuoteBanner 
-                  quote={QUOTES.dashboard.quote}
+                  text={QUOTES.dashboard.quote}
                   author={QUOTES.dashboard.author}
                 />
 
