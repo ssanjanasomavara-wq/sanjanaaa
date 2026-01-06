@@ -8,7 +8,6 @@ import ChatPopup from '../components/ChatPopup';
 import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
 import MobileDrawer from '../components/MobileDrawer';
-import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
 import { THINGS_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function Dashboard() {

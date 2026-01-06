@@ -574,7 +574,7 @@ export default function IndexPage() {
         .muted { 
           background:var(--cta-gradient); 
           border: 1px solid rgba(255,255,255,0.06); 
-          color: rgba(155, 220, 220, 0.85); 
+          color: rgba(66, 77, 77, 0.85); 
           padding: 10px 14px; 
           display: inline-block;
           border-radius: 10px;
