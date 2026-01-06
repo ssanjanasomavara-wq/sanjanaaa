@@ -17,7 +17,7 @@
 
   /* Default button tokens (site-wide defaults) */
   --btn-bg: var(--brand-accent-strong);
-  --btn-text: #ffffff;
+  --btn-text: #7fd1d0;
   --btn-border: transparent;
 
   --btn-outline-border: rgba(24,53,71,0.12);
