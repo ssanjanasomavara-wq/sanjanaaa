@@ -31,17 +31,16 @@ export default function Games() {
       ]} />
 
       <div className="site">
-        <main className="main-content">
+        
+       <main className="main-content">
           <h1 style={{ marginTop: 0 }}>Games</h1>
           <p style={{ color: '#617489' }}>
-            Small accessible games and playful interactions. Tap or click a tile to open a game.
+            Relaxing mini-games and playful prototypes. Click any tile to open a game.
           </p>
-
-          <QuoteBanner
-            text={(QUOTES && QUOTES.games && QUOTES.games.quote) || (QUOTES && QUOTES.features && QUOTES.features.quote) || ''}
-            author={(QUOTES && QUOTES.games && QUOTES.games.author) || (QUOTES && QUOTES.features && QUOTES.features.author) || ''}
+         <QuoteBanner 
+            text={QUOTES.games.quote}
+            author={QUOTES.games.author}
           />
-
           <div
             className="games-grid"
             style={{
@@ -52,7 +51,7 @@ export default function Games() {
             }}
             role="list"
           >
-            <Link href="/games/breathing" legacyBehavior>
+            <Link href="/games/mindful-puzzle" legacyBehavior>
               <a
                 className="game-tile"
                 role="listitem"
@@ -66,13 +65,26 @@ export default function Games() {
                   boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
                 }}
               >
-                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>🌬️</div>
-                <div style={{ fontWeight: 700 }}>Breathing Game</div>
-                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Guided breathing with visual cues</div>
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🧩
+                </div>
+                <div style={{ fontWeight: 700 }}>Mindful Puzzle</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Quick mindful puzzles
+                </div>
               </a>
             </Link>
 
-            <Link href="/games/color-match" legacyBehavior>
+            <Link href="/games/FocusSprint" legacyBehavior>
               <a
                 className="game-tile"
                 role="listitem"
@@ -86,13 +98,26 @@ export default function Games() {
                   boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
                 }}
               >
-                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>🎨</div>
-                <div style={{ fontWeight: 700 }}>Color Match</div>
-                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>Match colors to calm your mind</div>
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🎯
+                </div>
+                <div style={{ fontWeight: 700 }}>Focus Sprint Challenge</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Click targets quickly
+                </div>
               </a>
             </Link>
 
-            <Link href="/games/puzzle" legacyBehavior>
+            <Link href="/games/PatternSequence" legacyBehavior>
               <a
                 className="game-tile"
                 role="listitem"
@@ -106,13 +131,90 @@ export default function Games() {
                   boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
                 }}
               >
-                <div style={{ height: 72, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34, marginBottom: 8 }}>🧩</div>
-                <div style={{ fontWeight: 700 }}>Puzzle</div>
-                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>A relaxing tile puzzle</div>
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🔴
+                </div>
+                <div style={{ fontWeight: 700 }}>Pattern & Sequence Game</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Memory sequence game
+                </div>
               </a>
             </Link>
 
-            {/* add additional game tiles here */}
+            <Link href="/games/CalmDownGames" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  🫧
+                </div>
+                <div style={{ fontWeight: 700 }}>Calm-Down Games</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Relaxing activities
+                </div>
+              </a>
+            </Link>
+
+            <Link href="/games/PressureSlice" legacyBehavior>
+              <a
+                className="game-tile"
+                role="listitem"
+                style={{
+                  display: 'block',
+                  padding: 16,
+                  background: '#fff',
+                  borderRadius: 12,
+                  textDecoration: 'none',
+                  color: '#222',
+                  boxShadow: '0 6px 18px rgba(20,40,60,0.06)',
+                }}
+              >
+                <div
+                  style={{
+                    height: 72,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 34,
+                    marginBottom: 8,
+                  }}
+                >
+                  ✂️
+                </div>
+                <div style={{ fontWeight: 700 }}>Pressure Slice</div>
+                <div style={{ fontSize: 12, color: '#617489', marginTop: 6 }}>
+                  Draw and release tension
+                </div>
+              </a>
+            </Link>
           </div>
         </main>
 
