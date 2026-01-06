@@ -99,6 +99,87 @@ export default function ImageGrid({ items = null, images = [], className = '' })
           </div>
         );
       })}
+
+      <style jsx>{`
+        .image-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+          gap: 12px;
+          align-items: stretch;
+        }
+
+        .image-grid__item,
+        .image-grid__link,
+        .image-grid__button {
+          display: block;
+          background: #fff;
+          border-radius: 10px;
+          overflow: hidden;
+          text-decoration: none;
+          color: inherit;
+          box-shadow: 0 6px 18px rgba(20,40,60,0.04);
+          border: 1px solid rgba(6,20,40,0.04);
+          transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .image-grid__item:focus,
+        .image-grid__link:focus,
+        .image-grid__button:focus {
+          outline: 3px solid rgba(31,159,255,0.18);
+          outline-offset: 2px;
+        }
+
+        .image-grid__item:hover,
+        .image-grid__link:hover,
+        .image-grid__button:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 12px 28px rgba(20,40,60,0.08);
+        }
+
+        .image-grid__img {
+          width: 100%;
+          height: 120px;
+          object-fit: cover;
+          display: block;
+          background: linear-gradient(180deg, #f6f9fb, #fff);
+        }
+
+        .image-grid__caption {
+          padding: 10px 12px;
+          font-size: 14px;
+          color: #183547;
+          font-weight: 600;
+        }
+
+        .image-grid__tile {
+          padding: 18px 12px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: flex-start;
+          min-height: 120px;
+        }
+
+        .image-grid__tile-title {
+          font-weight: 700;
+          color: #183547;
+          font-size: 15px;
+        }
+
+        .image-grid__tile-subtitle {
+          margin-top: 6px;
+          color: #617489;
+          font-size: 13px;
+        }
+
+        @media (max-width: 480px) {
+          .image-grid__img,
+          .image-grid__tile {
+            height: auto;
+            min-height: 100px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
