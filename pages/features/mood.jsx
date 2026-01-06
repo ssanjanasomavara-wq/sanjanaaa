@@ -1,6 +1,6 @@
 import Head from 'next/head';
-import Link from 'next/link';
 import Topbar from '../../components/Topbar';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'moodDiary';
@@ -38,7 +38,6 @@ export default function Mood() {
     setSelected('');
     setNote('');
     setMessage(thankYouMessage(moodKey));
-    // clear message after a short delay
     setTimeout(() => setMessage(''), 3000);
   }
 
@@ -54,12 +53,13 @@ export default function Mood() {
   const counts = countsByMood();
 
   return (
-    <>
+    <div className="site-root">
       <Head>
         <title>Mood Diary — Semi;colonic</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
 
+      {/* Topbar with mobile drawer (matches pages/games.jsx usage) */}
       <Topbar
         links={[
           { href: '/posts', label: 'Posts' },
@@ -68,16 +68,16 @@ export default function Mood() {
           { href: '/games', label: 'Games' },
           { href: '/resources', label: 'Resources' },
         ]}
-        mobileDrawer={true}
-        navActive="/features"
       />
 
-      <div className="page-wrapper">
-        <main className="container" role="main" aria-labelledby="mood-title">
-          <div className="card" role="region" aria-label="Mood diary">
+      <main className="page-wrapper" role="main" aria-labelledby="mood-title">
+        <div className="container">
+          <section className="card" role="region" aria-label="Mood diary">
             <div className="icon" aria-hidden>😊</div>
             <h1 id="mood-title">Mood Diary</h1>
-            <p className="subtitle">Track your emotions and discover patterns. Click a face to select how you feel, add an optional note, then tap "Check in".</p>
+            <p className="subtitle">
+              Track your emotions and discover patterns. Click a face to select how you feel, add an optional note, then tap "Check in".
+            </p>
 
             <div className="moods-row" role="list" aria-label="Mood options">
               {moodList().map(m => (
@@ -132,121 +132,96 @@ export default function Mood() {
                 </div>
               ))}
             </div>
-          </div>
-        </main>
-      </div>
+          </section>
+        </div>
+      </main>
 
       <style jsx>{`
-        :root { --max-width: 900px; --bg-start: #f6f7fb; --bg-end: #eef2ff; --card-bg: #fff; --muted: #6b7280; --accent: #6c7cff; }
+        :root { --max-width: 980px; --bg-start: #f6f7fb; --bg-end: #eef2ff; --card-bg: #fff; --muted: #6b7280; --accent: #6c7cff; }
 
         html, body {
           -webkit-text-size-adjust: 100%;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
-          font-family: Inter, 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          font-family: Poppins, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
           color: #0f1724;
         }
 
-        .page-wrapper {
-          min-height: 100vh;
-          background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%);
-          padding: 20px;
-          display:flex;
-          justify-content:center;
-        }
-
-        .container {
-          width: 100%;
-          max-width: var(--max-width);
-          display:flex;
-          justify-content:center;
-        }
+        .site-root { min-height: 100vh; background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-end) 100%); display:flex; flex-direction:column; }
+        .page-wrapper { padding: 20px 18px; flex:1; display:flex; justify-content:center; align-items:flex-start; }
+        .container { width: 100%; max-width: var(--max-width); display:flex; justify-content:center; }
 
         .card {
+          width: 100%;
           background: var(--card-bg);
           border-radius: 16px;
           padding: 28px;
           box-shadow: 0 8px 28px rgba(11,22,77,0.06);
-          width: 100%;
           box-sizing: border-box;
         }
 
-        .icon {
-          font-size: 48px;
-          margin-bottom: 8px;
-          text-align:center;
-        }
+        .icon { font-size: 48px; text-align:center; margin-bottom: 6px; }
+        h1 { font-size: 20px; margin: 0 0 6px 0; text-align:center; }
+        .subtitle { text-align:center; color: var(--muted); margin-bottom: 18px; font-size: 14px; }
 
-        h1 {
-          font-size: 20px;
-          margin: 0 0 6px 0;
-          text-align:center;
-        }
-
-        .subtitle {
-          text-align:center;
-          color: var(--muted);
-          margin-bottom: 18px;
-          font-size: 14px;
-        }
-
-        /* Mood row - single horizontal line, responsive */
+        /* Mood row: single horizontal line, center-aligned and responsive */
         .moods-row {
           display: flex;
           justify-content: center;
-          gap: 16px;
+          gap: 18px;
           margin-bottom: 12px;
           flex-wrap: nowrap;
           overflow-x: auto;
           padding-bottom: 6px;
+          -webkit-overflow-scrolling: touch;
         }
 
         .mood-item {
           display:flex;
           flex-direction:column;
-          gap:8px;
           align-items:center;
-          min-width: 72px;
+          gap:8px;
+          min-width: 84px;
           padding: 8px;
           border-radius: 12px;
           cursor: pointer;
           transition: transform .12s, box-shadow .12s, background .12s;
           background: transparent;
-          border: none;
           user-select:none;
+          flex: 0 0 auto;
         }
 
-        .mood-item:focus {
-          outline: 3px solid rgba(99,102,241,0.12);
-        }
+        .mood-item:focus { outline: 3px solid rgba(99,102,241,0.12); }
 
         .mood-item.selected {
           background: rgba(99,102,241,0.06);
-          transform: translateY(-4px);
-          box-shadow: 0 6px 18px rgba(15,23,36,0.06);
+          transform: translateY(-6px);
+          box-shadow: 0 8px 24px rgba(15,23,36,0.06);
         }
 
         .mood-emoji {
-          font-size: 42px;
+          font-size: 48px;
           line-height: 1;
           display:flex;
           align-items:center;
           justify-content:center;
-          width: 64px;
-          height: 64px;
+          width: 80px;
+          height: 80px;
           border-radius: 50%;
-          background: linear-gradient(180deg,#ffffff,#f8fafc);
+          background: linear-gradient(180deg,#ffffff,#fbfdff);
+          box-shadow: 0 6px 14px rgba(15,23,36,0.04);
         }
 
         .mood-caption {
           font-size: 13px;
           color: #374151;
           font-weight: 600;
+          text-align: center;
         }
 
         .note {
           width: 100%;
-          min-height: 90px;
+          min-height: 96px;
           border-radius: 12px;
           border: 1px solid #e6eefc;
           padding: 12px;
@@ -292,64 +267,49 @@ export default function Mood() {
           text-align: center;
         }
 
-        .chart-title {
-          margin-top: 20px;
-          margin-bottom: 8px;
-          font-size: 15px;
-          color: #0f1724;
-        }
+        .chart-title { margin-top: 20px; margin-bottom: 8px; font-size: 15px; color: #0f1724; }
+        .chart { padding: 12px; border-radius: 12px; background: linear-gradient(180deg,#ffffff,#fbfdff); border: 1px solid #eef2ff; }
 
-        .chart {
-          padding: 12px;
-          border-radius: 12px;
-          background: linear-gradient(180deg,#ffffff,#fbfdff);
-          border: 1px solid #eef2ff;
-        }
-
-        .recent-list {
-          margin-top: 14px;
-        }
-
-        .recent-item {
-          border-top: 1px dashed #eef2ff;
-          padding: 12px 0;
-          display:flex;
-          flex-direction:column;
-          gap:8px;
-        }
-
-        .recent-left {
-          display:flex;
-          gap:12px;
-          align-items:center;
-        }
-
+        .recent-list { margin-top: 14px; }
+        .recent-item { border-top: 1px dashed #eef2ff; padding: 12px 0; display:flex; flex-direction:column; gap:8px; }
+        .recent-left { display:flex; gap:12px; align-items:center; }
         .recent-emoji { font-size: 28px; width:42px; text-align:center; }
         .recent-meta { font-size: 13px; color:#374151; }
         .recent-label { font-weight:700; }
         .recent-time { color: var(--muted); font-size: 12px; margin-top: 2px; }
         .recent-note { color:#334155; font-size: 14px; }
-
         .empty { color: var(--muted); text-align:center; padding: 12px 0; }
 
-        /* Responsive tweaks */
-        @media (max-width: 640px) {
-          .mood-emoji { width:56px; height:56px; font-size:36px; }
-          .mood-item { min-width: 64px; gap:6px; }
-          .note { min-height: 76px; }
-          .controls { flex-direction: column; align-items: stretch; gap: 8px; }
-          .back-link { display:inline-block; text-align:center; }
+        /* iPhone 13 Pro (approx 390px wide) */
+        @media (max-width: 430px) {
+          .page-wrapper { padding: 14px 12px; align-items:flex-start; }
+          .card { padding: 18px; border-radius: 14px; }
+          .mood-emoji { width: 64px; height: 64px; font-size: 36px; }
+          .mood-item { min-width: 68px; gap:6px; }
+          .note { min-height: 80px; }
+          .controls { flex-direction: column; align-items: stretch; }
+          .back-link { text-align:center; }
         }
 
-        @media (min-width: 1200px) {
-          .card { padding: 36px; }
+        /* iPad / tablet (portrait & landscape) - keep controls comfortable */
+        @media (min-width: 431px) and (max-width: 1024px) {
+          .page-wrapper { padding: 18px 18px; }
+          .card { padding: 22px; }
+          .mood-emoji { width: 72px; height: 72px; font-size: 42px; }
+        }
+
+        /* Desktop - larger canvas */
+        @media (min-width: 1025px) {
+          .page-wrapper { padding: 28px 18px; }
+          .container { align-items: flex-start; }
+          .card { padding: 32px; max-width: 820px; margin: 0 auto; }
         }
       `}</style>
-    </>
+    </div>
   );
 }
 
-/* Helper components & functions */
+/* Helpers */
 
 function moodList() {
   return [
@@ -382,7 +342,7 @@ function thankYouMessage(key) {
   }
 }
 
-/* Simple lightweight svg bar chart to visualize counts */
+/* Simple, responsive SVG bar chart showing counts per mood */
 function MoodChart({ counts }) {
   const items = moodList();
   const values = items.map(i => counts[i.key] || 0);
@@ -393,7 +353,14 @@ function MoodChart({ counts }) {
   const totalWidth = items.length * barWidth + (items.length - 1) * gap;
 
   return (
-    <svg width="100%" height={chartHeight + 48} viewBox={`0 0 ${totalWidth} ${chartHeight + 48}`} preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="false">
+    <svg
+      width="100%"
+      height={chartHeight + 48}
+      viewBox={`0 0 ${totalWidth} ${chartHeight + 48}`}
+      preserveAspectRatio="xMidYMid meet"
+      role="img"
+      aria-hidden="false"
+    >
       <g transform={`translate(0,0)`}>
         {items.map((it, idx) => {
           const v = counts[it.key] || 0;
@@ -404,7 +371,7 @@ function MoodChart({ counts }) {
             <g key={it.key} transform={`translate(${x},0)`}>
               <rect x="0" y={barY} width={barWidth} height={h} rx="8" ry="8" fill="#6c7cff" opacity={v === 0 ? 0.18 : 1} />
               <text x={barWidth / 2} y={barY - 6} textAnchor="middle" fontSize="11" fill="#0f1724">{v}</text>
-              <text x={barWidth / 2} y={chartHeight + 18} textAnchor="middle" fontSize="12" fill="#374151">{it.emoji}</text>
+              <text x={barWidth / 2} y={chartHeight + 18} textAnchor="middle" fontSize="18" fill="#374151">{it.emoji}</text>
               <text x={barWidth / 2} y={chartHeight + 34} textAnchor="middle" fontSize="11" fill="#6b7280">{it.label}</text>
             </g>
           );
