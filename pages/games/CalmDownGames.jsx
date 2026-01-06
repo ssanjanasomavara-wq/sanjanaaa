@@ -1,17 +1,16 @@
 import React, { useEffect, useRef } from "react";
 import Link from 'next/link';
-import { useRouter } from 'next/router';
+import Topbar from '../../components/Topbar'; // use shared Topbar for sign-out and mobile drawer
 
 /**
  * Calm-Down / Emotional Regulation Games
  * Converted from index (10).html
+ *
+ * - Replaced local header + sign-out button with shared <Topbar />
+ * - Keeps responsive layout for iPhone 13 Pro, iPad and PC
+ * - Centers the game area and makes canvases responsive (resizes on window resize)
  */
 export default function CalmDownGames() {
-  const router = useRouter();
-  function handleSignOut() {
-    router.replace('/');
-  }
-
   const bubbleCanvasRef = useRef(null);
   const drawCanvasRef = useRef(null);
   const flowCanvasRef = useRef(null);
@@ -25,18 +24,53 @@ export default function CalmDownGames() {
   const drawSoundRef = useRef(null);
 
   useEffect(() => {
+    // helper to size canvases responsively
+    function resizeCanvases() {
+      const vw = Math.max(0, window.innerWidth || 360);
+      // pick canvas size:
+      // - desktop: ~300
+      // - tablet: ~300
+      // - mobile: 220..280
+      const size = Math.min(360, Math.max(220, Math.floor(Math.min(vw - 48, 320))));
+      const setSize = (c) => {
+        if (!c) return;
+        // set drawing buffer size for crisp rendering
+        const dpr = window.devicePixelRatio || 1;
+        c.width = size * dpr;
+        c.height = size * dpr;
+        c.style.width = `${size}px`;
+        c.style.height = `${size}px`;
+        const ctx = c.getContext('2d');
+        if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      };
+
+      setSize(bubbleCanvasRef.current);
+      setSize(drawCanvasRef.current);
+      setSize(flowCanvasRef.current);
+
+      // recreate bubbles so they fit new size
+      createBubbles();
+    }
+
     // setup bubbles
     const bubbleCanvas = bubbleCanvasRef.current;
     const bubbleCtx = bubbleCanvas.getContext("2d");
     const bubbles = bubblesRef.current;
 
     function createBubbles() {
+      const c = bubbleCanvasRef.current;
+      if (!c) return;
+      const w = c.width;
+      const h = c.height;
       bubbles.length = 0;
+      // use device pixels, but coordinates will be in CSS pixels due to setTransform
+      const cssW = Math.floor(c.style.width ? parseInt(c.style.width, 10) : (w / (window.devicePixelRatio || 1)));
+      const cssH = Math.floor(c.style.height ? parseInt(c.style.height, 10) : (h / (window.devicePixelRatio || 1)));
       for (let i = 0; i < 15; i++) {
         bubbles.push({
-          x: Math.random() * bubbleCanvas.width,
-          y: Math.random() * bubbleCanvas.height,
-          r: Math.random() * 25 + 10,
+          x: Math.random() * cssW,
+          y: Math.random() * cssH,
+          r: Math.random() * 25 + 8,
           dx: (Math.random() - 0.5) * 1.5,
           dy: (Math.random() - 0.5) * 1.5,
         });
@@ -44,23 +78,33 @@ export default function CalmDownGames() {
     }
 
     function drawBubbles() {
-      bubbleCtx.clearRect(0, 0, bubbleCanvas.width, bubbleCanvas.height);
+      const c = bubbleCanvasRef.current;
+      const ctx = bubbleCtx;
+      if (!c || !ctx) return;
+      const cssW = parseInt(c.style.width, 10);
+      const cssH = parseInt(c.style.height, 10);
+      ctx.clearRect(0, 0, cssW, cssH);
       bubbles.forEach((b) => {
-        bubbleCtx.beginPath();
-        bubbleCtx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-        bubbleCtx.fillStyle = "#4dd0e1";
-        bubbleCtx.fill();
-        bubbleCtx.strokeStyle = "#00796b";
-        bubbleCtx.stroke();
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fillStyle = "#4dd0e1";
+        ctx.fill();
+        ctx.strokeStyle = "#00796b";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
       });
     }
 
     function updateBubbles() {
+      const c = bubbleCanvasRef.current;
+      if (!c) return;
+      const cssW = parseInt(c.style.width, 10);
+      const cssH = parseInt(c.style.height, 10);
       bubbles.forEach((b) => {
         b.x += b.dx;
         b.y += b.dy;
-        if (b.x + b.r > bubbleCanvas.width || b.x - b.r < 0) b.dx *= -1;
-        if (b.y + b.r > bubbleCanvas.height || b.y - b.r < 0) b.dy *= -1;
+        if (b.x + b.r > cssW || b.x - b.r < 0) b.dx *= -1;
+        if (b.y + b.r > cssH || b.y - b.r < 0) b.dy *= -1;
       });
     }
 
@@ -70,17 +114,18 @@ export default function CalmDownGames() {
       bubbleRAF.current = requestAnimationFrame(animateBubbles);
     }
 
-    createBubbles();
-    animateBubbles();
-
     // draw shapes canvas
     const drawCanvas = drawCanvasRef.current;
     const drawCtx = drawCanvas.getContext("2d");
     drawCtxRef.current = drawCtx;
 
-    // create audio once and reuse
-    drawSoundRef.current = new Audio("https://freesound.org/data/previews/66/66717_931655-lq.mp3");
-    drawSoundRef.current.volume = 0.2;
+    // create audio once and reuse (optional)
+    try {
+      drawSoundRef.current = new Audio("https://freesound.org/data/previews/66/66717_931655-lq.mp3");
+      drawSoundRef.current.volume = 0.18;
+    } catch (err) {
+      drawSoundRef.current = null;
+    }
 
     const startDraw = () => (drawingRef.current = true);
     const stopDraw = () => (drawingRef.current = false);
@@ -95,29 +140,34 @@ export default function CalmDownGames() {
       drawCtx.arc(x, y, 10, 0, Math.PI * 2);
       drawCtx.fill();
 
-      // optional sound (reuse audio object)
       if (drawSoundRef.current) {
-        drawSoundRef.current.currentTime = 0;
-        drawSoundRef.current.play().catch(() => {});
+        try {
+          drawSoundRef.current.currentTime = 0;
+          drawSoundRef.current.play().catch(() => {});
+        } catch (err) {}
       }
     }
 
-    drawCanvas.addEventListener("mousedown", startDraw);
-    drawCanvas.addEventListener("mouseup", stopDraw);
-    drawCanvas.addEventListener("mouseout", stopDraw);
-    drawCanvas.addEventListener("mousemove", drawMove);
+    drawCanvas.addEventListener("pointerdown", startDraw);
+    document.addEventListener("pointerup", stopDraw);
+    drawCanvas.addEventListener("pointerout", stopDraw);
+    drawCanvas.addEventListener("pointermove", drawMove);
 
     // flow canvas
     const flowCanvas = flowCanvasRef.current;
     const flowCtx = flowCanvas.getContext("2d");
 
     function animateFlow() {
-      flowCtx.fillStyle = "rgba(224, 247, 250, 0.1)";
-      flowCtx.fillRect(0, 0, flowCanvas.width, flowCanvas.height);
+      const c = flowCanvasRef.current;
+      if (!c || !flowCtx) return;
+      const cssW = parseInt(c.style.width, 10);
+      const cssH = parseInt(c.style.height, 10);
+      flowCtx.fillStyle = "rgba(224, 247, 250, 0.12)";
+      flowCtx.fillRect(0, 0, cssW, cssH);
 
       flowCtx.beginPath();
-      for (let i = 0; i < flowCanvas.width; i += 5) {
-        const y = flowCanvas.height / 2 + Math.sin((i + flowAngleRef.current) * 0.05) * 40;
+      for (let i = 0; i < cssW; i += 6) {
+        const y = cssH / 2 + Math.sin((i + flowAngleRef.current) * 0.05) * (cssH * 0.12);
         if (i === 0) flowCtx.moveTo(i, y);
         else flowCtx.lineTo(i, y);
       }
@@ -128,17 +178,38 @@ export default function CalmDownGames() {
       flowAngleRef.current += 2;
       flowRAF.current = requestAnimationFrame(animateFlow);
     }
-    animateFlow();
+
+    // initial sizing & start animations
+    function start() {
+      resizeCanvases();
+      animateBubbles();
+      animateFlow();
+    }
+
+    start();
+
+    // responsive: resize canvases on window resize
+    let resizeTimer = null;
+    function onResize() {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        resizeCanvases();
+      }, 120);
+    }
+    window.addEventListener("resize", onResize);
 
     // cleanup
     return () => {
       cancelAnimationFrame(bubbleRAF.current);
       cancelAnimationFrame(flowRAF.current);
-      drawCanvas.removeEventListener("mousedown", startDraw);
-      drawCanvas.removeEventListener("mouseup", stopDraw);
-      drawCanvas.removeEventListener("mouseout", stopDraw);
-      drawCanvas.removeEventListener("mousemove", drawMove);
+      drawCanvas.removeEventListener("pointerdown", startDraw);
+      document.removeEventListener("pointerup", stopDraw);
+      drawCanvas.removeEventListener("pointerout", stopDraw);
+      drawCanvas.removeEventListener("pointermove", drawMove);
+      window.removeEventListener("resize", onResize);
+      if (resizeTimer) clearTimeout(resizeTimer);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function resetBubbles() {
@@ -146,11 +217,13 @@ export default function CalmDownGames() {
     if (!bubbleCanvas) return;
     const bubbles = bubblesRef.current;
     bubbles.length = 0;
+    const cssW = parseInt(bubbleCanvas.style.width, 10) || 300;
+    const cssH = parseInt(bubbleCanvas.style.height, 10) || 300;
     for (let i = 0; i < 15; i++) {
       bubbles.push({
-        x: Math.random() * bubbleCanvas.width,
-        y: Math.random() * bubbleCanvas.height,
-        r: Math.random() * 25 + 10,
+        x: Math.random() * cssW,
+        y: Math.random() * cssH,
+        r: Math.random() * 25 + 8,
         dx: (Math.random() - 0.5) * 1.5,
         dy: (Math.random() - 0.5) * 1.5,
       });
@@ -161,74 +234,51 @@ export default function CalmDownGames() {
     const drawCtx = drawCtxRef.current;
     if (drawCtx) {
       const c = drawCanvasRef.current;
-      drawCtx.clearRect(0, 0, c.width, c.height);
+      drawCtx.clearRect(0, 0, parseInt(c.style.width, 10) || 300, parseInt(c.style.height, 10) || 300);
     }
   }
 
   return (
     <div className="site-root">
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+      ]} />
+
       <div className="site">
-        {/* Top navigation */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  className="brand-avatar"
-                  aria-hidden
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    flex: '0 0 40px',
-                  }}
-                >
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <main className="games-main" role="main">
+          <div className="games-center">
+            <div className="games-card">
+              <h1 style={{ margin: 0, textAlign: 'center' }}>Calm-Down / Emotional Regulation Games</h1>
+              <p style={{ marginTop: 8, color: '#617489', textAlign: 'center' }}>
+                Bubbles, drawing and flowing lines to help you breathe and focus.
+              </p>
+
+              <div className="gameContainer" role="region" aria-label="Calm down games">
+                <div className="canvasWrap">
+                  <canvas ref={bubbleCanvasRef} className="game-canvas" />
+                  <div style={{ textAlign: "center" }}>
+                    <button onClick={resetBubbles} className="action-btn">Reset Bubbles</button>
+                  </div>
                 </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-              </a>
-            </Link>
 
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a style={{ marginRight: 12 }}>Games</a></Link>
-            </nav>
-          </div>
+                <div className="canvasWrap">
+                  <canvas ref={drawCanvasRef} className="game-canvas" />
+                  <div style={{ textAlign: "center" }}>
+                    <button onClick={clearDrawing} className="action-btn">Clear Drawing</button>
+                  </div>
+                </div>
 
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>guest</div>
-              <button onClick={handleSignOut} className="btn btn-outline" aria-label="Sign out">Sign out</button>
-            </div>
-          </div>
-        </header>
-
-        <main style={{ padding: 18, display: 'flex', justifyContent: 'center' }}>
-          <div style={styles.container}>
-            <h1>Calm-Down / Emotional Regulation Games</h1>
-            <div style={styles.gameContainer}>
-              <div>
-                <canvas id="bubbleCanvas" ref={bubbleCanvasRef} width={300} height={300} style={styles.canvas} />
-                <div style={{ textAlign: "center" }}>
-                  <button onClick={resetBubbles} style={styles.button}>Reset Bubbles</button>
+                <div className="canvasWrap">
+                  <canvas ref={flowCanvasRef} className="game-canvas" />
                 </div>
               </div>
 
-              <div>
-                <canvas id="drawCanvas" ref={drawCanvasRef} width={300} height={300} style={styles.canvas} />
-                <div style={{ textAlign: "center" }}>
-                  <button onClick={clearDrawing} style={styles.button}>Clear Drawing</button>
-                </div>
-              </div>
-
-              <div>
-                <canvas id="flowCanvas" ref={flowCanvasRef} width={300} height={300} style={styles.canvas} />
+              <div style={{ marginTop: 12, textAlign: 'center' }}>
+                <Link href="/games" legacyBehavior><a className="btn-link">← Back to games</a></Link>
               </div>
             </div>
           </div>
@@ -238,13 +288,65 @@ export default function CalmDownGames() {
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
+
+      <style jsx>{`
+        :root { --max-width: 980px; --cta-strong: #1f9fff; --brand: #1f9fff; --text-primary: #183547; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          color: var(--text-primary);
+        }
+
+        .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
+        .games-main { padding: 20px 18px; display: flex; justify-content: center; }
+        .games-center { width: 100%; display: flex; justify-content: center; }
+        .games-card { max-width: 980px; width: 100%; }
+
+        .gameContainer {
+          display: flex;
+          gap: 24px;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-top: 18px;
+        }
+
+        .canvasWrap { display: flex; flex-direction: column; gap: 8px; align-items: center; }
+
+        /* canvas is sized in JS for crisp drawing, but constrain layout here */
+        .game-canvas { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 12px; background: rgba(255,255,255,0.9); box-shadow: 0 6px 18px rgba(20,40,60,0.12); }
+
+        .action-btn {
+          margin-top: 6px;
+          padding: 8px 14px;
+          font-size: 14px;
+          border-radius: 8px;
+          cursor: pointer;
+          background: #00796b;
+          color: white;
+          border: none;
+        }
+
+        .btn-link { color: var(--text-primary); text-decoration: none; font-weight: 600; }
+
+        .site-footer { margin-top: 18px; padding: 12px 0; font-size: 13px; color: var(--text-muted, #7b8899); text-align: center; }
+
+        /* responsive tweaks */
+        @media (max-width: 820px) {
+          .gameContainer { gap: 16px; }
+          .game-canvas { max-width: 300px; }
+        }
+
+        @media (max-width: 420px) {
+          .games-main { padding: 14px 12px; }
+          .game-canvas { max-width: 260px; }
+          .action-btn { padding: 8px 12px; font-size: 13px; }
+        }
+      `}</style>
     </div>
   );
 }
-
-const styles = {
-  container: { fontFamily: "Arial, sans-serif", display: "flex", flexDirection: "column", alignItems: "center", padding: 16 },
-  gameContainer: { display: "flex", gap: 30, flexWrap: "wrap", justifyContent: "center", marginTop: 20 },
-  canvas: { borderRadius: 12, background: "#ffffffaa", boxShadow: "0 4px 10px rgba(0,0,0,0.2)" },
-  button: { marginTop: 8, padding: "8px 15px", fontSize: 14, borderRadius: 8, cursor: "pointer", backgroundColor: "#00796b", color: "white", border: "none" },
-};
