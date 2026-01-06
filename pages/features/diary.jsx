@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-
+import Topbar from '../../components/Topbar';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../../lib/firebaseClient';
@@ -158,24 +158,19 @@ export default function Diary() {
         : null;
     } catch (tErr) {
       console.error('Error getting ID token', tErr);
-      // let the caller handle fallback
       token = null;
     }
 
     const makeUrl = (tok) => `${base}${path}${tok ? `?auth=${tok}` : ''}`;
 
-    // try request
     let resp = await fetch(makeUrl(token), options);
 
-    // If unauthorized, try to refresh token once and retry
     if (resp.status === 401 && authInstance && authInstance.currentUser && typeof authInstance.currentUser.getIdToken === 'function') {
-      console.debug('fetchWithAuth: 401 received, refreshing idToken and retrying');
       try {
-        token = await authInstance.currentUser.getIdToken(true); // force refresh
+        token = await authInstance.currentUser.getIdToken(true);
         resp = await fetch(makeUrl(token), options);
       } catch (refreshErr) {
         console.error('fetchWithAuth: token refresh failed', refreshErr);
-        // return the original 401 response for diagnostics if available
       }
     }
 
@@ -197,12 +192,9 @@ export default function Diary() {
           body: JSON.stringify(payload),
         };
 
-        console.debug('Attempting remote save', { path, uid, dateKey });
-
         const resp = await fetchWithAuth(path, options);
 
         if (!resp.ok) {
-          // surface body for easier debugging
           const bodyText = await resp.text().catch(() => '');
           throw new Error(`Failed saving remote diary (${resp.status}) ${bodyText}`);
         }
@@ -214,7 +206,6 @@ export default function Diary() {
         saveLocalEntry(payload);
       }
     } else {
-      // Guest or firebase not available -> localStorage
       saveLocalEntry(payload);
     }
   }
@@ -250,7 +241,6 @@ export default function Diary() {
         alert('Could not remove remote entry.');
       }
     } else {
-      // local
       try {
         const map = JSON.parse(localStorage.getItem('diaryEntries') || '{}');
         delete map[dateKey];
@@ -263,13 +253,11 @@ export default function Diary() {
     }
   }
 
-  // Allow user to change date and load that day's content (local or remote)
   async function handleDateChange(e) {
     const newKey = e.target.value;
     setDateKey(newKey);
     setText('');
     if (firebaseAvailable && userRef.current && cfg && cfg.databaseURL) {
-      // try to fetch the day's entry from remote
       try {
         const uid = userRef.current.uid;
         const path = `/diaries/${encodeURIComponent(uid)}/${encodeURIComponent(newKey)}.json`;
@@ -282,7 +270,6 @@ export default function Diary() {
         setText('');
       }
     } else {
-      // local
       try {
         const map = JSON.parse(localStorage.getItem('diaryEntries') || '{}');
         setText(map[newKey] ? map[newKey].text : '');
@@ -298,51 +285,25 @@ export default function Diary() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <title>My Diary — Semi‑Colonic</title>
+      </Head>
+
+      {/* Shared Topbar provides sign-in / sign-out and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+        { href: '/resources', label: 'Resources' },
+
+      ]} />
+
       <div className="site">
-        {/* Top navigation (matches dashboard layout & sizing) */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div
-                  className="brand-avatar"
-                  aria-hidden
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 8,
-                    overflow: 'hidden',
-                    flex: '0 0 40px',
-                  }}
-                >
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-              </a>
-            </Link>
-
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a style={{ marginRight: 12 }}>Games</a></Link>
-            </nav>
-          </div>
-
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>{user ? (user.email || user.uid) : 'guest'}</div>
-              <button onClick={() => router.replace('/')} className="btn btn-outline" aria-label="Sign out">Sign out</button>
-            </div>
-          </div>
-        </header>
-
-        <main style={{ padding: 18, display: 'flex', justifyContent: 'center' }}>
-          <div style={{ maxWidth: 720, width: '100%' }}>
-            <div style={{ background: '#fdfefe', padding: 24, borderRadius: 12, boxShadow: '0 6px 18px rgba(20,40,60,0.06)' }}>
+        <main className="main" role="main">
+          <div className="card-wrap">
+            <div className="card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <h2 style={{ margin: 0, color: '#3b6f7d' }}>My Diary</h2>
                 <div style={{ fontSize: 13, color: '#7a9a8f' }}>{firebaseAvailable ? 'Saved to your account' : 'Saved locally'}</div>
@@ -350,7 +311,7 @@ export default function Diary() {
 
               <div style={{ color: '#7a9a8f', marginBottom: 12 }}>Daily entries — pick a date or use today.</div>
 
-              <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
                 <input type="date" value={dateKey} onChange={handleDateChange} style={{ padding: 8, borderRadius: 8, border: '1px solid #e6eef0' }} />
                 <div style={{ flex: 1 }} />
                 <button onClick={handleSave} className="btn" style={{ padding: '8px 12px', borderRadius: 12 }}>Save Entry</button>
@@ -387,6 +348,36 @@ export default function Diary() {
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved. Use of this site constitutes acceptance of our Terms and Privacy Policy.
         </footer>
       </div>
+
+      <style jsx>{`
+        :root { --max-width: 980px; --text-primary: #183547; --muted: #7b8899; --card-bg: #fdfefe; }
+
+        html, body {
+          -webkit-text-size-adjust: 100%;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          color: var(--text-primary);
+        }
+
+        .site-root { min-height: 100vh; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; box-sizing: border-box; }
+
+        .main { padding: 20px 18px; display:flex; justify-content:center; }
+        .card-wrap { width:100%; display:flex; justify-content:center; }
+        .card { width:100%; max-width:720px; background: var(--card-bg); padding: 24px; border-radius: 12px; box-shadow: 0 6px 18px rgba(20,40,60,0.06); box-sizing: border-box; }
+
+        .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 12px; border-radius: 10px; cursor: pointer; color: var(--text-primary); }
+
+        @media (max-width: 820px) {
+          .card { max-width: 640px; padding: 18px; }
+        }
+
+        @media (max-width: 420px) {
+          .card { max-width: 340px; padding: 14px; }
+          .main { padding: 14px 12px; }
+        }
+      `}</style>
     </div>
   );
 }
