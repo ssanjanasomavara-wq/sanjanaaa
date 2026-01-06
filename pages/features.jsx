@@ -17,6 +17,7 @@ export default function Features() {
     <div className="site-root">
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
       </Head>
 
       <div className="site">
@@ -178,12 +179,14 @@ export default function Features() {
       </div>
 
       <style jsx>{`
-        :root { --max-width: 980px; }
+        :root { --max-width: 980px; --cta-strong: #1f9fff; --brand: #1f9fff; --text-primary: #183547; }
 
         html, body {
           -webkit-text-size-adjust: 100%;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
+          font-family: 'Poppins', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+          color: var(--text-primary);
         }
 
         .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
@@ -195,9 +198,12 @@ export default function Features() {
         .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
         .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
 
-        .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
-        .btn-outline { border: 1px solid rgba(6,20,40,0.08); background: transparent; padding: 6px 8px; border-radius: 8px; }
-        .btn-strong { background: var(--cta-strong, #1f9fff); color: #fff; padding: 8px 12px; border-radius: 8px; }
+        /* buttons — visible in light theme */
+        .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; color: var(--brand); font-weight: 600; }
+        .btn:focus { outline: 2px solid rgba(31,159,255,0.18); }
+        .btn-outline { border: 1px solid rgba(6,20,40,0.08); background: #fff; padding: 6px 8px; border-radius: 8px; color: var(--brand); font-weight: 600; }
+        .btn-strong { background: var(--cta-strong); color: #fff; padding: 8px 12px; border-radius: 8px; font-weight: 700; border: none; }
+        .btn-delete { background: #c0392b; color: #fff; padding: 6px 8px; border-radius: 8px; }
 
         .main-content { padding: var(--space-md, 20px); }
 
