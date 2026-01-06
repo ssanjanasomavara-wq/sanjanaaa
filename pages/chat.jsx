@@ -3,10 +3,12 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig, isFirebaseInitialized } from '../lib/firebaseClient';
+import Topbar from '../components/Topbar';
 
 /**
  * Community Chat page (responsive update)
  *
+ * - Uses shared <Topbar /> for top navigation and mobile drawer so sign-out is consistent with other pages
  * - Styled to match dashboard.jsx layout (centered site container, top navigation)
  * - Responsive for phones (iPhone), tablets (iPad) and desktop (PC)
  * - Keeps Firestore/local fallback behavior unchanged
@@ -228,41 +230,17 @@ export default function Chat() {
     <div className="site-root">
       <Head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
       </Head>
 
+      {/* Shared Topbar provides sign-in / sign-out button and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+      ]} />
+
       <div className="site">
-        {/* Top navigation */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="brand-avatar" aria-hidden style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flex: '0 0 40px' }}>
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
-              </a>
-            </Link>
-
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a>Games</a></Link>
-            </nav>
-          </div>
-
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>{user ? (user.email || user.displayName || user.uid) : 'guest'}</div>
-              <button onClick={() => router.replace('/')} className="btn btn-outline" aria-label="Close chat">Close</button>
-            </div>
-          </div>
-        </header>
-
         <main style={{ padding: 18 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr', gap: 16 }}>
             {/* Channels */}
@@ -378,12 +356,6 @@ export default function Chat() {
 
         .brand-avatar img { display: block; }
         .channel-btn:focus { outline: 2px solid rgba(20,40,60,0.08); }
-
-        /* topbar and nav (match dashboard styles) */
-        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; position: relative; }
-        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
-        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
-        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
 
         /* Button styles — visible in light theme */
         .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; color: var(--brand); font-weight: 600; }
