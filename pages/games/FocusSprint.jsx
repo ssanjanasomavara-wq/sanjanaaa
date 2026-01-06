@@ -106,6 +106,7 @@ export default function FocusSprint() {
         { href: '/features', label: 'Features' },
         { href: '/games', label: 'Games' },
         { href: '/resources', label: 'Resources' },
+
       ]} />
 
       <div className="site">
@@ -154,16 +155,17 @@ export default function FocusSprint() {
         .site-root { min-height: 100vh; background: var(--bg, #fff); }
         .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
 
-        .games-main { padding: 20px 18px; display: flex; justify-content: center; }
-        .games-center { width: 100%; display: flex; justify-content: center; }
-        .games-card { width: 100%; max-width: 760px; }
+        /* Centering: ensure the outer and inner containers horizontally center the card and its children */
+        .games-main { padding: 20px 18px; display: flex; justify-content: center; align-items: flex-start; }
+        .games-center { width: 100%; display: flex; justify-content: center; align-items: center; }
+        .games-card { width: 100%; max-width: 760px; display: flex; flex-direction: column; align-items: center; padding: 8px; box-sizing: border-box; }
 
         .meta-row { display:flex; gap:12px; justify-content:center; margin-top:12px; }
         .meta-item { font-weight:700; color:var(--text-primary); }
 
         /* responsive play area: use CSS to scale down on small screens */
         .gameArea {
-          margin: 18px auto 0;
+          margin: 18px 0 0;
           width: min(400px, 92vw);
           height: min(400px, 72vw);
           max-height: 460px;
