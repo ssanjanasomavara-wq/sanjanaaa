@@ -27,15 +27,12 @@ export default function SettingsPage() {
   const authModRef = useRef(null);
   const firestoreRef = useRef(null);
   const firestoreModRef = useRef(null);
-  const storageRef = useRef(null);
-  const storageModRef = useRef(null);
   const unsubRef = useRef(null);
 
-  // Avatar upload state
-  const [avatarFile, setAvatarFile] = useState(null);
+  // Avatar state (using localStorage instead of Firebase Storage)
   const [avatarPreview, setAvatarPreview] = useState('');
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploading, setUploading] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [uploading, setUploading] = useState(false); // only used for UX (no remote upload)
 
   // Theme listener (for 'system' mode)
   const themeMediaQueryRef = useRef(null);
@@ -50,14 +47,12 @@ export default function SettingsPage() {
         if (!resp.ok) throw new Error('Missing firebase config');
         const cfg = await resp.json();
 
-        const { auth, authMod, firestore, firestoreMod, storage, storageMod } = await initFirebaseWithConfig(cfg);
+        const { auth, authMod, firestore, firestoreMod } = await initFirebaseWithConfig(cfg);
 
         authRef.current = auth;
         authModRef.current = authMod;
         firestoreRef.current = firestore;
         firestoreModRef.current = firestoreMod;
-        storageRef.current = storage;
-        storageModRef.current = storageMod;
 
         // wait for auth to be ready and get current user (mirror dashboard behavior)
         const INIT_TIMEOUT_MS = 7000;
@@ -114,12 +109,22 @@ export default function SettingsPage() {
               const remote = data.settings || {};
               const merged = { ...DEFAULT_SETTINGS, ...remote };
               setSettings(merged);
-              // initialize preview if we have a photoURL
-              if (merged.photoURL) setAvatarPreview(merged.photoURL);
+
+              // Choose avatar: prefer a locally stored avatar for this user (localStorage) otherwise remote URL
+              const local = loadAvatarFromLocal(uid);
+              if (local) {
+                setAvatarPreview(local);
+              } else if (merged.photoURL) {
+                setAvatarPreview(merged.photoURL);
+              } else {
+                setAvatarPreview('');
+              }
+
               applyThemeClass(merged.theme);
             } else {
               setSettings((prev) => ({ ...DEFAULT_SETTINGS, ...prev }));
               applyThemeClass(DEFAULT_SETTINGS.theme);
+              setAvatarPreview('');
             }
             setLoading(false);
           },
@@ -165,8 +170,9 @@ export default function SettingsPage() {
       const mql = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)');
       themeMediaQueryRef.current = mql;
       const applyFromSystem = (ev) => {
-        body.classList.toggle('theme-dark', ev.matches);
-        body.classList.toggle('theme-light', !ev.matches);
+        const matches = ev.matches !== undefined ? ev.matches : ev;
+        body.classList.toggle('theme-dark', matches);
+        body.classList.toggle('theme-light', !matches);
       };
       if (mql) {
         applyFromSystem(mql);
@@ -210,7 +216,12 @@ export default function SettingsPage() {
       if (value && isValidUrl(value)) {
         setAvatarPreview(value);
       } else if (!value) {
-        setAvatarPreview('');
+        // If user cleared the input, prefer localStorage avatar if any
+        const auth = authRef.current;
+        const uid = auth && auth.currentUser && auth.currentUser.uid;
+        const local = uid ? loadAvatarFromLocal(uid) : null;
+        if (local) setAvatarPreview(local);
+        else setAvatarPreview('');
       }
     }
   };
@@ -220,7 +231,6 @@ export default function SettingsPage() {
     if (!tz || typeof tz !== 'string') return false;
     try {
       // try to create a formatter for the timezone
-      // If invalid timezone, this will throw RangeError on many browsers
       Intl.DateTimeFormat(undefined, { timeZone: tz });
       return true;
     } catch (err) {
@@ -237,10 +247,32 @@ export default function SettingsPage() {
     }
   }
 
-  // Avatar file selection & upload
+  // LocalStorage helpers for avatar data (data URL)
+  function avatarStorageKey(uid) {
+    return `semi-colonic-avatar:${uid}`;
+  }
+
+  function saveAvatarToLocal(uid, dataUrl) {
+    try {
+      localStorage.setItem(avatarStorageKey(uid), dataUrl);
+    } catch (err) {
+      console.warn('Failed to save avatar to localStorage', err);
+    }
+  }
+
+  function loadAvatarFromLocal(uid) {
+    try {
+      return localStorage.getItem(avatarStorageKey(uid));
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // Avatar file selection (store in localStorage instead of uploading to firebase)
   const handleAvatarFileChange = async (e) => {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
+
     // Accept images only, limit size (e.g., 2.5MB)
     const MAX_BYTES = 2_500_000;
     if (!file.type.startsWith('image/')) {
@@ -252,61 +284,37 @@ export default function SettingsPage() {
       return;
     }
     setError('');
-    setAvatarFile(file);
-    // show local preview immediately
-    const localUrl = URL.createObjectURL(file);
-    setAvatarPreview(localUrl);
-
-    // upload if storage available and user signed in
-    const storage = storageRef.current;
-    const storageMod = storageModRef.current;
-    const auth = authRef.current;
-    if (!storage || !storageMod || !auth || !auth.currentUser) {
-      setError('Storage not available or not signed in. Avatar will be saved as a URL when you click Save.');
-      return;
-    }
-
     setUploading(true);
-    setUploadProgress(0);
-    try {
-      const uid = auth.currentUser.uid;
-      const safeName = file.name.replace(/\s+/g, '_');
-      const path = `avatars/${uid}/${Date.now()}_${safeName}`;
-      const sref = storageMod.ref(storage, path);
-      const uploadTask = storageMod.uploadBytesResumable(sref, file);
+    setAvatarFile(file);
 
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const pct = snapshot.totalBytes ? Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100) : 0;
-          setUploadProgress(pct);
-        },
-        (err) => {
-          console.error('Avatar upload error', err);
-          setError('Avatar upload failed: ' + err.message);
-          setUploading(false);
-        },
-        async () => {
-          try {
-            const url = await storageMod.getDownloadURL(sref);
-            // set the photoURL in settings so it will be saved
-            setSettings((s) => ({ ...s, photoURL: url }));
-            setAvatarPreview(url);
-          } catch (err) {
-            console.error('Failed to get download URL', err);
-            setError('Failed to get avatar URL: ' + err.message);
-          } finally {
-            setUploading(false);
-            setUploadProgress(0);
-          }
+    // create data URL
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      setAvatarPreview(dataUrl);
+
+      // Persist to localStorage for the current user
+      const auth = authRef.current;
+      const uid = auth && auth.currentUser && auth.currentUser.uid;
+      if (uid) {
+        try {
+          saveAvatarToLocal(uid, dataUrl);
+        } catch (err) {
+          console.warn('Failed saving avatar to localStorage', err);
         }
-      );
-    } catch (err) {
-      console.error('Avatar upload exception', err);
-      setError('Avatar upload failed: ' + err.message);
+      } else {
+        // if no uid, still keep preview, but warn user that this will not persist across devices
+        setError('Avatar stored locally in your browser. Sign in to persist per-user.');
+      }
+
       setUploading(false);
-      setUploadProgress(0);
-    }
+    };
+    reader.onerror = (err) => {
+      console.error('FileReader error', err);
+      setError('Failed to read image file.');
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async (e) => {
@@ -330,7 +338,7 @@ export default function SettingsPage() {
       return;
     }
 
-    // Validate photoURL if provided
+    // Validate photoURL if provided and looks like a remote URL (we won't push local data URLs to Firestore)
     if (settings.photoURL && settings.photoURL.trim() && !isValidUrl(settings.photoURL)) {
       setError('Avatar URL is not valid. Use a full https:// or http:// URL or upload an image.');
       return;
@@ -340,7 +348,16 @@ export default function SettingsPage() {
     try {
       const uid = auth.currentUser.uid;
       const docRef = firestoreMod.doc(firestore, 'users', uid);
-      await firestoreMod.setDoc(docRef, { settings }, { merge: true });
+
+      // If the avatar preview is a local data URL, do NOT write a huge data URI into Firestore.
+      // Instead keep it in localStorage only; we will write settings.photoURL only if it is a remote URL.
+      const toSave = { ...settings };
+      if (avatarPreview && avatarPreview.startsWith('data:')) {
+        // remove photoURL for Firestore to avoid storing base64 data
+        toSave.photoURL = settings.photoURL && isValidUrl(settings.photoURL) ? settings.photoURL : '';
+      }
+
+      await firestoreMod.setDoc(docRef, { settings: toSave }, { merge: true });
     } catch (err) {
       console.error('Failed to save settings:', err);
       setError('Failed to save settings: ' + err.message);
@@ -362,16 +379,10 @@ export default function SettingsPage() {
     );
   };
 
-  // cleanup preview object URL if needed
+  // cleanup not-needed object URLs (we're using data URLs here, so nothing to revoke)
   useEffect(() => {
     return () => {
-      if (avatarPreview && avatarFile) {
-        try {
-          URL.revokeObjectURL(avatarPreview);
-        } catch (err) {
-          // ignore
-        }
-      }
+      removeThemeListener();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -421,7 +432,7 @@ export default function SettingsPage() {
                   <label className="form-label">
                     Avatar URL
                     <input className="form-input" name="photoURL" value={settings.photoURL} onChange={handleChange} placeholder="https://..." type="text" />
-                    <small style={{ display: 'block', color: '#7b8899' }}>Or upload an image below (recommended)</small>
+                    <small style={{ display: 'block', color: '#7b8899' }}>Or upload an image below (stored locally in your browser)</small>
                   </label>
 
                   <div style={{ gridColumn: '1 / -1' }}>
@@ -441,10 +452,11 @@ export default function SettingsPage() {
                         </label>
                         <div style={{ marginTop: 8 }}>
                           {uploading ? (
-                            <div style={{ fontSize: 13, color: '#617489' }}>Uploading avatar… {uploadProgress}%</div>
-                          ) : uploadProgress > 0 ? (
-                            <div style={{ fontSize: 13, color: '#617489' }}>Uploaded {uploadProgress}%</div>
+                            <div style={{ fontSize: 13, color: '#617489' }}>Processing avatar…</div>
                           ) : null}
+                          <div style={{ fontSize: 12, color: '#7b8899', marginTop: 6 }}>
+                            Note: uploaded avatar is stored in your browser (localStorage) for now.
+                          </div>
                         </div>
                       </div>
                     </div>
