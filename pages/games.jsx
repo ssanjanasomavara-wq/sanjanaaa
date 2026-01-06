@@ -76,7 +76,7 @@ export default function Games() {
             Relaxing mini-games and playful prototypes. Click any tile to open a game.
           </p>
          <QuoteBanner 
-            quote={QUOTES.games.quote}
+            text={QUOTES.games.quote}
             author={QUOTES.games.author}
           />
           <div
