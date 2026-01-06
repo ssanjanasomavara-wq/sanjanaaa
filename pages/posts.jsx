@@ -1,14 +1,14 @@
 import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
+import Topbar from '../components/Topbar';
 
 /**
  * Community Posts page (refactored for responsive layout & styling)
  *
  * - Preserves existing logic (Firestore or localStorage)
- * - Uses the same topbar/site container and responsive CSS patterns as dashboard.jsx
+ * - Uses the shared Topbar component for navigation and mobile drawer
  */
 
 export default function Posts() {
@@ -293,45 +293,15 @@ export default function Posts() {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </Head>
 
+      {/* Use shared Topbar which contains sign-in/sign-out and mobile drawer */}
+      <Topbar links={[
+        { href: '/posts', label: 'Posts' },
+        { href: '/chat', label: 'Chat' },
+        { href: '/features', label: 'Features' },
+        { href: '/games', label: 'Games' },
+      ]} />
+
       <div className="site">
-        {/* header */}
-        <header className="topbar" role="banner">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
-            <Link href="/" legacyBehavior>
-              <a
-                className="brand"
-                aria-label="Semi-colonic home"
-                style={{ display: 'flex', alignItems: 'center', gap: 12 }}
-              >
-                <div className="brand-avatar" aria-hidden="true">
-                  <img
-                    src="/semi-colonic-logo.png"
-                    alt="Semi‑Colonic"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                  />
-                </div>
-                <span className="brand-text">Semi-colonic</span>
-              </a>
-            </Link>
-
-            <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
-              <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
-              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
-            </nav>
-          </div>
-
-          <div className="topbar-actions" role="navigation" aria-label="Top actions">
-            <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
-            <button aria-label="Messages" className="btn" title="Messages">💬</button>
-            <div className="user-email" title={user ? (user.email || user.displayName || user.uid) : 'guest'}>
-              {user ? (user.email || user.displayName || user.uid) : 'guest'}
-            </div>
-            <button onClick={() => router.replace('/')} className="btn btn-outline" aria-label="Close posts">Close</button>
-          </div>
-        </header>
-
         <main className="main-content">
           <div className="posts-layout">
             <section className="posts-column">
@@ -437,15 +407,6 @@ export default function Posts() {
         .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
         .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
 
-        /* topbar */
-        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; position: relative; }
-        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
-        .brand-text { font-weight: 700; color: var(--text-primary, #183547); }
-        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
-        .nav-link { margin-right: 12px; color: var(--text-primary, #183547); text-decoration: none; font-weight: 600; }
-        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
-        .user-email { color: var(--text-secondary, #617489); font-size: 14px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
         /* main layout */
         .main-content { padding: var(--space-md, 20px); }
         .posts-layout { display: flex; gap: 16px; align-items: flex-start; }
@@ -503,7 +464,6 @@ export default function Posts() {
         }
 
         @media (max-width: 600px) {
-          .desktop-nav { display: none; }
           .brand-text { font-size: 14px; }
           .site { padding: 0 12px; }
           .main-content { padding: 14px 6px; }
@@ -516,7 +476,6 @@ export default function Posts() {
         @media (max-width: 420px) {
           .post-body { font-size: 14px; }
           .input-body { min-height: 180px; }
-          .brand-text { display: none; }
         }
       `}</style>
     </div>
