@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState, useRef } from 'react';
+import Topbar from '../../components/Topbar';
 
 export default function MindfulPuzzle() {
   const router = useRouter();
