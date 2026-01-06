@@ -1,15 +1,14 @@
+import Head from 'next/head';
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { initFirebaseWithConfig } from '../lib/firebaseClient';
 
 /**
- * Community Posts page
+ * Community Posts page (refactored for responsive layout & styling)
  *
- * - Public read of posts (Firestore or localStorage).
- * - Create/Edit/Delete available to authors (owner) and admins (custom claim 'admin' on ID token).
- * - Firestore document shape:
- *    posts/{postId} => { title, body, authorName, authorUid, published: bool, createdAt, updatedAt }
+ * - Preserves existing logic (Firestore or localStorage)
+ * - Uses the same topbar/site container and responsive CSS patterns as dashboard.jsx
  */
 
 export default function Posts() {
@@ -61,7 +60,6 @@ export default function Posts() {
             setUser(u || null);
             setIsAdmin(false);
             if (u) {
-              // check ID token claims for admin/author roles
               try {
                 const tokenRes = await u.getIdTokenResult();
                 const claims = tokenRes && tokenRes.claims ? tokenRes.claims : {};
@@ -97,7 +95,6 @@ export default function Posts() {
 
   // subscribe posts (firestore or local)
   useEffect(() => {
-    // clear previous
     if (typeof unsubRef.current === 'function') {
       try { unsubRef.current(); } catch (e) {}
       unsubRef.current = null;
@@ -153,7 +150,6 @@ export default function Posts() {
         createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
         updatedAt: p.updatedAt ? new Date(p.updatedAt) : null,
       }));
-      // sort desc
       arr.sort((a, b) => (b.createdAt - a.createdAt));
       setPosts(arr);
     } catch (err) {
@@ -178,7 +174,6 @@ export default function Posts() {
       try {
         const { collection, addDoc, doc, updateDoc, serverTimestamp } = fm;
         if (!editing.id) {
-          // create
           const colRef = collection(f, 'posts');
           await addDoc(colRef, {
             title,
@@ -190,7 +185,6 @@ export default function Posts() {
             updatedAt: serverTimestamp(),
           });
         } else {
-          // update (check privileges client-side: author or admin)
           const docRef = doc(f, 'posts', editing.id);
           await updateDoc(docRef, {
             title,
@@ -219,7 +213,6 @@ export default function Posts() {
       const raw = localStorage.getItem('posts') || '[]';
       const arr = JSON.parse(raw);
       if (payload.id) {
-        // update existing
         const idx = arr.findIndex((p) => p.id === payload.id);
         if (idx !== -1) {
           arr[idx] = { ...arr[idx], ...payload, updatedAt: new Date().toString() };
@@ -244,7 +237,6 @@ export default function Posts() {
   }
 
   async function onEditPost(p) {
-    // only allow if admin or author (client-side check; enforce on server)
     if (!canModify(p)) return alert('You are not allowed to edit this post.');
     setEditing({ id: p.id, title: p.title, body: p.body, published: p.published, authorName: p.authorName });
     setShowEditor(true);
@@ -266,7 +258,6 @@ export default function Posts() {
         alert('Failed to delete on server; try again.');
       }
     } else {
-      // local
       try {
         const raw = localStorage.getItem('posts') || '[]';
         const arr = JSON.parse(raw).filter((t) => t.id !== p.id);
@@ -287,7 +278,6 @@ export default function Posts() {
 
   function openNew() {
     if (!user) {
-      // allow creating drafts locally for guests? Here we prefer requiring auth.
       alert('You must sign in to create posts.');
       return;
     }
@@ -299,106 +289,115 @@ export default function Posts() {
 
   return (
     <div className="site-root">
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+      </Head>
+
       <div className="site">
         {/* header */}
         <header className="topbar" role="banner">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
             <Link href="/" legacyBehavior>
-              <a className="brand" aria-label="Semi-colonic home" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div className="brand-avatar" aria-hidden style={{ width: 40, height: 40, borderRadius: 8, overflow: 'hidden', flex: '0 0 40px' }}>
-                  <img src="/semi-colonic-logo.png" alt="Semi‑Colonic" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <a
+                className="brand"
+                aria-label="Semi-colonic home"
+                style={{ display: 'flex', alignItems: 'center', gap: 12 }}
+              >
+                <div className="brand-avatar" aria-hidden="true">
+                  <img
+                    src="/semi-colonic-logo.png"
+                    alt="Semi‑Colonic"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
                 </div>
-                <span style={{ fontWeight: 700, color: '#183547' }}>Semi-colonic</span>
+                <span className="brand-text">Semi-colonic</span>
               </a>
             </Link>
 
             <nav className="desktop-nav" aria-label="Primary">
-              <Link href="/posts" legacyBehavior><a style={{ marginRight: 12 }}>Posts</a></Link>
-              <Link href="/chat" legacyBehavior><a style={{ marginRight: 12 }}>Chat</a></Link>
-              <Link href="/features" legacyBehavior><a style={{ marginRight: 12 }}>Features</a></Link>
-              <Link href="/games" legacyBehavior><a>Games</a></Link>
+              <Link href="/posts" legacyBehavior><a className="nav-link">Posts</a></Link>
+              <Link href="/chat" legacyBehavior><a className="nav-link">Chat</a></Link>
+              <Link href="/features" legacyBehavior><a className="nav-link">Features</a></Link>
+              <Link href="/games" legacyBehavior><a className="nav-link">Games</a></Link>
             </nav>
           </div>
 
           <div className="topbar-actions" role="navigation" aria-label="Top actions">
             <button aria-label="Notifications" className="btn" title="Notifications">🔔</button>
             <button aria-label="Messages" className="btn" title="Messages">💬</button>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ color: '#556', fontSize: 14 }}>{user ? (user.email || user.displayName || user.uid) : 'guest'}</div>
-              <button onClick={() => router.replace('/')} className="btn btn-outline" aria-label="Close posts">Close</button>
+            <div className="user-email" title={user ? (user.email || user.displayName || user.uid) : 'guest'}>
+              {user ? (user.email || user.displayName || user.uid) : 'guest'}
             </div>
+            <button onClick={() => router.replace('/')} className="btn btn-outline" aria-label="Close posts">Close</button>
           </div>
         </header>
 
-        <main style={{ padding: 18 }}>
-          <div style={{ display: 'flex', gap: 16 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <h1 style={{ margin: 0 }}>Community Posts</h1>
+        <main className="main-content">
+          <div className="posts-layout">
+            <section className="posts-column">
+              <div className="posts-header">
+                <h1>Community Posts</h1>
                 <div>
                   {user ? (
-                    <button onClick={openNew} className="btn btn-strong" style={{ padding: '8px 12px' }}>New Post</button>
+                    <button onClick={openNew} className="btn btn-strong">New Post</button>
                   ) : (
-                    <div style={{ fontSize: 13, color: '#7b8899' }}>Sign in to post</div>
+                    <div className="signin-hint">Sign in to post</div>
                   )}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gap: 12 }}>
-                {posts.length === 0 && <div style={{ color: '#7b8899' }}>No posts yet.</div>}
+              <div className="posts-grid">
+                {posts.length === 0 && <div className="muted">No posts yet.</div>}
                 {posts.map((p) => (
-                  <article key={p.id} style={{ background: '#fff', padding: 12, borderRadius: 10, boxShadow: '0 6px 18px rgba(20,40,60,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <article key={p.id} className="post-card" aria-labelledby={`post-${p.id}-title`}>
+                    <div className="post-top">
                       <div>
-                        <h3 style={{ margin: '0 0 6px' }}>{p.title}</h3>
-                        <div style={{ fontSize: 12, color: '#6a8f8d' }}>By {p.authorName} • {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''}</div>
+                        <h3 id={`post-${p.id}-title`}>{p.title}</h3>
+                        <div className="meta">By {p.authorName} • {p.createdAt ? new Date(p.createdAt).toLocaleDateString() : ''}</div>
                       </div>
-                      <div style={{ display: 'flex', gap: 8 }}>
+                      <div className="post-actions">
                         {canModify(p) && (
                           <>
-                            <button onClick={() => onEditPost(p)} className="btn btn-outline" style={{ padding: '6px 8px' }}>Edit</button>
-                            <button onClick={() => onDeletePost(p)} className="btn" style={{ padding: '6px 8px', background: '#c0392b', color: '#fff' }}>Delete</button>
+                            <button onClick={() => onEditPost(p)} className="btn btn-outline">Edit</button>
+                            <button onClick={() => onDeletePost(p)} className="btn btn-delete">Delete</button>
                           </>
                         )}
                       </div>
                     </div>
-                    <div style={{ marginTop: 8, color: '#222', whiteSpace: 'pre-wrap' }}>
-                      {p.body.length > 500 ? p.body.slice(0, 500) + '…' : p.body}
+                    <div className="post-body">
+                      {p.body && p.body.length > 500 ? p.body.slice(0, 500) + '…' : p.body}
                     </div>
                   </article>
                 ))}
               </div>
-            </div>
+            </section>
 
-            <aside style={{ width: 320 }}>
-              <div style={{ background: '#fff', padding: 12, borderRadius: 10, boxShadow: '0 6px 18px rgba(20,40,60,0.04)' }}>
-                <h4 style={{ marginTop: 0 }}>About posts</h4>
-                <p style={{ marginTop: 6, color: '#617489' }}>
+            <aside className="sidebar">
+              <div className="info-card">
+                <h4>About posts</h4>
+                <p>
                   Community posts are public. Only authors (owners) and admins may edit or remove posts. For production, enforce this with Firestore security rules or a server API.
                 </p>
 
-                <div style={{ marginTop: 10 }}>
-                  <div style={{ fontSize: 13, color: '#7b8899' }}>Admin status:</div>
-                  <div style={{ fontWeight: 700 }}>{isAdmin ? 'You are an admin' : 'Not an admin'}</div>
+                <div className="admin-status">
+                  <div className="muted-label">Admin status:</div>
+                  <div className="bold">{isAdmin ? 'You are an admin' : 'Not an admin'}</div>
                 </div>
               </div>
             </aside>
           </div>
         </main>
 
-        <footer className="site-footer" style={{ marginTop: 12 }}>
+        <footer className="site-footer">
           © {new Date().getFullYear()} Semi‑Colonic — Semi‑Colonic Ltd. All rights reserved.
         </footer>
       </div>
 
       {/* Editor modal */}
       {showEditor && editing && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(6,20,40,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60
-        }}>
-          <div style={{ width: 'min(900px, 96%)', background: '#fff', borderRadius: 12, padding: 16 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal">
+            <div className="modal-head">
               <h3 style={{ margin: 0 }}>{editing.id ? 'Edit Post' : 'New Post'}</h3>
               <div>
                 <button onClick={() => { setShowEditor(false); setEditing(null); }} className="btn btn-outline" style={{ marginRight: 8 }}>Cancel</button>
@@ -406,34 +405,119 @@ export default function Posts() {
               </div>
             </div>
 
-            <div style={{ marginTop: 12, display: 'flex', gap: 12 }}>
+            <div className="modal-body">
               <input
                 value={editing.title}
                 onChange={(e) => setEditing(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="Title"
-                style={{ flex: 1, padding: 10, borderRadius: 8, border: '1px solid #e6eef0' }}
+                className="input-title"
               />
-              <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <label className="published-label">
                 <input
                   type="checkbox"
                   checked={!!editing.published}
                   onChange={(e) => setEditing(prev => ({ ...prev, published: e.target.checked }))}
                 /> Published
               </label>
-            </div>
 
-            <textarea
-              value={editing.body}
-              onChange={(e) => setEditing(prev => ({ ...prev, body: e.target.value }))}
-              placeholder="Write your post…"
-              style={{ width: '100%', minHeight: 240, marginTop: 12, padding: 12, borderRadius: 8, border: '1px solid #e6eef0', fontSize: 15 }}
-            />
+              <textarea
+                value={editing.body}
+                onChange={(e) => setEditing(prev => ({ ...prev, body: e.target.value }))}
+                placeholder="Write your post…"
+                className="input-body"
+              />
+            </div>
           </div>
         </div>
       )}
 
       <style jsx>{`
-        .site-root { min-height: 100vh; }
+        :root { --max-width: 980px; }
+
+        .site-root { min-height: 100vh; padding: 0; background: var(--bg, #fff); }
+        .site { max-width: var(--max-width); margin: 0 auto; padding: 0 18px; }
+
+        /* topbar */
+        .topbar { display: flex; gap: 12px; align-items: center; padding: 12px 0; position: relative; }
+        .brand-avatar { width: 44px; height: 44px; border-radius: 10px; overflow: hidden; flex: 0 0 44px; }
+        .brand-text { font-weight: 700; color: var(--text-primary, #183547); }
+        .desktop-nav { margin-left: 8px; display: flex; gap: 8px; align-items: center; }
+        .nav-link { margin-right: 12px; color: var(--text-primary, #183547); text-decoration: none; font-weight: 600; }
+        .topbar-actions { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+        .user-email { color: var(--text-secondary, #617489); font-size: 14px; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* main layout */
+        .main-content { padding: var(--space-md, 20px); }
+        .posts-layout { display: flex; gap: 16px; align-items: flex-start; }
+        .posts-column { flex: 1; }
+        .sidebar { width: 320px; }
+
+        .posts-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .posts-header h1 { margin: 0; font-size: clamp(18px, 2.6vw, 24px); color: var(--text-primary, #183547); }
+        .signin-hint { font-size: 13px; color: #7b8899; }
+
+        .posts-grid { display: grid; gap: 12px; }
+        .post-card { background: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(20,40,60,0.04); }
+        .post-top { display: flex; justify-content: space-between; align-items: center; }
+        .post-top h3 { margin: 0 0 6px 0; }
+        .meta { font-size: 12px; color: #6a8f8d; }
+        .post-actions { display: flex; gap: 8px; }
+        .post-body { margin-top: 8px; color: #222; white-space: pre-wrap; }
+
+        .btn { border: none; background: transparent; padding: 6px 10px; border-radius: 8px; cursor: pointer; }
+        .btn-outline { border: 1px solid rgba(6,20,40,0.08); background: transparent; padding: 6px 8px; border-radius: 8px; }
+        .btn-strong { background: var(--cta-strong, #1f9fff); color: #fff; padding: 8px 12px; border-radius: 8px; }
+        .btn-delete { background: #c0392b; color: #fff; padding: 6px 8px; border-radius: 8px; }
+
+        .info-card { background: #fff; padding: 12px; border-radius: 10px; box-shadow: 0 6px 18px rgba(20,40,60,0.04); }
+        .muted { color: #7b8899; }
+        .muted-label { color: var(--text-muted, #7b8899); font-weight: 700; margin-bottom: 4px; }
+        .bold { font-weight: 700; }
+
+        /* modal/editor */
+        .modal-backdrop {
+          position: fixed;
+          inset: 0;
+          background: rgba(6,20,40,0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 60;
+        }
+        .modal { width: min(900px, 96%); background: #fff; border-radius: 12px; padding: 16px; }
+        .modal-head { display: flex; justify-content: space-between; align-items: center; }
+        .modal-body { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
+        .input-title { padding: 10px; border-radius: 8px; border: 1px solid #e6eef0; font-size: 16px; width: 100%; }
+        .published-label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .input-body { width: 100%; min-height: 240px; padding: 12px; border-radius: 8px; border: 1px solid #e6eef0; font-size: 15px; }
+
+        .site-footer { margin-top: 12px; padding: 12px 0; font-size: 13px; color: var(--text-muted, #7b8899); text-align: center; }
+
+        @media (max-width: 980px) {
+          .site { padding: 0 14px; }
+        }
+
+        @media (max-width: 820px) {
+          .posts-layout { flex-direction: column-reverse; }
+          .sidebar { width: 100%; }
+        }
+
+        @media (max-width: 600px) {
+          .desktop-nav { display: none; }
+          .brand-text { font-size: 14px; }
+          .site { padding: 0 12px; }
+          .main-content { padding: 14px 6px; }
+          .posts-header h1 { font-size: 18px; }
+          .brand-avatar { width: 40px; height: 40px; }
+          .user-email { max-width: 110px; font-size: 13px; }
+          .post-card { padding: 10px; }
+        }
+
+        @media (max-width: 420px) {
+          .post-body { font-size: 14px; }
+          .input-body { min-height: 180px; }
+          .brand-text { display: none; }
+        }
       `}</style>
     </div>
   );
