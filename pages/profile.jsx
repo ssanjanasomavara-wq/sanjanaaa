@@ -247,7 +247,7 @@ export default function ProfilePage() {
         /* Buttons: Ensure visible brand color in light theme */
         .btn { background: transparent; border: 1px solid rgba(6,20,40,0.06); padding: 8px 10px; border-radius: 10px; cursor: pointer; color: var(--text-primary); font-weight:700; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
         .btn-outline { border: 1px solid rgba(20,40,60,0.06); padding: 8px 12px; background: transparent; color: var(--text-primary); }
-        .btn-strong, .btn-primary { background: linear-gradient(90deg,var(--cta-strong),#c87a3c); color: #fff; padding: 8px 12px; border-radius: 12px; border: none; }
+        .btn-strong, .btn-primary { background: linear-gradient(90deg,var(--cta-strong),#c87a3c); color: #8a1414; padding: 8px 12px; border-radius: 12px; border: none; }
         .btn-ghost { background: transparent; }
 
         .content-card {

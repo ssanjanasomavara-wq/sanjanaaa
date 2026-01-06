@@ -9,6 +9,7 @@ import QuoteBanner from '../components/QuoteBanner';
 import ImageGrid from '../components/ImageGrid';
 import MobileDrawer from '../components/MobileDrawer';
 import { SEASIDE_IMAGES, QUOTES } from '../lib/themeConstants';
+import { THINGS_IMAGES, QUOTES } from '../lib/themeConstants';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -230,7 +231,7 @@ export default function Dashboard() {
                   </Link>
                 </div>
 
-
+                  <ImageGrid images={THINGS_IMAGES} />
                 <hr className="divider" />
 
       
