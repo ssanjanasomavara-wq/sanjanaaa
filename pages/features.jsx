@@ -69,7 +69,7 @@ export default function Features() {
           </p>
 
           <QuoteBanner 
-            quote={QUOTES.features.quote}
+            text={QUOTES.features.quote}
             author={QUOTES.features.author}
           />
 
