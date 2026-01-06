@@ -65,6 +65,7 @@ export default function Resources() {
               Resources — Books on Mental Health & Comfort Reading
             </h1>
           </header>
+         
           <QuoteBanner 
             text={QUOTES.games.quote}
             author={QUOTES.games.author}
