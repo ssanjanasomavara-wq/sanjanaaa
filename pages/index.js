@@ -352,7 +352,7 @@ export default function IndexPage() {
               <button onClick={showForgot} className="muted small">Forgot Password?</button>
             </div>
 
-            <center><div className="google-row">
+            <div className="google-row">
               <button onClick={handleGoogleSignIn} className="google-btn" aria-label="Continue with Google">
                 <svg width="18" height="18" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden focusable="false" role="img">
                   <path fill="#fbbc05" d="M43.6 20.1H42V20H24v8h11.2c-1.1 4-4 7.4-8.2 9.2l0 .1 6.2 4.8c3.6-3.3 6-8.2 6-13.9 0-1.1-.1-2.1-.6-3.2z"/>
@@ -362,7 +362,7 @@ export default function IndexPage() {
                 </svg>
                 <span style={{ marginLeft: 6 }}>Continue with Google</span>
               </button>
-            </div></center>
+            </div>
 
             <div className="message" aria-live="polite">{authMessage}</div>
           </div>
@@ -585,6 +585,7 @@ export default function IndexPage() {
           border-radius: 10px;
           cursor: pointer;
           font-weight: 600;
+          margin: 0; /* ensure no unexpected margin pushes alignment */
         }
 
         .muted.small {
@@ -592,15 +593,17 @@ export default function IndexPage() {
           font-size: 0.92rem;
         }
 
-        /* Center action row items similarly to .card */
-        .row.action-row { 
-          display: flex; 
-          gap: 12px; 
-          justify-content: center; 
-          align-items: center; /* vertically center items */
+        /* Stronger, more specific selector so we reliably center these rows */
+        body.login .card .row.action-row,
+        .card .row.action-row {
+          display: flex !important;
+          gap: 12px;
+          justify-content: center !important;
+          align-items: center;
           margin-top: 8px;
           flex-wrap: wrap;
-          text-align: center; /* make child inline content centered */
+          width: 100%;
+          text-align: center;
         }
 
         .centered-row { 
@@ -610,9 +613,10 @@ export default function IndexPage() {
         }
 
         /* ensure google row centers its contents both horizontally and vertically */
-        .google-row {
-          display: flex;
-          justify-content: center;
+        body.login .card .google-row,
+        .card .google-row {
+          display: flex !important;
+          justify-content: center !important;
           align-items: center;
           margin-top: 12px;
           width: 100%;
