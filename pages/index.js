@@ -561,6 +561,19 @@ export default function IndexPage() {
           font-size: 1rem;
         }
 
+        /* Base button typography to keep all buttons visually consistent */
+        .card, .container {
+          /* ensure buttons inherit a consistent font family if a global font is present */
+          font-family: inherit;
+        }
+        .btn, .btn-cta, .muted, .google-btn, .tab {
+          font-family: inherit;
+          font-size: 1rem;
+          line-height: 1.2;
+          font-weight: 600; /* unified weight */
+          letter-spacing: 0.01em;
+        }
+
         /* Button overrides for login page */
         .btn-cta {
           width: 100%;
@@ -570,7 +583,7 @@ export default function IndexPage() {
           color: var(--cta-text);
           padding: 10px 14px;
           border-radius: 14px;
-          font-weight: 700;
+          /* previously 700 — lowered to 600 above for consistency */
           border: none;
           cursor: pointer;
         }
@@ -584,8 +597,6 @@ export default function IndexPage() {
           display: inline-block;
           border-radius: 10px;
           cursor: pointer;
-          font-weight: 600;
-          margin: 0; /* ensure no unexpected margin pushes alignment */
         }
 
         .muted.small {
@@ -636,6 +647,7 @@ export default function IndexPage() {
           align-items: center;
           justify-content: center;
           gap: 10px;
+          /* unify typography with other buttons (font-weight/font-size set above) */
         }
 
         /* Home view specific */
