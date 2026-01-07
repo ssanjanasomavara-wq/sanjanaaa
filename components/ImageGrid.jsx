@@ -151,25 +151,45 @@ export default function ImageGrid({ items = null, images = [], className = '' })
           font-weight: 600;
         }
 
+        /* Tile layout: center content vertically, keep left alignment horizontally.
+           This helps when tiles are tall so the copy doesn't cluster at the top. */
         .image-grid__tile {
           padding: 18px 12px;
           display: flex;
           flex-direction: column;
-          justify-content: center;
-          align-items: flex-start;
+          justify-content: center; /* vertical centering */
+          align-items: flex-start; /* keep left aligned */
+          gap: 8px;
           min-height: 120px;
+          box-sizing: border-box;
         }
 
+        /* Responsive text sizing:
+           - Title scales with viewport width but stays within sensible bounds
+           - Subtitle also scales and keeps readable line-height */
         .image-grid__tile-title {
           font-weight: 700;
           color: #183547;
-          font-size: 15px;
+          font-size: clamp(16px, 1.6rem, 22px); /* baseline: 1.6rem, max 22px */
+          line-height: 1.05;
+          margin: 0;
         }
 
         .image-grid__tile-subtitle {
-          margin-top: 6px;
           color: #617489;
-          font-size: 13px;
+          font-size: clamp(13px, 1.05rem, 17px);
+          line-height: 1.25;
+          margin: 0;
+        }
+
+        /* If a tile becomes especially large (e.g. desktop wide), increase title size a bit */
+        @media (min-width: 900px) {
+          .image-grid__tile-title {
+            font-size: clamp(18px, 1.8rem, 26px);
+          }
+          .image-grid__tile-subtitle {
+            font-size: clamp(14px, 1.1rem, 18px);
+          }
         }
 
         @media (max-width: 480px) {
@@ -177,6 +197,13 @@ export default function ImageGrid({ items = null, images = [], className = '' })
           .image-grid__tile {
             height: auto;
             min-height: 100px;
+          }
+          /* smaller devices: keep readable sizes */
+          .image-grid__tile-title {
+            font-size: clamp(15px, 1.4rem, 20px);
+          }
+          .image-grid__tile-subtitle {
+            font-size: clamp(12px, 0.95rem, 15px);
           }
         }
       `}</style>
