@@ -432,7 +432,7 @@ export default function IndexPage() {
           <div className="card">
             <input value={signupEmail} onChange={(e) => setSignupEmail(e.target.value)} id="signup-email" type="email" placeholder="Email" autoComplete="email" />
             <input value={signupPassword} onChange={(e) => setSignupPassword(e.target.value)} id="signup-password" type="password" placeholder="Password (min 6 chars)" autoComplete="new-password" />
-            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="new-password" />
+            <input value={signupPasswordConfirm} onChange={(e) => setSignupPasswordConfirm(e.target.value)} id="signup-password-confirm" type="password" placeholder="Confirm password" autoComplete="ne[...]
             <button id="create-account-btn" onClick={handleSignUp} className="btn-cta">Create account</button>
             <div className="row action-row">
               <button onClick={showLogin} className="muted">Back</button>
@@ -592,12 +592,15 @@ export default function IndexPage() {
           font-size: 0.92rem;
         }
 
+        /* Center action row items similarly to .card */
         .row.action-row { 
           display: flex; 
           gap: 12px; 
           justify-content: center; 
+          align-items: center; /* vertically center items */
           margin-top: 8px;
           flex-wrap: wrap;
+          text-align: center; /* make child inline content centered */
         }
 
         .centered-row { 
@@ -606,10 +609,15 @@ export default function IndexPage() {
           margin-top: 8px; 
         }
 
+        /* ensure google row centers its contents both horizontally and vertically */
         .google-row {
           display: flex;
           justify-content: center;
+          align-items: center;
           margin-top: 12px;
+          width: 100%;
+          text-align: center;
+          flex-wrap: wrap;
         }
 
         .google-btn {
